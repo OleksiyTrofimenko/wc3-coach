@@ -1,0 +1,22 @@
+{
+  "name": "@wc3-coach/api-node",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit",
+    "lint": "echo \"lint: no linter configured yet\"",
+    "test": "echo \"test: no tests yet (TODO T1.3)\"",
+    "dev": "node --watch dist/index.js",
+    "clean": "rm -rf dist *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@wc3-coach/shared-types": "workspace:*",
+    "@wc3-coach/parser": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "*"
+  }
+}

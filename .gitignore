@@ -1,0 +1,62 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Local dev helpers (machine-specific; not committed)
+.bin/
+
+# Build outputs
+dist/
+.next/
+out/
+build/
+
+# Turbo cache
+.turbo/
+
+# TypeScript
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+*.egg-info/
+dist/
+.pytest_cache/
+*.coverage
+htmlcov/
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+*.env
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+*.code-workspace
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Docker
+docker-compose.override.yml
+
+# Replay fixtures: keep .w3g test fixtures committed (golden files for parser tests)
+# Individual replays for personal use should be stored outside the repo
+# Uncomment the next line to ignore all replays except those under test/fixtures:
+# *.w3g
+# !**/test/fixtures/**/*.w3g
+# !**/fixtures/**/*.w3g

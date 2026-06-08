@@ -1,0 +1,22 @@
+{
+  "name": "wc3-coach",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Local WC3 improvement platform: APM Trainer + Replay Analyzer + AI Coach",
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "dev": "turbo run dev --parallel"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.4",
+    "typescript": "^5.8.3"
+  }
+}

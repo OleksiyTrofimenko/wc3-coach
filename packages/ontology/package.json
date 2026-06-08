@@ -1,0 +1,27 @@
+{
+  "name": "@wc3-coach/ontology",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit",
+    "lint": "echo \"lint: no linter configured yet\"",
+    "test": "echo \"test: no tests yet (TODO T2.2)\"",
+    "clean": "rm -rf dist *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@wc3-coach/shared-types": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "*"
+  }
+}

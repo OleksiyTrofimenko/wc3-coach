@@ -1,0 +1,12 @@
+{
+  "name": "@wc3-coach/web",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "echo \"build: Next.js not scaffolded yet (TODO T6.x)\"",
+    "typecheck": "echo \"typecheck: Next.js not scaffolded yet (TODO T6.x)\"",
+    "lint": "echo \"lint: Next.js not scaffolded yet (TODO T6.x)\"",
+    "test": "echo \"test: no tests yet (TODO T6.x)\"",
+    "dev": "echo \"dev: Next.js not scaffolded yet (TODO T6.x)\""
+  }
+}

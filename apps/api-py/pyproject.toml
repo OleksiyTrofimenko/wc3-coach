@@ -1,0 +1,62 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "wc3-coach-api-py"
+version = "0.0.1"
+description = "WC3 Coach Python API — benchmarks, RAG, LLM coach (FastAPI)"
+requires-python = ">=3.12"
+dependencies = [
+    # HTTP framework
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+
+    # Data validation (types generated from @wc3-coach/shared-types JSON Schema)
+    "pydantic>=2.10.0",
+
+    # Database
+    "asyncpg>=0.30.0",
+    "sqlalchemy[asyncio]>=2.0.36",
+
+    # Redis / queue
+    "redis>=5.2.0",
+
+    # ML / RAG — TODO(T5.1): enable when scaffolding embeddings pipeline
+    # "sentence-transformers>=3.3.0",
+    # "pgvector>=0.3.5",
+    # "xgboost>=2.1.3",
+
+    # LLM client — TODO(T5.3): enable when wiring Ollama
+    # "httpx>=0.27.0",  # for Ollama REST API calls
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "httpx>=0.27.0",  # for TestClient
+    "ruff>=0.8.0",
+    "mypy>=1.13.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = []
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_ignores = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

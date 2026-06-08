@@ -7,11 +7,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A personal, locally-run platform for deliberate Warcraft III improvement:
 **APM Trainer + Replay Analyzer + AI Coach**.
 
-> **Current state:** pre-code. The repo today contains only this file, `docs/`,
-> and `.claude/` (agents + shared WC3 knowledge skill). The stack, monorepo
-> layout, and commands described below are the **target design** — see
-> `docs/WC3_Coach_Design_Doc.md` and `docs/WC3_Coach_Project_Plan.md`.
-> EPIC 0 (T0.1–T0.4) is the foundation work that will scaffold them.
+> **Current state:** T0.1 complete. The monorepo skeleton is in place:
+> `apps/`, `packages/`, `db/`, `turbo.json`, `pnpm-workspace.yaml`.
+> `corepack pnpm install && corepack pnpm turbo build` works end-to-end.
+> Remaining EPIC 0 tasks: T0.2 (Docker infra), T0.4 (real shared types).
+> See `docs/WC3_Coach_Design_Doc.md` and `docs/WC3_Coach_Project_Plan.md`
+> for full architecture and backlog.
 
 ---
 
@@ -37,8 +38,10 @@ Any code or decision that violates principle #1 is rejected unconditionally.
 
 ## Where context lives
 
-- `docs/WC3_Coach_Design_Doc.md` — full architecture, data model, ML approach,
-  the `.w3g` "deaths are not recorded" limitation and the two paths around it (§6).
+- `docs/WC3_Coach_Design_Doc.md` — full architecture, ML approach, the **data model /
+  DB schema** (§5: `replays`, `replay_players`, `game_events`, `benchmarks`,
+  `apm_sessions`, `knowledge_docs`/`knowledge_chunks`, ontology tables), and the
+  `.w3g` "deaths are not recorded" limitation with the two paths around it (§6).
 - `docs/WC3_Coach_Project_Plan.md` — backlog of EPICs and T-tasks (T0.1, T1.2, …).
   Commits and PRs reference the `T-id`.
 - `docs/WC3_Coach_Team_Roles.md` — origin of the subagent personas.
@@ -95,6 +98,12 @@ embedding model fit in VRAM; QLoRA 7–8B is feasible later.
 | Embeddings | bge-m3 / nomic-embed-text |
 | Infra | Docker Compose, pnpm + Turborepo |
 
+### Key external libraries & references
+The replay pipeline leans on prior art (design doc §Sources) — consult before reinventing:
+- **`w3gjs`** (https://github.com/PBug90/w3gjs) — the chosen `.w3g` parser; best Reforged support.
+- **`wc3v`** (https://github.com/jblanchette/wc3v) — state/build-order simulation; reference for Path A (death inference).
+- **`war3observer`** (https://github.com/sides/war3observer) — reads `War3StatsObserverSharedMemory`; the legal Observer-API path (§6, Path B) for deaths/positions on replay playback.
+
 ---
 
 ## Repository structure (target — to be scaffolded in EPIC 0)
@@ -122,18 +131,114 @@ wc3-coach/
    └─ skills/wc3-knowledge/    # shared WC3 knowledge base
 ```
 
-Only `docs/` and `.claude/` exist today. Do **not** assume `apps/`, `packages/`,
-or `docker-compose.yml` are present — check first before referencing them.
+`apps/`, `packages/`, and `db/` exist (scaffolded in T0.1).
+`docker-compose.yml` does **not** exist yet — that is T0.2.
 
 ---
 
 ## Build / lint / test commands
 
-The monorepo (T0.1) and Docker infra (T0.2) have not been scaffolded yet, so
-there are no `pnpm`, `turbo`, `docker compose`, `pytest`, or migration commands
-to run. Once T0.1/T0.2 land, this section should list how to install,
-build, lint, run each app, run the full test suite, and run a single test
-(e.g. `pnpm --filter parser test -- <name>`, `pytest -k <name>`).
+> **pnpm is not installed globally** on the target machine (Windows, EPERM on
+> `corepack enable`). All pnpm commands must be prefixed with `corepack`:
+> ```
+> corepack pnpm <args>
+> ```
+> `corepack` ships with Node and auto-downloads pnpm 9.15.9 (pinned in
+> `package.json#packageManager`) on first use.
+>
+> **Turbo + corepack on Windows:** Turborepo's binary needs a `pnpm` executable
+> in the system PATH. Create a wrapper once after cloning:
+> ```bash
+> # Run once after clone (Git Bash / WSL):
+> mkdir -p ~/.local/bin
+> PNPM_CJS=$(node -e "require('child_process').execSync('corepack pnpm root -g',{encoding:'utf8'}).trim()" 2>/dev/null || \
+>   echo "$(node -e "process.stdout.write(process.execPath.replace(/node\.exe$/,''))")../corepack/v1/pnpm/9.15.9/bin/pnpm.cjs")
+> # Simpler: create it in the npm global prefix (already in PATH):
+> printf '#!/usr/bin/env bash\nexec node "%APPDATA%\\npm\\..\\..\\Local\\node\\corepack\\v1\\pnpm\\9.15.9\\bin\\pnpm.cjs" "$@"\n' \
+>   > "$(npm config get prefix)/pnpm"
+> chmod +x "$(npm config get prefix)/pnpm"
+> ```
+> On this machine the wrapper already lives at `%APPDATA%\npm\pnpm` (gitignored
+> `.bin/` in repo root also works for local dev).
+
+### Install all workspace dependencies
+```bash
+corepack pnpm install
+```
+
+### Build all packages (tsc, respects `^build` dependency order)
+```bash
+corepack pnpm turbo build
+# or via the root package.json script:
+corepack pnpm run build
+```
+
+### Type-check all TS packages
+```bash
+corepack pnpm turbo typecheck
+# or:
+corepack pnpm run typecheck
+```
+
+### Lint all packages
+```bash
+corepack pnpm turbo lint
+# or:
+corepack pnpm run lint
+```
+
+### Run all tests
+```bash
+corepack pnpm turbo test
+# or:
+corepack pnpm run test
+```
+
+### Run a single package's script
+```bash
+# Build / typecheck / test a specific workspace package
+corepack pnpm --filter @wc3-coach/parser build
+corepack pnpm --filter @wc3-coach/parser typecheck
+corepack pnpm --filter @wc3-coach/parser test
+
+# Filter by directory (alternative syntax)
+corepack pnpm --filter ./packages/shared-types build
+```
+
+### Python API (apps/api-py) — managed separately, not a pnpm workspace member
+```bash
+cd apps/api-py
+
+# Create and activate a virtual environment
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+
+# Install all dependencies (including dev extras)
+pip install -e ".[dev]"
+
+# Run the dev server
+uvicorn app.main:app --reload --port 8001
+
+# Run tests
+pytest                           # all tests
+pytest -k test_health            # single test by name
+pytest tests/benchmarks/         # all tests in a directory
+```
+
+### Docker infra (T0.2 — not yet scaffolded)
+```bash
+# Once T0.2 is done:
+docker compose up          # bring up Postgres+pgvector, Redis, Ollama
+docker compose down        # stop and remove containers
+docker compose up -d       # detached mode
+```
+
+### DB migrations (T2.1 — not yet scaffolded)
+```bash
+# Migrations live in db/migrations/ and will use the tool chosen in T2.1.
+# Placeholder: apply schema.sql manually during local dev until T2.1 lands.
+psql $DATABASE_URL -f db/schema.sql
+```
 
 ---
 
