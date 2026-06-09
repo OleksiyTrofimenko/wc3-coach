@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A personal, locally-run platform for deliberate Warcraft III improvement:
 **APM Trainer + Replay Analyzer + AI Coach**.
 
-> **Current state:** EPIC 0 complete (T0.1 + T0.2 + T0.4).
+> **Current state:** EPIC 0 complete; EPIC 1 in progress (T1.1 + T1.2 done).
 > - T0.1: monorepo skeleton — `apps/`, `packages/`, `db/`, `turbo.json`,
 >   `pnpm-workspace.yaml`. `corepack pnpm install && corepack pnpm turbo build`
 >   works end-to-end.
@@ -18,7 +18,14 @@ A personal, locally-run platform for deliberate Warcraft III improvement:
 >   canonical cross-service types (`GameEvent`, `ReplayTimeline`, `BenchmarkResult`,
 >   `CoachReport`, `DrillResult`) mirroring the design-doc §5 data model. camelCase
 >   fields, string-literal unions (clean JSON Schema → pydantic later).
-> Next up: EPIC 1 — T1.1 (spike: parse one `.w3g`) → T1.2 (event normalization).
+> - T1.1: parse spike — `packages/parser` wraps `w3gjs`; `corepack pnpm --filter
+>   @wc3-coach/parser dump <replay>` dumps a `.w3g` to JSON for inspection.
+> - T1.2: event normalization — `parseReplayFile(path)` / `normalizeReplay(...)`
+>   map `w3gjs` output → `ReplayTimeline` (`GameEvent[]`). Covered by a vitest
+>   golden-file test on a committed fixture (`corepack pnpm turbo test`).
+>   `entityRef` is a provisional `"<kind>:<fourcc>"` ref pending the ontology (T2.2).
+> Next up: EPIC 1 — T1.3 (ingest API + BullMQ queue → Postgres). Deaths/positions
+> (T1.4, Observer API) and ontology resolution (T2.2) are tracked follow-ups.
 > See `docs/WC3_Coach_Design_Doc.md` and `docs/WC3_Coach_Project_Plan.md`
 > for full architecture and backlog.
 
