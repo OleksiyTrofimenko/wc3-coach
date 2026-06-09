@@ -7,10 +7,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A personal, locally-run platform for deliberate Warcraft III improvement:
 **APM Trainer + Replay Analyzer + AI Coach**.
 
-> **Current state:** T0.1 complete. The monorepo skeleton is in place:
-> `apps/`, `packages/`, `db/`, `turbo.json`, `pnpm-workspace.yaml`.
-> `corepack pnpm install && corepack pnpm turbo build` works end-to-end.
-> Remaining EPIC 0 tasks: T0.2 (Docker infra), T0.4 (real shared types).
+> **Current state:** T0.1 + T0.2 complete.
+> - T0.1: monorepo skeleton — `apps/`, `packages/`, `db/`, `turbo.json`,
+>   `pnpm-workspace.yaml`. `corepack pnpm install && corepack pnpm turbo build`
+>   works end-to-end.
+> - T0.2: Docker infra — `docker-compose.yml` (Postgres 16 + pgvector, Redis 7,
+>   Ollama), `.env.example`, `db/init/01-extensions.sql`. One `docker compose up -d`
+>   brings up all backing services; Ollama GPU passthrough via the `gpu` profile.
+> Remaining EPIC 0 tasks: T0.4 (real shared types).
 > See `docs/WC3_Coach_Design_Doc.md` and `docs/WC3_Coach_Project_Plan.md`
 > for full architecture and backlog.
 
@@ -131,8 +135,7 @@ wc3-coach/
    └─ skills/wc3-knowledge/    # shared WC3 knowledge base
 ```
 
-`apps/`, `packages/`, and `db/` exist (scaffolded in T0.1).
-`docker-compose.yml` does **not** exist yet — that is T0.2.
+`apps/`, `packages/`, `db/`, and `docker-compose.yml` all exist (T0.1 + T0.2).
 
 ---
 
@@ -225,12 +228,74 @@ pytest -k test_health            # single test by name
 pytest tests/benchmarks/         # all tests in a directory
 ```
 
-### Docker infra (T0.2 — not yet scaffolded)
+### Local infrastructure (Docker) — T0.2 complete
+
+#### First-time setup
 ```bash
-# Once T0.2 is done:
-docker compose up          # bring up Postgres+pgvector, Redis, Ollama
-docker compose down        # stop and remove containers
-docker compose up -d       # detached mode
+# 1. Copy the env template (only once after cloning)
+cp .env.example .env          # Linux/macOS/Git Bash
+copy .env.example .env        # Windows CMD
+Copy-Item .env.example .env   # PowerShell
+
+# 2. Start Postgres + Redis (always needed for dev)
+docker compose up -d
+
+# 3. Check service health (wait ~15 s on first pull)
+docker compose ps
+# You should see "healthy" next to postgres and redis.
+```
+
+#### Connection strings (defaults from .env.example)
+```
+DATABASE_URL=postgresql://wc3coach:wc3coach@localhost:5432/wc3coach
+REDIS_URL=redis://localhost:6379
+OLLAMA_HOST=http://localhost:11434
+```
+
+#### Starting Ollama with GPU (RTX 5070 Ti)
+Ollama is in the `gpu` compose profile so it does NOT start on bare `up`.
+Requires the NVIDIA Container Toolkit installed in WSL2 first (see GPU fallback
+note below if you haven't done this yet).
+
+```bash
+# Start all three services (postgres + redis + ollama with GPU)
+docker compose --profile gpu up -d
+
+# Verify Ollama is reachable
+curl http://localhost:11434/api/tags
+```
+
+#### Manual Ollama model pulls
+Models are large (4–9 GB). Pull once; they persist in the `ollama-data` volume.
+```bash
+# LLM — choose one (or pull both for experimentation)
+docker compose exec ollama ollama pull qwen2.5:14b-instruct-q4_K_M   # ~9 GB, best quality
+docker compose exec ollama ollama pull llama3.1:8b                    # ~5 GB, faster
+
+# Embedding model — choose one
+docker compose exec ollama ollama pull bge-m3          # ~570 MB, best multilingual
+docker compose exec ollama ollama pull nomic-embed-text # ~270 MB, lighter alternative
+```
+These pulls are GPU-accelerated once the model is running. Expect 10–30 min on
+first pull depending on connection speed.
+
+#### GPU fallback (CPU-only Ollama)
+If the NVIDIA Container Toolkit is not yet set up in WSL2, comment out the
+`deploy:` block in the `ollama` service in `docker-compose.yml` and change or
+remove the `profiles:` line. Then run:
+```bash
+docker compose up -d ollama
+```
+CPU inference is much slower but functional for testing prompts/API integration.
+
+To set up GPU passthrough in WSL2, follow:
+https://docs.nvidia.com/cuda/wsl-user-guide/index.html
+
+#### Stopping services
+```bash
+docker compose down           # stop containers, KEEP data volumes
+docker compose --profile gpu down   # same but also stops ollama if running
+docker compose down -v        # stop AND delete all volumes (full reset)
 ```
 
 ### DB migrations (T2.1 — not yet scaffolded)

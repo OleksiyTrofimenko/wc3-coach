@@ -1,0 +1,205 @@
+# =============================================================================
+# WC3 Coach — Local Backing Infrastructure
+# =============================================================================
+# Three services: postgres (pgvector), redis, ollama.
+# The app processes (api-node, api-py, web) run on the HOST during development
+# and connect to these services via the ports mapped below.
+#
+# Usage (typical dev session):
+#   cp .env.example .env          # once after cloning
+#   docker compose up -d          # start all three services detached
+#   docker compose ps             # verify healthy status
+#   docker compose down           # stop containers (keeps volumes by default)
+#   docker compose down -v        # stop AND delete all data volumes (destructive!)
+#
+# GPU / Ollama note:
+#   Ollama is in the "gpu" profile so it does NOT start with a bare
+#   `docker compose up -d`. This avoids a hard failure when the NVIDIA
+#   Container Toolkit is not yet configured in WSL2.
+#
+#   To start Ollama WITH GPU support:
+#     docker compose --profile gpu up -d
+#
+#   To start Ollama WITHOUT GPU (CPU-only fallback):
+#     docker compose run --rm -p 11434:11434 --entrypoint ollama \
+#       -e OLLAMA_KEEP_ALIVE=24h ollama/ollama:latest serve
+#   OR simply add the service to the default profile after commenting out the
+#   "deploy" block (see the ollama service below).
+# =============================================================================
+
+name: wc3-coach   # explicit project name avoids surprises across terminals
+
+# ---------------------------------------------------------------------------
+# Named network — all services share this bridge network so they can reach
+# each other by service name (e.g. "postgres:5432", "redis:6379").
+# Host apps connect via localhost:<mapped-port>.
+# ---------------------------------------------------------------------------
+networks:
+  wc3-net:
+    driver: bridge
+
+# ---------------------------------------------------------------------------
+# Named volumes — data survives `docker compose down` (containers are removed
+# but volumes are kept). Use `docker compose down -v` to also delete volumes.
+# ---------------------------------------------------------------------------
+volumes:
+  postgres-data:   # Postgres WAL + tables
+  redis-data:      # Redis AOF persistence file
+  ollama-data:     # Ollama pulled models (~GB each — persist to avoid re-pulls)
+
+# ===========================================================================
+# SERVICES
+# ===========================================================================
+services:
+
+  # -------------------------------------------------------------------------
+  # postgres
+  # Image: pgvector/pgvector:pg16
+  #   This is the official pgvector project image. It is a thin wrapper around
+  #   the official postgres:16 image with the `vector` extension pre-compiled
+  #   and installed. Choosing it over stock postgres:16 avoids needing to
+  #   compile the extension from source or use a custom Dockerfile.
+  #
+  # Init script:
+  #   Any *.sql or *.sh files placed in /docker-entrypoint-initdb.d/ are
+  #   executed ONCE when the data directory is first created (i.e., on a fresh
+  #   volume). The bind-mount below injects db/init/01-extensions.sql which
+  #   runs CREATE EXTENSION IF NOT EXISTS vector (and uuid-ossp). Subsequent
+  #   `docker compose up` calls skip this directory because the data dir already
+  #   exists — it is not re-run on every start.
+  # -------------------------------------------------------------------------
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped    # restart automatically after Docker Desktop restart or crash
+    networks:
+      - wc3-net
+    ports:
+      # HOST:CONTAINER — host apps connect to localhost:5432
+      - "5432:5432"
+    volumes:
+      # Persist table data between container recreations
+      - postgres-data:/var/lib/postgresql/data
+      # Inject our extension-creation SQL into the init directory.
+      # read-only (:ro) — the container should not write back to db/init/
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    environment:
+      # These values are loaded from .env (copy .env.example → .env first).
+      # The postgres image uses exactly these three env vars to bootstrap
+      # the superuser and default database on first start.
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    healthcheck:
+      # pg_isready: lightweight built-in tool that checks whether the server
+      # is accepting connections. Returns exit 0 when ready, 1 otherwise.
+      # -U / -d must match the configured superuser and database.
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s    # check every 10 seconds
+      timeout: 5s      # fail the check if no response within 5 s
+      retries: 5       # mark unhealthy after 5 consecutive failures
+      start_period: 15s  # give Postgres time to initialise before counting failures
+
+  # -------------------------------------------------------------------------
+  # redis
+  # Image: redis:7-alpine
+  #   Alpine-based Redis 7 — minimal footprint (~30 MB). Redis 7 is the LTS
+  #   release that BullMQ (used in api-node) officially targets. We enable
+  #   appendonly persistence so the queue survives container restarts.
+  # -------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    networks:
+      - wc3-net
+    ports:
+      # Host apps connect to localhost:6379
+      - "6379:6379"
+    volumes:
+      # Persist the AOF (append-only file) — BullMQ job state survives restarts
+      - redis-data:/data
+    # redis-server flags passed as the container command:
+    #   --appendonly yes  — enable AOF persistence (writes every change to disk)
+    #   --save ""         — disable RDB snapshots (AOF is sufficient here; avoids
+    #                       periodic fork+write overhead on a small dev machine)
+    command: redis-server --appendonly yes --save ""
+    healthcheck:
+      # redis-cli ping returns "PONG" on success (exit 0)
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  # -------------------------------------------------------------------------
+  # ollama
+  # Image: ollama/ollama:latest
+  #   Official Ollama image. No LLM model is baked in — models are pulled
+  #   manually (see below) and stored in the ollama-data volume.
+  #
+  # Profile: "gpu"
+  #   This service is in the "gpu" profile so it is NOT started by a bare
+  #   `docker compose up -d`. This prevents a hard crash when the NVIDIA
+  #   Container Toolkit is absent from WSL2.
+  #
+  #   To start with GPU:   docker compose --profile gpu up -d
+  #   To start CPU-only:   comment out the entire "deploy:" block below,
+  #                        remove or change the "profiles:" line, then run
+  #                        docker compose up -d ollama
+  #
+  # GPU passthrough:
+  #   The deploy.resources.reservations.devices block is the Compose v3.8+
+  #   way to request NVIDIA GPU access. It requires:
+  #     1. NVIDIA driver installed on the Windows host.
+  #     2. nvidia-container-toolkit installed in WSL2
+  #        (https://docs.nvidia.com/cuda/wsl-user-guide/index.html).
+  #     3. Docker Desktop with WSL2 integration enabled.
+  #   driver: nvidia   — request the NVIDIA runtime
+  #   count: all       — expose all available GPUs (RTX 5070 Ti in our case)
+  #   capabilities: [gpu] — the minimum capability set Ollama needs
+  #
+  # Manual model pulls (run after `docker compose --profile gpu up -d`):
+  #   # LLM — choose one (or both):
+  #   docker compose exec ollama ollama pull qwen2.5:14b-instruct-q4_K_M
+  #   docker compose exec ollama ollama pull llama3.1:8b
+  #
+  #   # Embedding model — choose one:
+  #   docker compose exec ollama ollama pull bge-m3
+  #   docker compose exec ollama ollama pull nomic-embed-text
+  #
+  #   These are large downloads (4–9 GB). They are stored in ollama-data and
+  #   only need to be pulled once per machine (or after `docker compose down -v`).
+  # -------------------------------------------------------------------------
+  ollama:
+    image: ollama/ollama:latest
+    profiles:
+      # Only started when --profile gpu is passed; keeps bare `up` safe on
+      # machines without the NVIDIA Container Toolkit.
+      - gpu
+    restart: unless-stopped
+    networks:
+      - wc3-net
+    ports:
+      # Host apps connect to http://localhost:11434
+      - "11434:11434"
+    volumes:
+      # Models are stored here — survives container recreations
+      - ollama-data:/root/.ollama
+    environment:
+      # Keep models loaded in VRAM between requests (24 h idle timeout).
+      # Set to 0 to unload immediately after each request (saves VRAM).
+      OLLAMA_KEEP_ALIVE: "24h"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia      # request the NVIDIA container runtime
+              count: all          # use all available GPUs
+              capabilities: [gpu] # minimum required capability
+    healthcheck:
+      # Ollama exposes a simple /api/tags endpoint; curl exit 0 = healthy.
+      # Use --fail so a non-2xx response also marks the container unhealthy.
+      test: ["CMD-SHELL", "curl -fs http://localhost:11434/api/tags || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
