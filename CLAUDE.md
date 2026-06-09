@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A personal, locally-run platform for deliberate Warcraft III improvement:
 **APM Trainer + Replay Analyzer + AI Coach**.
 
-> **Current state:** EPIC 0 complete; EPIC 1 done (T1.1–T1.3); EPIC 2 in progress (T2.1 + T2.2 done).
+> **Current state:** EPIC 0 complete; EPIC 1 done (T1.1–T1.3); EPIC 2 done (T2.1–T2.3).
 > - T0.1: monorepo skeleton — `apps/`, `packages/`, `db/`, `turbo.json`,
 >   `pnpm-workspace.yaml`. `corepack pnpm install && corepack pnpm turbo build`
 >   works end-to-end.
@@ -41,10 +41,15 @@ A personal, locally-run platform for deliberate Warcraft III improvement:
 >   (pure logic in `packages/ontology`, DB-backed `resolveReplayRefs` in
 >   `packages/db`, wired NON-FATALLY into the worker). Seed is `verified:false`
 >   (community values, pending CASC cross-check); Human/Undead are stubs.
-> Next up: EPIC 2 — T2.3 (patch versioning), then **EPIC 3 — T3.1 benchmark engine**
-> (the first deterministic coaching value: worker curve, expand/T2 timing, supply
-> blocks, floating resources). Deaths/positions (T1.4, Observer API) remain a
-> tracked follow-up.
+> - T2.3: patch versioning — curated `patch_versions` registry seed
+>   (`patches.json`, only the confirmed 2.00/6117) + patch-aware stat lookup
+>   (`packages/db/src/lookup.ts`: `getUnit/.../getXForPatch`, patch-specific row →
+>   `NULL` baseline fallback via the pure `pickForPatch`). Replay→patch was already
+>   wired in `persistTimeline`.
+> Next up: **EPIC 3 — T3.1 benchmark engine** (the first deterministic coaching
+> value: worker curve, expand/T2 timing, supply blocks, hero level vs. time,
+> floating gold/lumber) → T3.2 (strategic corpus seed for 2–3 matchups).
+> Deaths/positions (T1.4, Observer API) remain a tracked follow-up.
 > See `docs/WC3_Coach_Design_Doc.md` and `docs/WC3_Coach_Project_Plan.md`
 > for full architecture and backlog.
 
