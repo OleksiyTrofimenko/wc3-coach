@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A personal, locally-run platform for deliberate Warcraft III improvement:
 **APM Trainer + Replay Analyzer + AI Coach**.
 
-> **Current state:** EPIC 0 complete; EPIC 1 in progress (T1.1 + T1.2 done).
+> **Current state:** EPIC 0 complete; EPIC 1 in progress (T1.1 + T1.2 + T1.3 done).
 > - T0.1: monorepo skeleton — `apps/`, `packages/`, `db/`, `turbo.json`,
 >   `pnpm-workspace.yaml`. `corepack pnpm install && corepack pnpm turbo build`
 >   works end-to-end.
@@ -24,8 +24,15 @@ A personal, locally-run platform for deliberate Warcraft III improvement:
 >   map `w3gjs` output → `ReplayTimeline` (`GameEvent[]`). Covered by a vitest
 >   golden-file test on a committed fixture (`corepack pnpm turbo test`).
 >   `entityRef` is a provisional `"<kind>:<fourcc>"` ref pending the ontology (T2.2).
-> Next up: EPIC 1 — T1.3 (ingest API + BullMQ queue → Postgres). Deaths/positions
-> (T1.4, Observer API) and ontology resolution (T2.2) are tracked follow-ups.
+> - T1.3: ingest pipeline — new `packages/db` (**Drizzle ORM**, the T2.1 schema
+>   subset: `patch_versions`, `replays`, `replay_players`, `game_events`) + an
+>   `apps/api-node` Fastify API (`POST /replays` upload+sha256 dedup, `GET
+>   /replays/:id`, `GET /health`) and a BullMQ worker that parses → persists.
+>   Lifecycle on `replays.status`: pending → parsing → done|error. Full
+>   walkthrough in `docs/T1.3_Ingest_Pipeline.md`.
+> Next up: EPIC 2 — T2.1 (finish the DB schema: ontology + benchmarks + knowledge
+> tables) and T2.2 (ontology import → resolve provisional `entityRef`s). Deaths/
+> positions (T1.4, Observer API) remain a tracked follow-up.
 > See `docs/WC3_Coach_Design_Doc.md` and `docs/WC3_Coach_Project_Plan.md`
 > for full architecture and backlog.
 
@@ -309,12 +316,22 @@ docker compose --profile gpu down   # same but also stops ollama if running
 docker compose down -v        # stop AND delete all volumes (full reset)
 ```
 
-### DB migrations (T2.1 — not yet scaffolded)
+### DB migrations (Drizzle ORM — partially scaffolded in T1.3)
+The schema lives in TypeScript at `packages/db/src/schema.ts` (single source of
+truth). SQL migrations are generated into `db/migrations/` by `drizzle-kit` and
+applied by a small runner. **Never hand-edit a live DB.** Requires `DATABASE_URL`
+in the environment and Postgres running (`docker compose up -d`).
 ```bash
-# Migrations live in db/migrations/ and will use the tool chosen in T2.1.
-# Placeholder: apply schema.sql manually during local dev until T2.1 lands.
-psql $DATABASE_URL -f db/schema.sql
+# 1. Edit packages/db/src/schema.ts, then generate a new migration SQL file:
+corepack pnpm --filter @wc3-coach/db db:generate   # → db/migrations/NNNN_*.sql
+
+# 2. Review the generated .sql, commit it, then apply pending migrations:
+corepack pnpm --filter @wc3-coach/db db:migrate
 ```
+> The full ingest pipeline (schema ↔ shared-types mapping, the
+> pending→parsing→done lifecycle, and an end-to-end local run) is documented in
+> `docs/T1.3_Ingest_Pipeline.md`. Remaining T2.1 work: ontology, benchmarks, and
+> knowledge/pgvector tables.
 
 ---
 
