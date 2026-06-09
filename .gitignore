@@ -60,3 +60,7 @@ docker-compose.override.yml
 # *.w3g
 # !**/test/fixtures/**/*.w3g
 # !**/fixtures/**/*.w3g
+
+# Personal replays + scratch parser dumps live here; never committed.
+# Small curated golden fixtures for tests go under packages/parser/test/fixtures instead.
+game-data/

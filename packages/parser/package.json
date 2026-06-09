@@ -16,12 +16,16 @@
     "typecheck": "tsc --noEmit",
     "lint": "echo \"lint: no linter configured yet\"",
     "test": "echo \"test: no tests yet (TODO T1.1 — golden replay fixtures)\"",
-    "clean": "rm -rf dist *.tsbuildinfo"
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "dump": "tsx src/spike-dump.ts"
   },
   "dependencies": {
-    "@wc3-coach/shared-types": "workspace:*"
+    "@wc3-coach/shared-types": "workspace:*",
+    "w3gjs": "^4.1.0"
   },
   "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.22.4",
     "typescript": "*"
   }
 }
