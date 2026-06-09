@@ -11,38 +11,28 @@
  *   Observer API usage (War3StatsObserverSharedMemory) is allowed ONLY during
  *   replay playback in observer mode, never during a live ladder/W3C game.
  *
- * TODO(T1.1): Spike — parse one replay with w3gjs; dump all events to JSON.
- *   Add w3gjs as a dependency: "w3gjs": "^2.x"  (do NOT install until T1.1)
+ * ## Public API
  *
- * TODO(T1.2): Map raw w3gjs commands → canonical GameEvent:
- *   - build / train / upgrade / learn_skill / item / move / attack /
- *     hero_level / expand
- *   - Each event carries: t_ms, entity_ref (→ ontology), player_id, payload
+ *   parseReplayFile(path)  — reads a .w3g file and returns a ReplayTimeline
+ *   normalizeReplay(...)   — pure mapper; useful for testing with pre-parsed data
+ *   PARSER_VERSION         — semver string for the parser implementation
  *
- * TODO(T1.3): Wire into ingest queue (BullMQ) via apps/api-node.
+ * ## TODO backlog
+ *
+ * TODO(T1.3): Wire parseReplayFile into the BullMQ ingest queue in apps/api-node.
+ * TODO(T1.4): Add move/attack events via low-level ActionParser (0x11/0x12 opcodes).
+ * TODO(T1.4): Add unit_death events via Observer API (design doc §6 Path B).
+ * TODO(T2.2): Resolve provisional entityRef strings to canonical ontology IDs.
+ * TODO(T2.3): Resolve provisional patchId to a patch_versions table entry.
  *
  * See docs/WC3_Coach_Design_Doc.md §3 (parser) and §6 (.w3g limitations).
  */
 
-// Placeholder export so the package builds cleanly.
-// Replace in T1.1/T1.2 with the real parse() function.
-export const PARSER_VERSION = "0.0.1" as const;
+export { parseReplayFile } from "./parse.js";
+export { normalizeReplay } from "./normalize.js";
 
 /**
- * Temporary stub — will be replaced by ReplayTimeline from @wc3-coach/shared-types in T1.2.
- * Import ReplayTimeline directly once T1.2 lands.
+ * Semver of the parser implementation.
+ * Bump on any breaking change to the output shape.
  */
-export type ParseResult = {
-  // TODO(T1.2): replace with ReplayTimeline from @wc3-coach/shared-types
-  _parseResult: true;
-};
-
-/**
- * Placeholder parse function.
- * TODO(T1.1): implement with w3gjs.
- */
-export async function parseReplay(_filePath: string): Promise<ParseResult> {
-  throw new Error(
-    "parseReplay is not implemented yet. See TODO(T1.1) in this file."
-  );
-}
+export const PARSER_VERSION = "0.1.0" as const;

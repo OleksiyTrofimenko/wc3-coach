@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "composite": false,
+    // No-emit typecheck project: widen rootDir to the package root so test/ and
+    // vitest.config.ts (outside src/) are covered without TS6059.
+    "rootDir": "."
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts", "vitest.config.ts"],
+  "exclude": ["node_modules", "dist"]
+}

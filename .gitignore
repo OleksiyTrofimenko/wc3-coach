@@ -56,10 +56,10 @@ docker-compose.override.yml
 
 # Replay fixtures: keep .w3g test fixtures committed (golden files for parser tests)
 # Individual replays for personal use should be stored outside the repo
-# Uncomment the next line to ignore all replays except those under test/fixtures:
-# *.w3g
-# !**/test/fixtures/**/*.w3g
-# !**/fixtures/**/*.w3g
+# All .w3g files are ignored EXCEPT curated golden fixtures under test/fixtures/.
+*.w3g
+!**/test/fixtures/**/*.w3g
+!**/fixtures/**/*.w3g
 
 # Personal replays + scratch parser dumps live here; never committed.
 # Small curated golden fixtures for tests go under packages/parser/test/fixtures instead.
