@@ -1,30 +1,15 @@
--- WC3 Coach — PostgreSQL 16 + pgvector schema
+-- WC3 Coach — schema pointer
 --
--- This file documents the target schema. Actual schema changes are applied
--- through versioned migration files in db/migrations/ — never by hand on a
--- live database.
+-- packages/db/src/schema.ts is the SINGLE SOURCE OF TRUTH for the DB schema.
+-- This file is no longer the canonical definition.
 --
--- TODO(T2.1): Implement full schema and first migration.
---   See docs/WC3_Coach_Design_Doc.md §5 for the complete data model, including:
---     - patch_versions         (ties all stats and timings to a WC3 patch)
---     - replays                (sha256 dedup, metadata, parse status)
---     - replay_players         (per-player race, APM, result)
---     - game_events            (canonical GameEvent rows, FK → replays)
---     - ontology_entities      (unit / building / hero / upgrade definitions)
---     - ontology_stats         (HP, armor, DPS, cost, food — versioned by patch)
---     - benchmarks             (deviation results FK → replays)
---     - apm_sessions           (APM trainer drill results)
---     - knowledge_docs         (guide chunks for RAG)
---     - knowledge_chunks       (embedded vectors, pgvector column)
+-- Schema changes:
+--   1. Edit packages/db/src/schema.ts (Drizzle ORM table definitions).
+--   2. Generate a new migration:
+--        corepack pnpm --filter @wc3-coach/db db:generate
+--      This produces a new SQL file in db/migrations/ (e.g. 0002_*.sql).
+--   3. Apply to the local DB:
+--        corepack pnpm --filter @wc3-coach/db db:migrate
 --
--- Extension requirements (applied in the first migration):
---   CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
---   CREATE EXTENSION IF NOT EXISTS "pgvector";
---
--- Naming conventions:
---   - All tables: snake_case, plural
---   - Primary keys: id UUID DEFAULT uuid_generate_v4()
---   - Timestamps: created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
---   - Foreign keys: <table_singular>_id UUID NOT NULL REFERENCES <table>(id)
---   - Patch versioning: patch_id UUID NOT NULL REFERENCES patch_versions(id)
---     on every table that stores game-version-sensitive data
+-- NEVER alter the live DB by hand — always go through migrations.
+-- See docs/WC3_Coach_Design_Doc.md §5 for the data model design.

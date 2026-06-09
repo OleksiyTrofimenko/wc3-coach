@@ -1,8 +1,14 @@
 /**
  * @wc3-coach/db — Drizzle ORM schema
  *
- * Tables covering the T2.1 subset needed for the T1.3 ingest pipeline.
- * Design doc §5.2 is the authoritative reference.
+ * Tables covering the full T2.1 scope: ingest pipeline tables (T1.3) plus the
+ * complete ontology, analytics, and knowledge-base tables defined in the design doc.
+ *
+ * Design doc §5 is the authoritative reference for the data model.
+ * §5.1 — ontology (static game facts)
+ * §5.2 — replays + benchmarks (dynamic / analytics)
+ * §5.3 — apm_sessions (APM trainer progress)
+ * §5.4 — knowledge_docs / knowledge_chunks (RAG)
  *
  * Conventions:
  *   - snake_case column names in the DB; camelCase TS property names via Drizzle.
@@ -11,8 +17,18 @@
  *   - Union-typed text columns are branded with .$type<>() so the TS layer carries
  *     the correct literal type from @wc3-coach/shared-types.
  *
- * PRINCIPLE #1: These tables store ONLY post-game replay data.
- *   No live-game schemas exist or will be added here.
+ * PATCH-VERSIONING DECISION (T2.1):
+ *   Stat-bearing ontology tables (heroes, units, buildings, upgrades,
+ *   hero_abilities) carry a NULLABLE patch_id FK → patch_versions.
+ *   NULL means "valid across all patches" (a bootstrap value before per-patch
+ *   splits are imported). A non-null patch_id means the row holds the stats
+ *   for that specific patch. The UNIQUE constraint on (key, patch_id) enforces
+ *   one row per entity per patch version. This implements Principle "stats are
+ *   versioned by patch" and is the foundation for T2.3 (patch diff import).
+ *   Identity tables races and maps are patch-invariant; they carry no patch_id.
+ *
+ * PRINCIPLE #1: These tables store ONLY post-game replay data and static game
+ *   facts. No live-game schemas exist or will be added here.
  */
 
 import {
@@ -21,13 +37,20 @@ import {
   uuid,
   integer,
   bigint,
+  real,
   timestamp,
   jsonb,
   uniqueIndex,
+  unique,
   index,
 } from "drizzle-orm/pg-core";
+import { vector } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
-import type { GameEventType, ReplayPlayer } from "@wc3-coach/shared-types";
+import type {
+  GameEventType,
+  ReplayPlayer,
+  BenchmarkSeverity,
+} from "@wc3-coach/shared-types";
 
 // ---------------------------------------------------------------------------
 // patch_versions
@@ -214,3 +237,643 @@ export const gameEvents = pgTable(
 
 export type GameEventRow = typeof gameEvents.$inferSelect;
 export type NewGameEventRow = typeof gameEvents.$inferInsert;
+
+// ===========================================================================
+// ONTOLOGY TABLES — design doc §5.1
+//
+// PATCH-VERSIONING: stat-bearing tables (heroes, units, buildings, upgrades,
+// hero_abilities) carry nullable patch_id. See file-level comment for the
+// full decision rationale.
+// ===========================================================================
+
+// ---------------------------------------------------------------------------
+// races
+// ---------------------------------------------------------------------------
+
+/**
+ * Race identity table — patch-invariant.
+ *
+ * `key` is the stable slug used throughout the system to identify a race,
+ * e.g. "human", "orc", "undead", "nightelf", "random".
+ * The parser emits provisional refs like "race:O" which T2.2 resolves
+ * against this key.
+ *
+ * Design doc §5.1.
+ */
+export const races = pgTable(
+  "races",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    /**
+     * Stable slug, e.g. "human", "orc", "undead", "nightelf".
+     * The parser's provisional race refs (e.g. "race:O", "race:H") are
+     * resolved against this key in T2.2 ontology enrichment.
+     */
+    key: text("key").notNull(),
+    /** Display name, e.g. "Orc", "Human". */
+    name: text("name").notNull(),
+  },
+  (table) => [uniqueIndex("races_key_idx").on(table.key)],
+);
+
+export type RaceRow = typeof races.$inferSelect;
+export type NewRaceRow = typeof races.$inferInsert;
+
+// ---------------------------------------------------------------------------
+// heroes
+// ---------------------------------------------------------------------------
+
+/**
+ * Hero definitions, optionally scoped to a patch.
+ *
+ * `patch_id` is nullable: a null row acts as the canonical patch-agnostic
+ * definition; non-null rows override stats for a specific patch (T2.3).
+ * UNIQUE(key, patch_id) ensures one row per hero per patch.
+ *
+ * `base_stats` jsonb carries HP, mana, armor, str/agi/int per level, etc.
+ * Exact shape defined in T2.2 import and .claude/skills/wc3-knowledge/ontology.md.
+ *
+ * Design doc §5.1.
+ */
+export const heroes = pgTable(
+  "heroes",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    raceId: uuid("race_id")
+      .notNull()
+      .references(() => races.id),
+    /**
+     * FK into patch_versions. NULL = patch-agnostic bootstrap value.
+     * Non-null = stats specific to that patch. See patch-versioning decision.
+     */
+    patchId: uuid("patch_id").references(() => patchVersions.id),
+    /** Stable slug, e.g. "paladin", "blademaster", "death_knight". */
+    key: text("key").notNull(),
+    /** Display name, e.g. "Paladin". */
+    name: text("name").notNull(),
+    /** Primary attribute — branded to the literal union. */
+    primaryAttr: text("primary_attr")
+      .notNull()
+      .$type<"str" | "agi" | "int">(),
+    /**
+     * JSONB blob of base stats: HP, mana, armor value, armor type,
+     * str/agi/int base and per-level gain. Shape defined in T2.2.
+     */
+    baseStats: jsonb("base_stats").notNull(),
+  },
+  (table) => [
+    // NULLS NOT DISTINCT: a NULL patch_id means "patch-agnostic", and there
+    // must be at most ONE such row per key. Without this, Postgres treats NULLs
+    // as distinct and would allow duplicate patch-agnostic rows for the same key.
+    // A unique CONSTRAINT (not uniqueIndex) is used because only the constraint
+    // builder exposes .nullsNotDistinct(); it still creates a backing btree index.
+    unique("heroes_key_patch_uq").on(table.key, table.patchId).nullsNotDistinct(),
+  ],
+);
+
+export type HeroRow = typeof heroes.$inferSelect;
+export type NewHeroRow = typeof heroes.$inferInsert;
+
+// ---------------------------------------------------------------------------
+// hero_abilities
+// ---------------------------------------------------------------------------
+
+/**
+ * Abilities belonging to a hero, keyed to the hero row (which already
+ * carries a patch_id if patch-specific).
+ *
+ * `levels` jsonb is an ordered array of per-level data: mana cost, cooldown,
+ * effect description, etc. Exact shape defined in T2.2.
+ *
+ * Design doc §5.1.
+ */
+export const heroAbilities = pgTable("hero_abilities", {
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  heroId: uuid("hero_id")
+    .notNull()
+    .references(() => heroes.id, { onDelete: "cascade" }),
+  /** Stable slug, e.g. "holy_light", "storm_bolt". */
+  key: text("key").notNull(),
+  /** Display name. */
+  name: text("name").notNull(),
+  /**
+   * JSONB array of per-level objects: [{level, manaCost, cooldown, range,
+   * aoe, duration, description}, ...]. Exact shape defined in T2.2.
+   */
+  levels: jsonb("levels").notNull(),
+});
+
+export type HeroAbilityRow = typeof heroAbilities.$inferSelect;
+export type NewHeroAbilityRow = typeof heroAbilities.$inferInsert;
+
+// ---------------------------------------------------------------------------
+// units
+// ---------------------------------------------------------------------------
+
+/**
+ * Non-hero unit definitions (melee, ranged, casters, summoned, etc.).
+ *
+ * `patch_id` nullable: same patch-versioning scheme as heroes.
+ * UNIQUE(key, patch_id) — one row per unit per patch.
+ *
+ * `build_time` is in integer seconds (game-seconds as used in the WC3
+ * in-game UI, e.g. Footman = 20 s). NOT milliseconds.
+ *
+ * `key` is the stable ontology slug the parser resolves against, e.g.
+ * "footman", "grunt", "ghoul". The parser emits provisional entity_ref
+ * strings such as "unit:hfoo" (Footman FOURCC) which T2.2 maps to this
+ * key — see game_events.entity_ref and ontology.md for the FOURCC→key table.
+ *
+ * Design doc §5.1.
+ */
+export const units = pgTable(
+  "units",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    raceId: uuid("race_id")
+      .notNull()
+      .references(() => races.id),
+    /** FK into patch_versions. NULL = patch-agnostic. */
+    patchId: uuid("patch_id").references(() => patchVersions.id),
+    /**
+     * Stable slug, e.g. "footman", "grunt", "crypt_fiend".
+     * This is the join target for parser provisional refs like "unit:hfoo" —
+     * T2.2 maps FOURCC codes to these keys during ontology enrichment.
+     */
+    key: text("key").notNull(),
+    /** Display name, e.g. "Footman". */
+    name: text("name").notNull(),
+    /** Maximum hit points. */
+    hp: integer("hp").notNull(),
+    /** Armor value (numeric). */
+    armor: integer("armor").notNull(),
+    /**
+     * Armor type slug, e.g. "heavy", "medium", "light", "unarmored",
+     * "fort", "hero", "divine", "none".
+     * Interacts with attack_type for damage multipliers — see ontology.md.
+     */
+    armorType: text("armor_type").notNull(),
+    /**
+     * Attack type slug, e.g. "normal", "pierce", "siege", "magic",
+     * "chaos", "hero", "spells".
+     */
+    attackType: text("attack_type").notNull(),
+    /**
+     * Average damage per second (integer, rounded).
+     * Computed from base damage + dice + cooldown; exact formula in T2.2.
+     */
+    dps: integer("dps").notNull(),
+    /** Gold cost. */
+    gold: integer("gold").notNull(),
+    /** Lumber cost. */
+    lumber: integer("lumber").notNull(),
+    /** Food (supply) used. */
+    food: integer("food").notNull(),
+    /**
+     * Training time in integer seconds (game-seconds, e.g. Footman = 20).
+     * Use integer seconds throughout ontology for consistency with in-game UI.
+     */
+    buildTime: integer("build_time").notNull(),
+    /**
+     * JSONB bag of tech-tree requirements, e.g.
+     * [{type:"building", key:"blacksmith"}, {type:"upgrade", key:"forged_swords"}].
+     * Shape defined in T2.2.
+     */
+    techReq: jsonb("tech_req"),
+  },
+  (table) => [
+    // NULLS NOT DISTINCT — one patch-agnostic (NULL patch) row per key. See heroes.
+    unique("units_key_patch_uq").on(table.key, table.patchId).nullsNotDistinct(),
+    index("units_race_idx").on(table.raceId),
+  ],
+);
+
+export type UnitRow = typeof units.$inferSelect;
+export type NewUnitRow = typeof units.$inferInsert;
+
+// ---------------------------------------------------------------------------
+// buildings
+// ---------------------------------------------------------------------------
+
+/**
+ * Building definitions (production, research, towers, etc.).
+ *
+ * `patch_id` nullable: same patch-versioning scheme as units.
+ * `build_time` in integer seconds (game-seconds).
+ * `provides` jsonb: what the building unlocks or does, e.g.
+ * [{type:"unit", key:"footman"}, {type:"upgrade", key:"forged_swords"}].
+ *
+ * Design doc §5.1.
+ */
+export const buildings = pgTable(
+  "buildings",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    raceId: uuid("race_id")
+      .notNull()
+      .references(() => races.id),
+    /** FK into patch_versions. NULL = patch-agnostic. */
+    patchId: uuid("patch_id").references(() => patchVersions.id),
+    /** Stable slug, e.g. "barracks", "altar_of_kings", "great_hall". */
+    key: text("key").notNull(),
+    /** Display name. */
+    name: text("name").notNull(),
+    /** Maximum hit points. */
+    hp: integer("hp").notNull(),
+    /** Armor value (numeric). */
+    armor: integer("armor").notNull(),
+    /** Gold cost. */
+    gold: integer("gold").notNull(),
+    /** Lumber cost. */
+    lumber: integer("lumber").notNull(),
+    /** Construction time in integer seconds (game-seconds). */
+    buildTime: integer("build_time").notNull(),
+    /**
+     * JSONB list of what this building provides or enables:
+     * units it can train, upgrades it can research, abilities it unlocks.
+     * Shape: [{type:"unit"|"upgrade"|"ability", key:string}, ...].
+     */
+    provides: jsonb("provides"),
+  },
+  (table) => [
+    // NULLS NOT DISTINCT — one patch-agnostic (NULL patch) row per key. See heroes.
+    unique("buildings_key_patch_uq").on(table.key, table.patchId).nullsNotDistinct(),
+    index("buildings_race_idx").on(table.raceId),
+  ],
+);
+
+export type BuildingRow = typeof buildings.$inferSelect;
+export type NewBuildingRow = typeof buildings.$inferInsert;
+
+// ---------------------------------------------------------------------------
+// upgrades
+// ---------------------------------------------------------------------------
+
+/**
+ * Research upgrades (weapons, armor, abilities, racial upgrades).
+ *
+ * `patch_id` nullable: same versioning scheme.
+ * `levels` jsonb: ordered array of per-level data (cost, research time,
+ * effect). Shape defined in T2.2.
+ *
+ * Design doc §5.1.
+ */
+export const upgrades = pgTable(
+  "upgrades",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    raceId: uuid("race_id")
+      .notNull()
+      .references(() => races.id),
+    /** FK into patch_versions. NULL = patch-agnostic. */
+    patchId: uuid("patch_id").references(() => patchVersions.id),
+    /** Stable slug, e.g. "forged_swords", "animal_war_training". */
+    key: text("key").notNull(),
+    /** Display name, e.g. "Forged Swords". */
+    name: text("name").notNull(),
+    /**
+     * JSONB array of per-level data:
+     * [{level, gold, lumber, researchTime, description, effect}, ...].
+     * researchTime is in integer seconds (game-seconds). Shape in T2.2.
+     */
+    levels: jsonb("levels").notNull(),
+  },
+  (table) => [
+    // NULLS NOT DISTINCT — one patch-agnostic (NULL patch) row per key. See heroes.
+    unique("upgrades_key_patch_uq").on(table.key, table.patchId).nullsNotDistinct(),
+  ],
+);
+
+export type UpgradeRow = typeof upgrades.$inferSelect;
+export type NewUpgradeRow = typeof upgrades.$inferInsert;
+
+// ---------------------------------------------------------------------------
+// maps
+// ---------------------------------------------------------------------------
+
+/**
+ * Map definitions — patch-invariant identity table.
+ *
+ * `key` is the stable slug used in replays.map_id and game events, e.g.
+ * "echo_isles", "twisted_meadows", "northshire_cliffs".
+ * `layout_meta` jsonb carries dimensions, starting positions, expansion
+ * locations, and other map-specific metadata needed for heatmaps and
+ * creep-camp lookups.
+ *
+ * Design doc §5.1.
+ */
+export const maps = pgTable(
+  "maps",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    /** Stable slug, e.g. "echo_isles". Used as the FK target from replays.map_id. */
+    key: text("key").notNull(),
+    /** Display name, e.g. "Echo Isles". */
+    name: text("name").notNull(),
+    /** Tileset identifier, e.g. "lordaeron_summer", "barrens", "ashenvale". */
+    tileset: text("tileset").notNull(),
+    /** Number of player slots (2, 4, 6, 8). */
+    playerCount: integer("player_count").notNull(),
+    /**
+     * JSONB of map-specific layout data: dimensions, start positions, expo
+     * locations, natural creep camp positions. Shape defined in T2.2.
+     */
+    layoutMeta: jsonb("layout_meta"),
+  },
+  (table) => [uniqueIndex("maps_key_idx").on(table.key)],
+);
+
+export type MapRow = typeof maps.$inferSelect;
+export type NewMapRow = typeof maps.$inferInsert;
+
+// ---------------------------------------------------------------------------
+// creep_camps
+// ---------------------------------------------------------------------------
+
+/**
+ * Neutral creep camp definitions per map.
+ *
+ * `position` jsonb: {x: number, y: number} in map coordinates.
+ * `units` jsonb: array of {key: string, count: number} creep entries.
+ * `drops` jsonb: array of possible item drops with drop rates.
+ * `difficulty` slug: "green", "orange", "red" following WC3 conventions.
+ *
+ * Indexed on map_id for fast per-map lookups (used by benchmarks to score
+ * creep-route efficiency).
+ *
+ * Design doc §5.1.
+ */
+export const creepCamps = pgTable(
+  "creep_camps",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    mapId: uuid("map_id")
+      .notNull()
+      .references(() => maps.id, { onDelete: "cascade" }),
+    /**
+     * Map coordinates: {x: number, y: number}.
+     * Coordinate system matches the w3g replay format used by the Observer API.
+     */
+    position: jsonb("position").notNull(),
+    /**
+     * Difficulty tier: "green" | "orange" | "red".
+     * Follows standard WC3 creep camp colour conventions.
+     */
+    difficulty: text("difficulty").notNull(),
+    /**
+     * JSONB array of creeps in the camp:
+     * [{key: string, count: number}, ...] where key is the unit ontology slug.
+     */
+    units: jsonb("units").notNull(),
+    /**
+     * JSONB array of possible item drops:
+     * [{itemKey: string, dropChance: number}, ...].
+     * dropChance in [0, 1]. Shape defined in T2.2.
+     */
+    drops: jsonb("drops"),
+  },
+  (table) => [index("creep_camps_map_idx").on(table.mapId)],
+);
+
+export type CreepCampRow = typeof creepCamps.$inferSelect;
+export type NewCreepCampRow = typeof creepCamps.$inferInsert;
+
+// ===========================================================================
+// ANALYTICS TABLES — design doc §5.2, §5.3
+// ===========================================================================
+
+// ---------------------------------------------------------------------------
+// benchmarks
+// ---------------------------------------------------------------------------
+
+/**
+ * Computed benchmark deviations from a reference value for a single metric
+ * within a replay. Aligns field-for-field to BenchmarkResult in shared-types.
+ *
+ * Indexed on (replay_id) and (replay_id, slot) to support:
+ *   "all benchmarks for a replay" — the primary analytics query.
+ *   "benchmarks for one player in a replay" — per-player breakdown.
+ *
+ * ON DELETE CASCADE: benchmarks are meaningless without their replay.
+ *
+ * Design doc §5.2, shared-types BenchmarkResult.
+ */
+export const benchmarks = pgTable(
+  "benchmarks",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    replayId: uuid("replay_id")
+      .notNull()
+      .references(() => replays.id, { onDelete: "cascade" }),
+    /** Player slot the metric belongs to (matches replay_players.slot). */
+    slot: integer("slot").notNull(),
+    /**
+     * Human-readable metric name, e.g. "expand_time", "hero_level_3_time",
+     * "floating_gold". Matches BenchmarkResult.metric.
+     */
+    metric: text("metric").notNull(),
+    /** Actual measured value (units natural to the metric). Maps to BenchmarkResult.value. */
+    value: real("value").notNull(),
+    /**
+     * Reference value from the benchmark corpus for this matchup + patch.
+     * Maps to BenchmarkResult.expected.
+     */
+    expected: real("expected").notNull(),
+    /**
+     * Signed delta: value − expected.
+     * Positive = later/more than expected; negative = earlier/less.
+     * Maps to BenchmarkResult.delta.
+     */
+    delta: real("delta").notNull(),
+    /**
+     * Severity tier — branded to BenchmarkSeverity from shared-types.
+     * Ordinal: info < minor < major < critical.
+     */
+    severity: text("severity")
+      .notNull()
+      .$type<BenchmarkSeverity>(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (table) => [
+    index("benchmarks_replay_idx").on(table.replayId),
+    index("benchmarks_replay_slot_idx").on(table.replayId, table.slot),
+  ],
+);
+
+export type BenchmarkRow = typeof benchmarks.$inferSelect;
+export type NewBenchmarkRow = typeof benchmarks.$inferInsert;
+
+// ---------------------------------------------------------------------------
+// apm_sessions
+// ---------------------------------------------------------------------------
+
+/**
+ * Recorded outcome of one APM trainer drill session.
+ * Standalone — NOT FK'd to replays (APM drills are independent of replays).
+ * Aligns field-for-field to DrillResult in shared-types.
+ *
+ * `checkpoints` is nullable jsonb: array of DrillCheckpoint objects
+ * [{tMs, ok}, ...] when the drill supports per-step evaluation.
+ *
+ * Design doc §5.3, shared-types DrillResult.
+ */
+export const apmSessions = pgTable("apm_sessions", {
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  /**
+   * Drill scenario identifier, e.g. "hotkey:control_groups", "micro:kiting".
+   * Maps to DrillResult.drillType.
+   */
+  drillType: text("drill_type").notNull(),
+  /**
+   * Wall-clock start timestamp. Maps to DrillResult.startedAt (ISO 8601 in TS).
+   */
+  startedAt: timestamp("started_at", { withTimezone: true }).notNull(),
+  /** Total session duration in milliseconds. Maps to DrillResult.durationMs. */
+  durationMs: integer("duration_ms").notNull(),
+  /** Effective actions per minute (meaningful inputs only). Maps to DrillResult.epm. */
+  epm: real("epm").notNull(),
+  /** Raw actions per minute. Maps to DrillResult.apm. */
+  apm: real("apm").notNull(),
+  /**
+   * Fraction of correct actions in [0, 1]. Maps to DrillResult.accuracy.
+   */
+  accuracy: real("accuracy").notNull(),
+  /** Mean reaction time across all reaction prompts (ms). Maps to DrillResult.reactionMs. */
+  reactionMs: integer("reaction_ms").notNull(),
+  /**
+   * Composite score for the session. Maps to DrillResult.score.
+   * Scaling is drill-type-specific; see APM trainer design.
+   */
+  score: real("score").notNull(),
+  /**
+   * Optional ordered per-step results within the drill.
+   * JSONB array: [{tMs: number, ok: boolean}, ...].
+   * Maps to DrillResult.checkpoints.
+   */
+  checkpoints: jsonb("checkpoints"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .default(sql`now()`),
+});
+
+export type ApmSessionRow = typeof apmSessions.$inferSelect;
+export type NewApmSessionRow = typeof apmSessions.$inferInsert;
+
+// ===========================================================================
+// KNOWLEDGE BASE (RAG) — design doc §5.4
+//
+// pgvector extension must be enabled before these tables are created.
+// The 0001 migration prepends: CREATE EXTENSION IF NOT EXISTS vector;
+// (pgvector is also enabled unconditionally in db/init/01-extensions.sql
+// for the Docker container, but the migration makes each deploy self-sufficient.)
+// ===========================================================================
+
+// ---------------------------------------------------------------------------
+// knowledge_docs
+// ---------------------------------------------------------------------------
+
+/**
+ * Top-level knowledge documents — guides, build orders, matchup notes, etc.
+ *
+ * `source` identifies origin, e.g. "liquipedia", "manual", "vod_transcript".
+ * `matchup` is optional, e.g. "OvH", "NEvUD" — null for race-agnostic docs.
+ * `tier` is optional skill level: "basic", "advanced", "pro".
+ * `patch_id` FK → patch_versions: null = patch-agnostic evergreen content.
+ *
+ * Design doc §5.4.
+ */
+export const knowledgeDocs = pgTable("knowledge_docs", {
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  /** Human-readable title, e.g. "OvH Fast Expo Build Order (2.00)". */
+  title: text("title").notNull(),
+  /** Data origin, e.g. "liquipedia", "manual", "vod_transcript". */
+  source: text("source").notNull(),
+  /** Optional matchup code, e.g. "OvH", "NEvUD". Null = race-agnostic. */
+  matchup: text("matchup"),
+  /** Optional skill-level tier: "basic", "advanced", "pro". */
+  tier: text("tier"),
+  /** FK into patch_versions. Null = patch-agnostic / evergreen content. */
+  patchId: uuid("patch_id").references(() => patchVersions.id),
+  /** Full raw text of the document, used for display and re-chunking. */
+  text: text("text").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .default(sql`now()`),
+});
+
+export type KnowledgeDocRow = typeof knowledgeDocs.$inferSelect;
+export type NewKnowledgeDocRow = typeof knowledgeDocs.$inferInsert;
+
+// ---------------------------------------------------------------------------
+// knowledge_chunks
+// ---------------------------------------------------------------------------
+
+/**
+ * Embedding chunks derived from knowledge_docs, used for vector similarity
+ * search (RAG retrieval).
+ *
+ * `embedding` is a vector(1024) matching bge-m3's output dimensionality.
+ * NOTE: switching to a different embedding model with different dimensions
+ * (e.g. nomic-embed-text = 768) requires a new migration to ALTER COLUMN or
+ * drop-and-recreate the embedding column.
+ *
+ * HNSW index for cosine distance:
+ *   drizzle-kit emits the index DDL from the schema definition below.
+ *   The ops class `vector_cosine_ops` is injected via the raw SQL override
+ *   prepended to the 0001 migration. See the migration file for the exact DDL:
+ *     CREATE INDEX knowledge_chunks_embedding_hnsw_idx
+ *       ON knowledge_chunks USING hnsw (embedding vector_cosine_ops);
+ *   This index is prepended manually to the generated migration because
+ *   drizzle-kit 0.31 cannot express pgvector ops-class names in its index API.
+ *
+ * ON DELETE CASCADE: chunks are meaningless without their parent doc.
+ *
+ * Design doc §5.4.
+ */
+export const knowledgeChunks = pgTable(
+  "knowledge_chunks",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    docId: uuid("doc_id")
+      .notNull()
+      .references(() => knowledgeDocs.id, { onDelete: "cascade" }),
+    /** The text fragment that was embedded. Stored for display and re-ranking. */
+    chunkText: text("chunk_text").notNull(),
+    /**
+     * bge-m3 embedding vector (1024 dimensions).
+     * Queried with cosine distance: <=> operator in pgvector.
+     * Dimensionality change requires a migration — see table JSDoc.
+     */
+    embedding: vector("embedding", { dimensions: 1024 }).notNull(),
+  },
+  (table) => [index("knowledge_chunks_doc_idx").on(table.docId)],
+);
+
+export type KnowledgeChunkRow = typeof knowledgeChunks.$inferSelect;
+export type NewKnowledgeChunkRow = typeof knowledgeChunks.$inferInsert;
