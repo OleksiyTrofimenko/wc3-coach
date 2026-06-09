@@ -7,14 +7,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A personal, locally-run platform for deliberate Warcraft III improvement:
 **APM Trainer + Replay Analyzer + AI Coach**.
 
-> **Current state:** T0.1 + T0.2 complete.
+> **Current state:** EPIC 0 complete (T0.1 + T0.2 + T0.4).
 > - T0.1: monorepo skeleton — `apps/`, `packages/`, `db/`, `turbo.json`,
 >   `pnpm-workspace.yaml`. `corepack pnpm install && corepack pnpm turbo build`
 >   works end-to-end.
 > - T0.2: Docker infra — `docker-compose.yml` (Postgres 16 + pgvector, Redis 7,
 >   Ollama), `.env.example`, `db/init/01-extensions.sql`. One `docker compose up -d`
 >   brings up all backing services; Ollama GPU passthrough via the `gpu` profile.
-> Remaining EPIC 0 tasks: T0.4 (real shared types).
+> - T0.4: Shared types contract — `packages/shared-types/src/index.ts` defines the
+>   canonical cross-service types (`GameEvent`, `ReplayTimeline`, `BenchmarkResult`,
+>   `CoachReport`, `DrillResult`) mirroring the design-doc §5 data model. camelCase
+>   fields, string-literal unions (clean JSON Schema → pydantic later).
+> Next up: EPIC 1 — T1.1 (spike: parse one `.w3g`) → T1.2 (event normalization).
 > See `docs/WC3_Coach_Design_Doc.md` and `docs/WC3_Coach_Project_Plan.md`
 > for full architecture and backlog.
 
