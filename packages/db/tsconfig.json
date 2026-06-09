@@ -2,13 +2,10 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "rootDir": "src",
-    "outDir": "dist",
-    "types": ["node"]
+    "outDir": "dist"
   },
   "references": [
-    { "path": "../../packages/shared-types" },
-    { "path": "../../packages/parser" },
-    { "path": "../../packages/db" }
+    { "path": "../shared-types" }
   ],
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]
