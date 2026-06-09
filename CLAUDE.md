@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A personal, locally-run platform for deliberate Warcraft III improvement:
 **APM Trainer + Replay Analyzer + AI Coach**.
 
-> **Current state:** EPIC 0 complete; EPIC 1 in progress (T1.1 + T1.2 + T1.3 done).
+> **Current state:** EPIC 0 complete; EPIC 1 done (T1.1–T1.3); EPIC 2 in progress (T2.1 done).
 > - T0.1: monorepo skeleton — `apps/`, `packages/`, `db/`, `turbo.json`,
 >   `pnpm-workspace.yaml`. `corepack pnpm install && corepack pnpm turbo build`
 >   works end-to-end.
@@ -30,9 +30,16 @@ A personal, locally-run platform for deliberate Warcraft III improvement:
 >   /replays/:id`, `GET /health`) and a BullMQ worker that parses → persists.
 >   Lifecycle on `replays.status`: pending → parsing → done|error. Full
 >   walkthrough in `docs/T1.3_Ingest_Pipeline.md`.
-> Next up: EPIC 2 — T2.1 (finish the DB schema: ontology + benchmarks + knowledge
-> tables) and T2.2 (ontology import → resolve provisional `entityRef`s). Deaths/
-> positions (T1.4, Observer API) remain a tracked follow-up.
+> - T2.1: full DB schema — `packages/db/src/schema.ts` now defines all design-doc
+>   §5 tables (ontology: races/heroes/hero_abilities/units/buildings/upgrades/maps/
+>   creep_camps; analytics: benchmarks, apm_sessions; RAG: knowledge_docs +
+>   knowledge_chunks with a `vector(1024)` HNSW index). Stat tables are
+>   patch-versioned (`patch_id` nullable, `UNIQUE(key,patch_id) NULLS NOT DISTINCT`).
+>   Migration `db/migrations/0001_*.sql`. Schema is EMPTY — values come in T2.2.
+> Next up: EPIC 2 — T2.2 (ontology import: populate unit/building/hero/upgrade
+> stats + resolve the parser's provisional `entityRef`/`raceId`/`mapId` slugs) and
+> T2.3 (patch versioning). Deaths/positions (T1.4, Observer API) remain a tracked
+> follow-up.
 > See `docs/WC3_Coach_Design_Doc.md` and `docs/WC3_Coach_Project_Plan.md`
 > for full architecture and backlog.
 
