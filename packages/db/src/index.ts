@@ -40,6 +40,19 @@ export {
 export { loadFourccMaps, resolveReplayRefs } from "./resolve.js";
 export type { ResolveResult } from "./resolve.js";
 
-// Seed importer (T2.2) — only types exported; importOntology requires a live DB at runtime
-export { importOntology, importRaces } from "./seed/import.js";
+// Seed importers (T2.2, T2.3) — require a live DB at runtime
+export { importOntology, importRaces, importPatches } from "./seed/import.js";
 export type { ImportResult } from "./seed/import.js";
+
+// Patch-aware stat lookup (T2.3)
+export {
+  pickForPatch,
+  getUnit,
+  getBuilding,
+  getHero,
+  getUpgrade,
+  getUnitsForPatch,
+  getBuildingsForPatch,
+  getHeroesForPatch,
+  getUpgradesForPatch,
+} from "./lookup.js";

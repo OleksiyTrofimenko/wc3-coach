@@ -199,3 +199,31 @@ export type RacesSeedFile = {
   };
   races: SeedRace[];
 };
+
+// ---------------------------------------------------------------------------
+// Patch registry seed (patches.json)
+// ---------------------------------------------------------------------------
+
+/**
+ * A single patch entry in the curated patches.json registry.
+ *
+ * `version`      — human-readable version string, e.g. "2.00".
+ * `build_number` — numeric build from the .w3g header (must be confirmed).
+ * `released_at`  — ISO 8601 date or null when the date is not confirmed.
+ * `notes`        — provenance comment (not written to DB).
+ */
+export type PatchSeedEntry = {
+  version: string;
+  build_number: number;
+  released_at: string | null;
+  notes: string;
+};
+
+export type PatchesSeedFile = {
+  _meta: {
+    source: string;
+    notes: string;
+    guardrail: string;
+  };
+  patches: PatchSeedEntry[];
+};

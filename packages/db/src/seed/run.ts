@@ -22,8 +22,8 @@ import { readFile } from "node:fs/promises";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createDb } from "../client.js";
-import { importOntology, importRaces } from "./import.js";
-import type { RaceSeedFile, RacesSeedFile } from "./types.js";
+import { importPatches, importOntology, importRaces } from "./import.js";
+import type { RaceSeedFile, RacesSeedFile, PatchesSeedFile } from "./types.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -48,6 +48,13 @@ async function main(): Promise<void> {
   console.log("[db:seed] Connected — starting ontology import...");
 
   try {
+    // 0. Import curated patch_versions registry FIRST (FK target for stat rows).
+    const patchesSeed = await readJson<PatchesSeedFile>("patches.json");
+    const patchResult = await importPatches(db, patchesSeed);
+    console.log(
+      `[db:seed] Patches  — inserted=${patchResult.inserted}, updated=${patchResult.updated}`,
+    );
+
     // 1. Bootstrap all race identity rows from the races-only seed file.
     const racesSeed = await readJson<RacesSeedFile>("ontology.races.json");
     const racesResult = await importRaces(db, racesSeed);

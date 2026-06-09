@@ -1,0 +1,15 @@
+{
+  "_meta": {
+    "source": "replay-header/confirmed",
+    "notes": "Curated patch_versions registry for WC3 Reforged. Only entries whose version string AND build_number are both independently confirmed are included. The 2.00/6117 pair is confirmed from the primary fixture replay (game-data/dumps/w3c-20260426112948.json). Other patches are intentionally omitted until their build numbers can be confirmed from actual replay headers — a small correct registry beats a large guessed one (CLAUDE.md Principle #4).",
+    "guardrail": "Never add a row here based on guesswork. Each entry must have a source (replay header, Blizzard CDN, or CASC extraction) that confirms the exact build_number."
+  },
+  "patches": [
+    {
+      "version": "2.00",
+      "build_number": 6117,
+      "released_at": null,
+      "notes": "Confirmed from fixture replay header (w3c-20260426112948.json). Released_at is null — exact release date not independently confirmed."
+    }
+  ]
+}

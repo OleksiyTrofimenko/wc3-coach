@@ -33,6 +33,7 @@ import {
   units,
   buildings,
   upgrades,
+  patchVersions,
 } from "../schema.js";
 import type {
   RaceSeedFile,
@@ -43,6 +44,7 @@ import type {
   SeedBuilding,
   SeedUpgrade,
   SeedAbility,
+  PatchesSeedFile,
 } from "./types.js";
 
 // ---------------------------------------------------------------------------
@@ -53,6 +55,82 @@ export type ImportResult = {
   inserted: number;
   updated: number;
 };
+
+// ---------------------------------------------------------------------------
+// importPatches — curated patch_versions registry (T2.3)
+// ---------------------------------------------------------------------------
+
+/**
+ * Idempotent upsert of the curated patches.json seed into `patch_versions`.
+ *
+ * Each entry is upserted by (version, build_number) — the natural unique key
+ * (backed by the UNIQUE INDEX patch_versions_version_build_idx in the schema).
+ * On conflict, `released_at` is updated in case the date was null before and
+ * is now confirmed. `version` and `build_number` are never mutated (they are
+ * the conflict target).
+ *
+ * Call this BEFORE importOntology / importRaces so that any future FK
+ * references from stat rows to patch_versions rows are already present.
+ *
+ * @param db   - Drizzle database instance (must be connected at call time).
+ * @param seed - Parsed patches.json content.
+ * @returns    Aggregate inserted + updated row counts.
+ */
+export async function importPatches(
+  db: DrizzleDb,
+  seed: PatchesSeedFile,
+): Promise<ImportResult> {
+  let inserted = 0;
+  let updated = 0;
+
+  for (const entry of seed.patches) {
+    const releasedAt = entry.released_at ? new Date(entry.released_at) : null;
+
+    const result = await db
+      .insert(patchVersions)
+      .values({
+        version: entry.version,
+        buildNumber: entry.build_number,
+        releasedAt,
+      })
+      .onConflictDoUpdate({
+        target: [patchVersions.version, patchVersions.buildNumber],
+        set: {
+          // Update released_at in case it was previously null and is now confirmed.
+          releasedAt: sql`COALESCE(excluded.released_at, patch_versions.released_at)`,
+        },
+      })
+      .returning({ id: patchVersions.id, createdAt: patchVersions.createdAt });
+
+    const row = result[0];
+    if (row === undefined) {
+      throw new Error(
+        `importPatches: upsert returned no rows for version=${entry.version} build=${entry.build_number}`,
+      );
+    }
+    // Distinguish insert vs update: a newly inserted row has createdAt very
+    // close to now. We rely on the affected-rows heuristic via the onConflict
+    // branch. Drizzle does not expose xmax directly, so we count every call
+    // as "updated" on conflict and "inserted" on a genuine new row by checking
+    // whether any prior row existed.
+    //
+    // Because the upsert always returns one row, we determine insert vs update
+    // by querying the count before — but that adds a round-trip. Instead we
+    // use a simpler approach: count each upsert as contributing to inserted OR
+    // updated based on whether the returned createdAt is within the last second
+    // (a proxy for "just inserted"). This is only used for logging and is not
+    // load-bearing. For correctness of the registry the upsert itself is what
+    // matters.
+    const ageMs = Date.now() - new Date(row.createdAt).getTime();
+    if (ageMs < 2000) {
+      inserted++;
+    } else {
+      updated++;
+    }
+  }
+
+  return { inserted, updated };
+}
 
 // ---------------------------------------------------------------------------
 // importOntology
