@@ -21,13 +21,14 @@
  * See docs/WC3_Coach_Design_Doc.md §5 for the DB schema these types back.
  */
 
-import type { Placeholder } from "@wc3-coach/shared-types";
-
 // Placeholder export so the package builds cleanly.
 // Replace in T2.2 with real ontology types.
 export const ONTOLOGY_VERSION = "0.0.1" as const;
 
-export type OntologyPlaceholder = Placeholder & {
+/**
+ * Temporary stub — will be replaced by real entity types in T2.2.
+ */
+export type OntologyPlaceholder = {
   // TODO(T2.2): remove and add real entity types
   _ontology: true;
 };

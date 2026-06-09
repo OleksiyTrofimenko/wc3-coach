@@ -24,13 +24,15 @@
  * See docs/WC3_Coach_Design_Doc.md §3 (parser) and §6 (.w3g limitations).
  */
 
-import type { Placeholder } from "@wc3-coach/shared-types";
-
 // Placeholder export so the package builds cleanly.
 // Replace in T1.1/T1.2 with the real parse() function.
 export const PARSER_VERSION = "0.0.1" as const;
 
-export type ParseResult = Placeholder & {
+/**
+ * Temporary stub — will be replaced by ReplayTimeline from @wc3-coach/shared-types in T1.2.
+ * Import ReplayTimeline directly once T1.2 lands.
+ */
+export type ParseResult = {
   // TODO(T1.2): replace with ReplayTimeline from @wc3-coach/shared-types
   _parseResult: true;
 };
