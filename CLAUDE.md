@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A personal, locally-run platform for deliberate Warcraft III improvement:
 **APM Trainer + Replay Analyzer + AI Coach**.
 
-> **Current state:** EPIC 0 complete; EPIC 1 done (T1.1–T1.3); EPIC 2 in progress (T2.1 done).
+> **Current state:** EPIC 0 complete; EPIC 1 done (T1.1–T1.3); EPIC 2 in progress (T2.1 + T2.2 done).
 > - T0.1: monorepo skeleton — `apps/`, `packages/`, `db/`, `turbo.json`,
 >   `pnpm-workspace.yaml`. `corepack pnpm install && corepack pnpm turbo build`
 >   works end-to-end.
@@ -35,11 +35,16 @@ A personal, locally-run platform for deliberate Warcraft III improvement:
 >   creep_camps; analytics: benchmarks, apm_sessions; RAG: knowledge_docs +
 >   knowledge_chunks with a `vector(1024)` HNSW index). Stat tables are
 >   patch-versioned (`patch_id` nullable, `UNIQUE(key,patch_id) NULLS NOT DISTINCT`).
->   Migration `db/migrations/0001_*.sql`. Schema is EMPTY — values come in T2.2.
-> Next up: EPIC 2 — T2.2 (ontology import: populate unit/building/hero/upgrade
-> stats + resolve the parser's provisional `entityRef`/`raceId`/`mapId` slugs) and
-> T2.3 (patch versioning). Deaths/positions (T1.4, Observer API) remain a tracked
-> follow-up.
+>   Migration `db/migrations/0001_*.sql`.
+> - T2.2: ontology import — curated seed (`packages/db/src/seed/*.json`, Orc + NE +
+>   neutral; `db:seed`) + a `fourcc` column (migration 0002) + a FourCC resolver
+>   (pure logic in `packages/ontology`, DB-backed `resolveReplayRefs` in
+>   `packages/db`, wired NON-FATALLY into the worker). Seed is `verified:false`
+>   (community values, pending CASC cross-check); Human/Undead are stubs.
+> Next up: EPIC 2 — T2.3 (patch versioning), then **EPIC 3 — T3.1 benchmark engine**
+> (the first deterministic coaching value: worker curve, expand/T2 timing, supply
+> blocks, floating resources). Deaths/positions (T1.4, Observer API) remain a
+> tracked follow-up.
 > See `docs/WC3_Coach_Design_Doc.md` and `docs/WC3_Coach_Project_Plan.md`
 > for full architecture and backlog.
 
