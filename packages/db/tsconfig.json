@@ -5,7 +5,8 @@
     "outDir": "dist"
   },
   "references": [
-    { "path": "../shared-types" }
+    { "path": "../shared-types" },
+    { "path": "../ontology" }
   ],
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]

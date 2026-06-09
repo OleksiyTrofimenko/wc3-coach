@@ -19,10 +19,12 @@
     "test:watch": "vitest",
     "clean": "rm -rf dist *.tsbuildinfo",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "node --loader tsx/esm src/migrate.ts"
+    "db:migrate": "node --loader tsx/esm src/migrate.ts",
+    "db:seed": "node --import tsx/esm src/seed/run.ts"
   },
   "dependencies": {
     "@wc3-coach/shared-types": "workspace:*",
+    "@wc3-coach/ontology": "workspace:*",
     "drizzle-orm": "^0.44.2",
     "pg": "^8.13.3"
   },

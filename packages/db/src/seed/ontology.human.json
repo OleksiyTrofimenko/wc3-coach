@@ -1,0 +1,16 @@
+{
+  "_meta": {
+    "source": "community/liquipedia seed",
+    "patch": "2.0",
+    "verified": false,
+    "notes": "TODO(T2.2+): Human ontology not yet seeded. The fixture replay is NvO, so Human FourCCs are not required for end-to-end resolver tests against that fixture. Seed when a Human-race fixture is added."
+  },
+  "race": {
+    "key": "human",
+    "name": "Human"
+  },
+  "units": [],
+  "buildings": [],
+  "heroes": [],
+  "upgrades": []
+}

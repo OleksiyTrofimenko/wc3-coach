@@ -1,0 +1,389 @@
+{
+  "_meta": {
+    "source": "community/liquipedia seed",
+    "patch": "2.0",
+    "verified": false,
+    "notes": "Hand-curated patch-agnostic baseline (patch_id = NULL). Stats from WC3 Reforged patch 2.00 community reference. FourCCs confirmed from w3gjs fixture w3c-20260426112948.json are marked; others are null until extracted from CASC. NOTE: The fixture hero Nfir is the FIRELORD (neutral Tavern hero), NOT a Night Elf race hero — it has been moved to ontology.neutral.json. Night Elf race heroes (Keeper of the Grove / Priestess of the Moon / Demon Hunter / Warden) have FourCCs not confirmed from this fixture and are omitted until a fixture containing them is available or CASC extraction is done."
+  },
+  "race": {
+    "key": "nightelf",
+    "name": "Night Elf"
+  },
+  "units": [
+    {
+      "key": "wisp",
+      "name": "Wisp",
+      "fourcc": "ewsp",
+      "hp": 120,
+      "armor": 0,
+      "armorType": "unarmored",
+      "attackType": "normal",
+      "dps": 6,
+      "gold": 60,
+      "lumber": 0,
+      "food": 1,
+      "buildTime": 5,
+      "techReq": []
+    },
+    {
+      "key": "archer",
+      "name": "Archer",
+      "fourcc": "earc",
+      "hp": 255,
+      "armor": 0,
+      "armorType": "medium",
+      "attackType": "pierce",
+      "dps": 15,
+      "gold": 130,
+      "lumber": 10,
+      "food": 2,
+      "buildTime": 22,
+      "techReq": [{ "type": "building", "key": "ancient_of_war" }]
+    },
+    {
+      "key": "huntress",
+      "name": "Huntress",
+      "fourcc": "esen",
+      "hp": 525,
+      "armor": 1,
+      "armorType": "medium",
+      "attackType": "pierce",
+      "dps": 28,
+      "gold": 195,
+      "lumber": 20,
+      "food": 3,
+      "buildTime": 30,
+      "techReq": [{ "type": "building", "key": "ancient_of_war" }]
+    },
+    {
+      "key": "dryad",
+      "name": "Dryad",
+      "fourcc": null,
+      "hp": 370,
+      "armor": 0,
+      "armorType": "medium",
+      "attackType": "magic",
+      "dps": 19,
+      "gold": 145,
+      "lumber": 30,
+      "food": 2,
+      "buildTime": 22,
+      "techReq": [{ "type": "building", "key": "ancient_of_war" }]
+    },
+    {
+      "key": "druid_of_the_claw",
+      "name": "Druid of the Claw",
+      "fourcc": null,
+      "hp": 525,
+      "armor": 2,
+      "armorType": "heavy",
+      "attackType": "normal",
+      "dps": 22,
+      "gold": 175,
+      "lumber": 40,
+      "food": 3,
+      "buildTime": 30,
+      "techReq": [{ "type": "building", "key": "ancient_of_claw" }]
+    },
+    {
+      "key": "druid_of_the_talon",
+      "name": "Druid of the Talon",
+      "fourcc": null,
+      "hp": 290,
+      "armor": 0,
+      "armorType": "unarmored",
+      "attackType": "magic",
+      "dps": 15,
+      "gold": 155,
+      "lumber": 20,
+      "food": 2,
+      "buildTime": 22,
+      "techReq": [{ "type": "building", "key": "ancient_of_wind" }]
+    },
+    {
+      "key": "mountain_giant",
+      "name": "Mountain Giant",
+      "fourcc": null,
+      "hp": 2100,
+      "armor": 10,
+      "armorType": "heavy",
+      "attackType": "siege",
+      "dps": 40,
+      "gold": 300,
+      "lumber": 80,
+      "food": 7,
+      "buildTime": 48,
+      "techReq": [{ "type": "building", "key": "ancient_of_wonders" }]
+    },
+    {
+      "key": "faerie_dragon",
+      "name": "Faerie Dragon",
+      "fourcc": null,
+      "hp": 350,
+      "armor": 0,
+      "armorType": "unarmored",
+      "attackType": "magic",
+      "dps": 20,
+      "gold": 155,
+      "lumber": 25,
+      "food": 2,
+      "buildTime": 22,
+      "techReq": [{ "type": "building", "key": "ancient_of_wind" }]
+    },
+    {
+      "key": "hippogryph",
+      "name": "Hippogryph",
+      "fourcc": null,
+      "hp": 500,
+      "armor": 0,
+      "armorType": "medium",
+      "attackType": "pierce",
+      "dps": 26,
+      "gold": 250,
+      "lumber": 60,
+      "food": 4,
+      "buildTime": 32,
+      "techReq": [{ "type": "building", "key": "ancient_of_wind" }]
+    },
+    {
+      "key": "chimaera",
+      "name": "Chimaera",
+      "fourcc": null,
+      "hp": 950,
+      "armor": 3,
+      "armorType": "heavy",
+      "attackType": "siege",
+      "dps": 43,
+      "gold": 340,
+      "lumber": 155,
+      "food": 6,
+      "buildTime": 48,
+      "techReq": [{ "type": "building", "key": "ancient_of_wind" }]
+    },
+    {
+      "key": "glaive_thrower",
+      "name": "Glaive Thrower",
+      "fourcc": null,
+      "hp": 475,
+      "armor": 5,
+      "armorType": "heavy",
+      "attackType": "siege",
+      "dps": 35,
+      "gold": 215,
+      "lumber": 50,
+      "food": 4,
+      "buildTime": 35,
+      "techReq": [{ "type": "building", "key": "ancient_of_war" }]
+    }
+  ],
+  "buildings": [
+    {
+      "key": "tree_of_life",
+      "name": "Tree of Life",
+      "fourcc": null,
+      "hp": 2400,
+      "armor": 5,
+      "gold": 350,
+      "lumber": 185,
+      "buildTime": 100,
+      "provides": [{ "type": "unit", "key": "wisp" }]
+    },
+    {
+      "key": "tree_of_ages",
+      "name": "Tree of Ages",
+      "fourcc": null,
+      "hp": 2800,
+      "armor": 5,
+      "gold": 200,
+      "lumber": 125,
+      "buildTime": 60,
+      "provides": [{ "type": "unit", "key": "wisp" }]
+    },
+    {
+      "key": "tree_of_eternity",
+      "name": "Tree of Eternity",
+      "fourcc": null,
+      "hp": 3600,
+      "armor": 5,
+      "gold": 200,
+      "lumber": 175,
+      "buildTime": 75,
+      "provides": [{ "type": "unit", "key": "wisp" }]
+    },
+    {
+      "key": "altar_of_elders",
+      "name": "Altar of Elders",
+      "fourcc": "eaom",
+      "hp": 900,
+      "armor": 5,
+      "gold": 180,
+      "lumber": 50,
+      "buildTime": 60,
+      "provides": []
+    },
+    {
+      "key": "moon_well",
+      "name": "Moon Well",
+      "fourcc": "emow",
+      "hp": 400,
+      "armor": 5,
+      "gold": 180,
+      "lumber": 40,
+      "buildTime": 35,
+      "provides": []
+    },
+    {
+      "key": "ancient_of_war",
+      "name": "Ancient of War",
+      "fourcc": "eate",
+      "hp": 1400,
+      "armor": 5,
+      "gold": 150,
+      "lumber": 0,
+      "buildTime": 60,
+      "provides": [
+        { "type": "unit", "key": "archer" },
+        { "type": "unit", "key": "huntress" },
+        { "type": "unit", "key": "dryad" }
+      ]
+    },
+    {
+      "key": "ancient_of_lore",
+      "name": "Ancient of Lore",
+      "fourcc": "edob",
+      "hp": 1400,
+      "armor": 5,
+      "gold": 150,
+      "lumber": 65,
+      "buildTime": 60,
+      "provides": [
+        { "type": "upgrade", "key": "ne_ranged_weapon_upgrade" },
+        { "type": "upgrade", "key": "ne_armor_upgrade" }
+      ]
+    },
+    {
+      "key": "ancient_of_claw",
+      "name": "Ancient of Claw",
+      "fourcc": null,
+      "hp": 1400,
+      "armor": 5,
+      "gold": 145,
+      "lumber": 65,
+      "buildTime": 60,
+      "provides": [
+        { "type": "unit", "key": "druid_of_the_claw" }
+      ]
+    },
+    {
+      "key": "ancient_of_wind",
+      "name": "Ancient of Wind",
+      "fourcc": null,
+      "hp": 1400,
+      "armor": 5,
+      "gold": 150,
+      "lumber": 65,
+      "buildTime": 60,
+      "provides": [
+        { "type": "unit", "key": "druid_of_the_talon" },
+        { "type": "unit", "key": "faerie_dragon" },
+        { "type": "unit", "key": "hippogryph" }
+      ]
+    },
+    {
+      "key": "ancient_of_wonders",
+      "name": "Ancient of Wonders",
+      "fourcc": null,
+      "hp": 1200,
+      "armor": 5,
+      "gold": 175,
+      "lumber": 150,
+      "buildTime": 75,
+      "provides": [
+        { "type": "unit", "key": "mountain_giant" }
+      ]
+    },
+    {
+      "key": "ancient_protector",
+      "name": "Ancient Protector",
+      "fourcc": "etrp",
+      "hp": 700,
+      "armor": 5,
+      "gold": 75,
+      "lumber": 50,
+      "buildTime": 25,
+      "provides": []
+    },
+    {
+      "key": "hunters_hall",
+      "name": "Hunters Hall",
+      "fourcc": null,
+      "hp": 1100,
+      "armor": 5,
+      "gold": 145,
+      "lumber": 0,
+      "buildTime": 40,
+      "provides": [
+        { "type": "upgrade", "key": "ne_melee_weapon_upgrade" }
+      ]
+    }
+  ],
+  "heroes": [],
+  "upgrades": [
+    {
+      "key": "ne_melee_weapon_upgrade",
+      "name": "NE Melee Weapon Upgrade",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 75,  "lumber": 75,  "researchTime": 60, "effect": "+1 melee attack damage" },
+        { "level": 2, "gold": 150, "lumber": 175, "researchTime": 75, "effect": "+2 melee attack damage" },
+        { "level": 3, "gold": 225, "lumber": 275, "researchTime": 90, "effect": "+3 melee attack damage" }
+      ]
+    },
+    {
+      "key": "ne_ranged_weapon_upgrade",
+      "name": "NE Ranged Weapon Upgrade",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 75,  "lumber": 75,  "researchTime": 60, "effect": "+1 ranged attack damage" },
+        { "level": 2, "gold": 150, "lumber": 175, "researchTime": 75, "effect": "+2 ranged attack damage" },
+        { "level": 3, "gold": 225, "lumber": 275, "researchTime": 90, "effect": "+3 ranged attack damage" }
+      ]
+    },
+    {
+      "key": "ne_armor_upgrade",
+      "name": "NE Armor Upgrade",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 75,  "lumber": 75,  "researchTime": 60, "effect": "+1 armor" },
+        { "level": 2, "gold": 150, "lumber": 175, "researchTime": 75, "effect": "+2 armor" },
+        { "level": 3, "gold": 225, "lumber": 275, "researchTime": 90, "effect": "+3 armor" }
+      ]
+    },
+    {
+      "key": "moon_armor",
+      "name": "Moon Armor",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 50, "lumber": 100, "researchTime": 40, "effect": "Equips Archer/Huntress with Moon Armor, improving armor." },
+        { "level": 2, "gold": 75, "lumber": 175, "researchTime": 60, "effect": "Improves Moon Armor." }
+      ]
+    },
+    {
+      "key": "improved_bows",
+      "name": "Improved Bows",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 100, "lumber": 50, "researchTime": 45, "effect": "Increases Archer attack range by 100." }
+      ]
+    },
+    {
+      "key": "archer_adept_training",
+      "name": "Archer Adept Training",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 100, "lumber": 50,  "researchTime": 60, "effect": "Upgrades Archer to Adept, improving damage." },
+        { "level": 2, "gold": 100, "lumber": 150, "researchTime": 75, "effect": "Upgrades Archer to Master." }
+      ]
+    }
+  ]
+}

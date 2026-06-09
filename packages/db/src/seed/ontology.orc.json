@@ -1,0 +1,526 @@
+{
+  "_meta": {
+    "source": "community/liquipedia seed",
+    "patch": "2.0",
+    "verified": false,
+    "notes": "Hand-curated patch-agnostic baseline (patch_id = NULL). Stats from WC3 Reforged patch 2.00 community reference. FourCCs confirmed from w3gjs fixture w3c-20260426112948.json are marked; others are null until extracted from CASC."
+  },
+  "race": {
+    "key": "orc",
+    "name": "Orc"
+  },
+  "units": [
+    {
+      "key": "peon",
+      "name": "Peon",
+      "fourcc": "opeo",
+      "hp": 250,
+      "armor": 0,
+      "armorType": "unarmored",
+      "attackType": "normal",
+      "dps": 11,
+      "gold": 75,
+      "lumber": 0,
+      "food": 1,
+      "buildTime": 15,
+      "techReq": []
+    },
+    {
+      "key": "grunt",
+      "name": "Grunt",
+      "fourcc": "ogru",
+      "hp": 700,
+      "armor": 1,
+      "armorType": "heavy",
+      "attackType": "normal",
+      "dps": 27,
+      "gold": 200,
+      "lumber": 0,
+      "food": 3,
+      "buildTime": 22,
+      "techReq": [{ "type": "building", "key": "barracks" }]
+    },
+    {
+      "key": "raider",
+      "name": "Raider",
+      "fourcc": "orai",
+      "hp": 650,
+      "armor": 1,
+      "armorType": "medium",
+      "attackType": "normal",
+      "dps": 22,
+      "gold": 180,
+      "lumber": 40,
+      "food": 3,
+      "buildTime": 27,
+      "techReq": [{ "type": "building", "key": "beastiary" }]
+    },
+    {
+      "key": "troll_headhunter",
+      "name": "Troll Headhunter",
+      "fourcc": null,
+      "hp": 340,
+      "armor": 0,
+      "armorType": "medium",
+      "attackType": "pierce",
+      "dps": 17,
+      "gold": 135,
+      "lumber": 10,
+      "food": 2,
+      "buildTime": 22,
+      "techReq": [{ "type": "building", "key": "barracks" }]
+    },
+    {
+      "key": "shaman",
+      "name": "Shaman",
+      "fourcc": null,
+      "hp": 290,
+      "armor": 0,
+      "armorType": "unarmored",
+      "attackType": "magic",
+      "dps": 13,
+      "gold": 135,
+      "lumber": 20,
+      "food": 2,
+      "buildTime": 22,
+      "techReq": [{ "type": "building", "key": "spirit_lodge" }]
+    },
+    {
+      "key": "witch_doctor",
+      "name": "Troll Witch Doctor",
+      "fourcc": null,
+      "hp": 290,
+      "armor": 0,
+      "armorType": "unarmored",
+      "attackType": "magic",
+      "dps": 13,
+      "gold": 135,
+      "lumber": 20,
+      "food": 2,
+      "buildTime": 22,
+      "techReq": [{ "type": "building", "key": "barracks" }]
+    },
+    {
+      "key": "tauren",
+      "name": "Tauren",
+      "fourcc": null,
+      "hp": 1200,
+      "armor": 3,
+      "armorType": "heavy",
+      "attackType": "siege",
+      "dps": 36,
+      "gold": 280,
+      "lumber": 70,
+      "food": 5,
+      "buildTime": 38,
+      "techReq": [{ "type": "building", "key": "tauren_totem" }]
+    },
+    {
+      "key": "spirit_walker",
+      "name": "Spirit Walker",
+      "fourcc": null,
+      "hp": 500,
+      "armor": 1,
+      "armorType": "unarmored",
+      "attackType": "normal",
+      "dps": 18,
+      "gold": 195,
+      "lumber": 35,
+      "food": 3,
+      "buildTime": 30,
+      "techReq": [{ "type": "building", "key": "tauren_totem" }]
+    },
+    {
+      "key": "kodo_beast",
+      "name": "Kodo Beast",
+      "fourcc": null,
+      "hp": 825,
+      "armor": 2,
+      "armorType": "heavy",
+      "attackType": "normal",
+      "dps": 23,
+      "gold": 255,
+      "lumber": 60,
+      "food": 4,
+      "buildTime": 37,
+      "techReq": [{ "type": "building", "key": "beastiary" }]
+    },
+    {
+      "key": "wind_rider",
+      "name": "Wind Rider",
+      "fourcc": null,
+      "hp": 500,
+      "armor": 1,
+      "armorType": "medium",
+      "attackType": "pierce",
+      "dps": 24,
+      "gold": 255,
+      "lumber": 60,
+      "food": 4,
+      "buildTime": 32,
+      "techReq": [{ "type": "building", "key": "beastiary" }]
+    },
+    {
+      "key": "demolisher",
+      "name": "Demolisher",
+      "fourcc": null,
+      "hp": 525,
+      "armor": 5,
+      "armorType": "heavy",
+      "attackType": "siege",
+      "dps": 30,
+      "gold": 220,
+      "lumber": 50,
+      "food": 4,
+      "buildTime": 35,
+      "techReq": [{ "type": "building", "key": "war_mill" }]
+    }
+  ],
+  "buildings": [
+    {
+      "key": "great_hall",
+      "name": "Great Hall",
+      "fourcc": null,
+      "hp": 1500,
+      "armor": 5,
+      "gold": 385,
+      "lumber": 185,
+      "buildTime": 100,
+      "provides": [{ "type": "unit", "key": "peon" }]
+    },
+    {
+      "key": "stronghold",
+      "name": "Stronghold",
+      "fourcc": "ostr",
+      "hp": 1800,
+      "armor": 5,
+      "gold": 215,
+      "lumber": 135,
+      "buildTime": 60,
+      "provides": [{ "type": "unit", "key": "peon" }]
+    },
+    {
+      "key": "fortress",
+      "name": "Fortress",
+      "fourcc": null,
+      "hp": 2500,
+      "armor": 5,
+      "gold": 215,
+      "lumber": 200,
+      "buildTime": 75,
+      "provides": [{ "type": "unit", "key": "peon" }]
+    },
+    {
+      "key": "altar_of_storms",
+      "name": "Altar of Storms",
+      "fourcc": "oalt",
+      "hp": 900,
+      "armor": 5,
+      "gold": 180,
+      "lumber": 50,
+      "buildTime": 60,
+      "provides": [
+        { "type": "hero", "key": "blademaster" },
+        { "type": "hero", "key": "shadow_hunter" }
+      ]
+    },
+    {
+      "key": "orc_burrow",
+      "name": "Orc Burrow",
+      "fourcc": "otrb",
+      "hp": 500,
+      "armor": 5,
+      "gold": 160,
+      "lumber": 40,
+      "buildTime": 35,
+      "provides": []
+    },
+    {
+      "key": "barracks",
+      "name": "Barracks",
+      "fourcc": "obar",
+      "hp": 1100,
+      "armor": 5,
+      "gold": 180,
+      "lumber": 0,
+      "buildTime": 60,
+      "provides": [
+        { "type": "unit", "key": "grunt" },
+        { "type": "unit", "key": "troll_headhunter" },
+        { "type": "unit", "key": "witch_doctor" }
+      ]
+    },
+    {
+      "key": "war_mill",
+      "name": "War Mill",
+      "fourcc": null,
+      "hp": 800,
+      "armor": 5,
+      "gold": 145,
+      "lumber": 0,
+      "buildTime": 40,
+      "provides": [
+        { "type": "upgrade", "key": "orc_melee_weapon_upgrade" },
+        { "type": "upgrade", "key": "orc_armor_upgrade" }
+      ]
+    },
+    {
+      "key": "voodoo_lounge",
+      "name": "Voodoo Lounge",
+      "fourcc": "ovln",
+      "hp": 750,
+      "armor": 5,
+      "gold": 145,
+      "lumber": 0,
+      "buildTime": 40,
+      "provides": []
+    },
+    {
+      "key": "spirit_lodge",
+      "name": "Spirit Lodge",
+      "fourcc": null,
+      "hp": 1100,
+      "armor": 5,
+      "gold": 150,
+      "lumber": 100,
+      "buildTime": 60,
+      "provides": [
+        { "type": "unit", "key": "shaman" },
+        { "type": "upgrade", "key": "witch_doctor_adept_training" }
+      ]
+    },
+    {
+      "key": "beastiary",
+      "name": "Beastiary",
+      "fourcc": "obea",
+      "hp": 1100,
+      "armor": 5,
+      "gold": 140,
+      "lumber": 140,
+      "buildTime": 60,
+      "provides": [
+        { "type": "unit", "key": "raider" },
+        { "type": "unit", "key": "kodo_beast" },
+        { "type": "unit", "key": "wind_rider" }
+      ]
+    },
+    {
+      "key": "orc_watch_tower",
+      "name": "Orc Watch Tower",
+      "fourcc": "otto",
+      "hp": 500,
+      "armor": 5,
+      "gold": 60,
+      "lumber": 0,
+      "buildTime": 20,
+      "provides": []
+    },
+    {
+      "key": "tauren_totem",
+      "name": "Tauren Totem",
+      "fourcc": null,
+      "hp": 1100,
+      "armor": 5,
+      "gold": 150,
+      "lumber": 125,
+      "buildTime": 60,
+      "provides": [
+        { "type": "unit", "key": "tauren" },
+        { "type": "unit", "key": "spirit_walker" }
+      ]
+    }
+  ],
+  "heroes": [
+    {
+      "key": "blademaster",
+      "name": "Blademaster",
+      "fourcc": "Obla",
+      "primaryAttr": "agi",
+      "baseStats": {
+        "hp": 550,
+        "mana": 255,
+        "hpRegen": 0.25,
+        "manaRegen": 1.0,
+        "armor": 3,
+        "armorType": "hero",
+        "attackType": "hero",
+        "dps": 41,
+        "str": 17,
+        "agi": 21,
+        "int": 13,
+        "strPerLevel": 1.5,
+        "agiPerLevel": 2.75,
+        "intPerLevel": 1.5,
+        "moveSpeed": 320
+      },
+      "abilities": [
+        {
+          "key": "mirror_image",
+          "name": "Mirror Image",
+          "fourcc": "AOmi",
+          "levels": [
+            { "level": 1, "manaCost": 75, "cooldown": 35, "description": "Creates 3 illusions dealing 30% damage, taking 300% damage." },
+            { "level": 2, "manaCost": 75, "cooldown": 35, "description": "Creates 4 illusions dealing 35% damage, taking 300% damage." },
+            { "level": 3, "manaCost": 75, "cooldown": 35, "description": "Creates 5 illusions dealing 40% damage, taking 300% damage." }
+          ]
+        },
+        {
+          "key": "wind_walk",
+          "name": "Wind Walk",
+          "fourcc": "AOww",
+          "levels": [
+            { "level": 1, "manaCost": 75, "cooldown": 10, "description": "Invisible for 20 sec; +40 bonus damage on first attack out of stealth." },
+            { "level": 2, "manaCost": 75, "cooldown": 10, "description": "Invisible for 40 sec; +50 bonus damage on first attack." },
+            { "level": 3, "manaCost": 75, "cooldown": 10, "description": "Invisible indefinitely; +60 bonus damage on first attack." }
+          ]
+        },
+        {
+          "key": "critical_strike",
+          "name": "Critical Strike",
+          "fourcc": "AOcr",
+          "levels": [
+            { "level": 1, "manaCost": 0, "cooldown": 0, "description": "Passive. 15% chance to deal 2x damage." },
+            { "level": 2, "manaCost": 0, "cooldown": 0, "description": "Passive. 20% chance to deal 3x damage." },
+            { "level": 3, "manaCost": 0, "cooldown": 0, "description": "Passive. 25% chance to deal 4x damage." }
+          ]
+        },
+        {
+          "key": "bladestorm",
+          "name": "Bladestorm",
+          "fourcc": "AObz",
+          "levels": [
+            { "level": 1, "manaCost": 200, "cooldown": 180, "description": "Whirlwind dealing 115 DPS to nearby enemies for 7 seconds." }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "shadow_hunter",
+      "name": "Shadow Hunter",
+      "fourcc": "Oshd",
+      "primaryAttr": "agi",
+      "baseStats": {
+        "hp": 500,
+        "mana": 255,
+        "hpRegen": 0.25,
+        "manaRegen": 1.0,
+        "armor": 0,
+        "armorType": "hero",
+        "attackType": "hero",
+        "dps": 30,
+        "str": 16,
+        "agi": 17,
+        "int": 19,
+        "strPerLevel": 1.75,
+        "agiPerLevel": 1.5,
+        "intPerLevel": 2.25,
+        "moveSpeed": 300
+      },
+      "abilities": [
+        {
+          "key": "hex",
+          "name": "Hex",
+          "fourcc": "AOhx",
+          "levels": [
+            { "level": 1, "manaCost": 65, "cooldown": 15, "description": "Transforms enemy into critter for 15 sec, disabling spellcasting." },
+            { "level": 2, "manaCost": 65, "cooldown": 15, "description": "Transforms enemy into critter for 20 sec." },
+            { "level": 3, "manaCost": 65, "cooldown": 15, "description": "Transforms enemy into critter for 25 sec." }
+          ]
+        },
+        {
+          "key": "serpent_ward",
+          "name": "Serpent Ward",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 75, "cooldown": 4, "description": "Summons a Serpent Ward dealing 17 DPS." },
+            { "level": 2, "manaCost": 75, "cooldown": 4, "description": "Summons a Serpent Ward dealing 22 DPS." },
+            { "level": 3, "manaCost": 75, "cooldown": 4, "description": "Summons a Serpent Ward dealing 27 DPS." }
+          ]
+        },
+        {
+          "key": "healing_wave",
+          "name": "Healing Wave",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 105, "cooldown": 8, "description": "Heals up to 4 friendly units, 200 HP primary target." },
+            { "level": 2, "manaCost": 105, "cooldown": 8, "description": "Heals up to 5 friendly units, 290 HP primary target." },
+            { "level": 3, "manaCost": 105, "cooldown": 8, "description": "Heals up to 6 friendly units, 380 HP primary target." }
+          ]
+        },
+        {
+          "key": "big_bad_voodoo",
+          "name": "Big Bad Voodoo",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 200, "cooldown": 180, "description": "Makes nearby friendly units invulnerable for 10 seconds (750 AoE)." }
+          ]
+        }
+      ]
+    }
+  ],
+  "upgrades": [
+    {
+      "key": "orc_melee_weapon_upgrade",
+      "name": "Orc Melee Weapon Upgrade",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 75,  "lumber": 75,  "researchTime": 60, "effect": "+1 melee attack damage" },
+        { "level": 2, "gold": 150, "lumber": 175, "researchTime": 75, "effect": "+2 melee attack damage" },
+        { "level": 3, "gold": 225, "lumber": 275, "researchTime": 90, "effect": "+3 melee attack damage" }
+      ]
+    },
+    {
+      "key": "orc_armor_upgrade",
+      "name": "Orc Armor Upgrade",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 75,  "lumber": 75,  "researchTime": 60, "effect": "+1 armor" },
+        { "level": 2, "gold": 150, "lumber": 175, "researchTime": 75, "effect": "+2 armor" },
+        { "level": 3, "gold": 225, "lumber": 275, "researchTime": 90, "effect": "+3 armor" }
+      ]
+    },
+    {
+      "key": "ensnare",
+      "name": "Ensnare",
+      "fourcc": "Roen",
+      "levels": [
+        { "level": 1, "gold": 75, "lumber": 25, "researchTime": 30, "effect": "Allows Raiders to use Ensnare, rooting air and ground units." }
+      ]
+    },
+    {
+      "key": "witch_doctor_adept_training",
+      "name": "Witch Doctor Adept Training",
+      "fourcc": "Rowt",
+      "levels": [
+        { "level": 1, "gold": 100, "lumber": 50,  "researchTime": 60, "effect": "Upgrades Witch Doctor to Adept level, unlocking Sentry Ward." },
+        { "level": 2, "gold": 100, "lumber": 150, "researchTime": 75, "effect": "Upgrades Witch Doctor to Master level." }
+      ]
+    },
+    {
+      "key": "troll_berserker_upgrade",
+      "name": "Troll Berserker Upgrade",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 100, "lumber": 50,  "researchTime": 60, "effect": "Upgrades Troll Headhunter to Berserker." },
+        { "level": 2, "gold": 100, "lumber": 150, "researchTime": 75, "effect": "Further improves Troll Berserker." }
+      ]
+    },
+    {
+      "key": "shaman_adept_training",
+      "name": "Shaman Adept Training",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 100, "lumber": 50,  "researchTime": 60, "effect": "Upgrades Shaman to Adept, unlocking Bloodlust." },
+        { "level": 2, "gold": 100, "lumber": 150, "researchTime": 75, "effect": "Upgrades Shaman to Master." }
+      ]
+    },
+    {
+      "key": "liquid_fire",
+      "name": "Liquid Fire",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 50, "lumber": 150, "researchTime": 45, "effect": "Allows Raiders to use Liquid Fire, preventing enemy buildings from attacking." }
+      ]
+    }
+  ]
+}

@@ -324,6 +324,14 @@ export const heroes = pgTable(
      * str/agi/int base and per-level gain. Shape defined in T2.2.
      */
     baseStats: jsonb("base_stats").notNull(),
+    /**
+     * Warcraft III FourCC identifier for this hero as emitted by w3gjs,
+     * e.g. "Obla" (Blademaster), "Nfir" (Priestess of the Moon).
+     * Nullable — NULL for entries not yet assigned a FourCC.
+     * Non-unique because the same FourCC may appear across multiple patch rows.
+     * Used by T2.2 resolver to map provisional "hero:Obla" refs to canonical keys.
+     */
+    fourcc: text("fourcc"),
   },
   (table) => [
     // NULLS NOT DISTINCT: a NULL patch_id means "patch-agnostic", and there
@@ -332,6 +340,7 @@ export const heroes = pgTable(
     // A unique CONSTRAINT (not uniqueIndex) is used because only the constraint
     // builder exposes .nullsNotDistinct(); it still creates a backing btree index.
     unique("heroes_key_patch_uq").on(table.key, table.patchId).nullsNotDistinct(),
+    index("heroes_fourcc_idx").on(table.fourcc),
   ],
 );
 
@@ -351,23 +360,34 @@ export type NewHeroRow = typeof heroes.$inferInsert;
  *
  * Design doc §5.1.
  */
-export const heroAbilities = pgTable("hero_abilities", {
-  id: uuid("id")
-    .primaryKey()
-    .default(sql`gen_random_uuid()`),
-  heroId: uuid("hero_id")
-    .notNull()
-    .references(() => heroes.id, { onDelete: "cascade" }),
-  /** Stable slug, e.g. "holy_light", "storm_bolt". */
-  key: text("key").notNull(),
-  /** Display name. */
-  name: text("name").notNull(),
-  /**
-   * JSONB array of per-level objects: [{level, manaCost, cooldown, range,
-   * aoe, duration, description}, ...]. Exact shape defined in T2.2.
-   */
-  levels: jsonb("levels").notNull(),
-});
+export const heroAbilities = pgTable(
+  "hero_abilities",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    heroId: uuid("hero_id")
+      .notNull()
+      .references(() => heroes.id, { onDelete: "cascade" }),
+    /** Stable slug, e.g. "holy_light", "storm_bolt". */
+    key: text("key").notNull(),
+    /** Display name. */
+    name: text("name").notNull(),
+    /**
+     * JSONB array of per-level objects: [{level, manaCost, cooldown, range,
+     * aoe, duration, description}, ...]. Exact shape defined in T2.2.
+     */
+    levels: jsonb("levels").notNull(),
+    /**
+     * Warcraft III FourCC for this ability as emitted by w3gjs,
+     * e.g. "AOmi" (Mirror Image), "ANlm" (Lunar Flare).
+     * Nullable — NULL for entries not yet assigned a FourCC.
+     * Used by T2.2 resolver to map provisional "ability:AOmi" refs.
+     */
+    fourcc: text("fourcc"),
+  },
+  (table) => [index("hero_abilities_fourcc_idx").on(table.fourcc)],
+);
 
 export type HeroAbilityRow = typeof heroAbilities.$inferSelect;
 export type NewHeroAbilityRow = typeof heroAbilities.$inferInsert;
@@ -448,11 +468,19 @@ export const units = pgTable(
      * Shape defined in T2.2.
      */
     techReq: jsonb("tech_req"),
+    /**
+     * Warcraft III FourCC identifier for this unit as emitted by w3gjs,
+     * e.g. "opeo" (Peon), "ogru" (Grunt), "ewsp" (Wisp).
+     * Nullable — NULL for entries not yet assigned a FourCC.
+     * Used by T2.2 resolver to map provisional "unit:opeo" refs to canonical keys.
+     */
+    fourcc: text("fourcc"),
   },
   (table) => [
     // NULLS NOT DISTINCT — one patch-agnostic (NULL patch) row per key. See heroes.
     unique("units_key_patch_uq").on(table.key, table.patchId).nullsNotDistinct(),
     index("units_race_idx").on(table.raceId),
+    index("units_fourcc_idx").on(table.fourcc),
   ],
 );
 
@@ -504,11 +532,19 @@ export const buildings = pgTable(
      * Shape: [{type:"unit"|"upgrade"|"ability", key:string}, ...].
      */
     provides: jsonb("provides"),
+    /**
+     * Warcraft III FourCC identifier for this building as emitted by w3gjs,
+     * e.g. "oalt" (Altar of Storms), "emow" (Moon Well).
+     * Nullable — NULL for entries not yet assigned a FourCC.
+     * Used by T2.2 resolver to map provisional "building:oalt" refs.
+     */
+    fourcc: text("fourcc"),
   },
   (table) => [
     // NULLS NOT DISTINCT — one patch-agnostic (NULL patch) row per key. See heroes.
     unique("buildings_key_patch_uq").on(table.key, table.patchId).nullsNotDistinct(),
     index("buildings_race_idx").on(table.raceId),
+    index("buildings_fourcc_idx").on(table.fourcc),
   ],
 );
 
@@ -549,10 +585,18 @@ export const upgrades = pgTable(
      * researchTime is in integer seconds (game-seconds). Shape in T2.2.
      */
     levels: jsonb("levels").notNull(),
+    /**
+     * Warcraft III FourCC identifier for this upgrade as emitted by w3gjs,
+     * e.g. "Roen" (Ensnare for Raiders), "Rowt" (Witch Doctor Adept Training).
+     * Nullable — NULL for entries not yet assigned a FourCC.
+     * Used by T2.2 resolver to map provisional "upgrade:Roen" refs.
+     */
+    fourcc: text("fourcc"),
   },
   (table) => [
     // NULLS NOT DISTINCT — one patch-agnostic (NULL patch) row per key. See heroes.
     unique("upgrades_key_patch_uq").on(table.key, table.patchId).nullsNotDistinct(),
+    index("upgrades_fourcc_idx").on(table.fourcc),
   ],
 );
 

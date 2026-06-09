@@ -1,0 +1,62 @@
+{
+  "_meta": {
+    "source": "community/liquipedia seed",
+    "patch": "2.0",
+    "verified": false,
+    "notes": "Neutral Tavern heroes available to any race. The Firelord (Nfir) is confirmed from fixture w3c-20260426112948.json (NvO match: NE player purchased Firelord from Tavern). Ability FourCCs ANlm (Summon Lava Spawn) and ANia (Incinerate) observed in that fixture. Base stats are from community WC3 reference; not yet cross-checked against CASC extraction."
+  },
+  "race": {
+    "key": "neutral",
+    "name": "Neutral"
+  },
+  "units": [],
+  "buildings": [],
+  "heroes": [
+    {
+      "key": "firelord",
+      "name": "Firelord",
+      "fourcc": "Nfir",
+      "primaryAttr": "int",
+      "baseStats": {
+        "hp": 600,
+        "mana": 360,
+        "hpRegen": 0.25,
+        "manaRegen": 1.0,
+        "armor": 3,
+        "armorType": "hero",
+        "attackType": "hero",
+        "dps": 36,
+        "str": 18,
+        "agi": 12,
+        "int": 24,
+        "strPerLevel": 1.5,
+        "agiPerLevel": 1.0,
+        "intPerLevel": 3.0,
+        "moveSpeed": 300
+      },
+      "abilities": [
+        {
+          "key": "summon_lava_spawn",
+          "name": "Summon Lava Spawn",
+          "fourcc": "ANlm",
+          "levels": [
+            { "level": 1, "manaCost": 75, "cooldown": 12, "description": "Summons a Lava Spawn that splits into two smaller Lava Spawns on death." },
+            { "level": 2, "manaCost": 75, "cooldown": 12, "description": "Summons a stronger Lava Spawn." },
+            { "level": 3, "manaCost": 75, "cooldown": 12, "description": "Summons the strongest Lava Spawn." }
+          ]
+        },
+        {
+          "key": "incinerate",
+          "name": "Incinerate",
+          "fourcc": "ANia",
+          "levels": [
+            { "level": 1, "manaCost": 0, "cooldown": 0, "description": "Passive. Gives attacks a chance to set units on fire, dealing bonus damage over time." },
+            { "level": 2, "manaCost": 0, "cooldown": 0, "description": "Passive. Increases Incinerate damage." },
+            { "level": 3, "manaCost": 0, "cooldown": 0, "description": "Passive. Further increases Incinerate damage." }
+          ]
+        }
+      ]
+    }
+  ],
+  "upgrades": []
+}

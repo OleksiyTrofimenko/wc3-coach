@@ -1,0 +1,16 @@
+{
+  "_meta": {
+    "source": "community/liquipedia seed",
+    "patch": "2.0",
+    "verified": false,
+    "notes": "TODO(T2.2+): Undead ontology not yet seeded. The fixture replay is NvO, so Undead FourCCs are not required for end-to-end resolver tests against that fixture. Seed when an Undead-race fixture is added."
+  },
+  "race": {
+    "key": "undead",
+    "name": "Undead"
+  },
+  "units": [],
+  "buildings": [],
+  "heroes": [],
+  "upgrades": []
+}

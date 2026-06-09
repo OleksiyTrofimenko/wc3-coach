@@ -1,6 +1,6 @@
 {
   "name": "@wc3-coach/ontology",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "exports": {
@@ -13,15 +13,18 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc -b",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit -p tsconfig.test.json",
     "lint": "echo \"lint: no linter configured yet\"",
-    "test": "echo \"test: no tests yet (TODO T2.2)\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "clean": "rm -rf dist *.tsbuildinfo"
   },
   "dependencies": {
     "@wc3-coach/shared-types": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "*"
+    "@types/node": "^22.0.0",
+    "typescript": "*",
+    "vitest": "^4.1.8"
   }
 }

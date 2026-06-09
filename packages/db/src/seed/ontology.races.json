@@ -1,0 +1,16 @@
+{
+  "_meta": {
+    "source": "community/liquipedia seed",
+    "patch": "2.0",
+    "verified": false,
+    "notes": "Canonical race identity rows. Patch-invariant — no patch_id. The 'random' entry covers the parser's race:R provisional ref. The 'neutral' entry covers Tavern (neutral) heroes such as the Firelord whose FourCC prefix is 'N' (Neutral) and who are available to any race via Taverns."
+  },
+  "races": [
+    { "key": "human",    "name": "Human"     },
+    { "key": "orc",      "name": "Orc"       },
+    { "key": "nightelf", "name": "Night Elf" },
+    { "key": "undead",   "name": "Undead"    },
+    { "key": "random",   "name": "Random"    },
+    { "key": "neutral",  "name": "Neutral"   }
+  ]
+}

@@ -35,3 +35,11 @@ export {
   setReplayStatus,
   getReplayWithTimeline,
 } from "./persist.js";
+
+// DB-backed FourCC resolver (T2.2)
+export { loadFourccMaps, resolveReplayRefs } from "./resolve.js";
+export type { ResolveResult } from "./resolve.js";
+
+// Seed importer (T2.2) — only types exported; importOntology requires a live DB at runtime
+export { importOntology, importRaces } from "./seed/import.js";
+export type { ImportResult } from "./seed/import.js";

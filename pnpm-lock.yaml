@@ -47,6 +47,9 @@ importers:
 
   packages/db:
     dependencies:
+      '@wc3-coach/ontology':
+        specifier: workspace:*
+        version: link:../ontology
       '@wc3-coach/shared-types':
         specifier: workspace:*
         version: link:../shared-types
@@ -82,9 +85,15 @@ importers:
         specifier: workspace:*
         version: link:../shared-types
     devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.19.20
       typescript:
         specifier: '*'
         version: 5.9.3
+      vitest:
+        specifier: ^4.1.8
+        version: 4.1.8(@types/node@22.19.20)(vite@8.0.16(@types/node@22.19.20)(esbuild@0.28.0)(tsx@4.22.4))
 
   packages/parser:
     dependencies:
