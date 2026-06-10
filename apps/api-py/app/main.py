@@ -12,6 +12,10 @@ Benchmark endpoints (T3.1):
     POST /benchmarks/{replay_id}/run    → compute + persist + return BenchmarkResult[]
                                           (idempotent — safe to re-run)
 
+Prioritization endpoint (T3.3):
+    GET  /benchmarks/{replay_id}/top    → top-N scored problems for the Orc player
+                                          ?top_n=5 (default)  ?orc_slot=<int> (optional)
+
 TODO(T5.1): Knowledge corpus ingestion
     POST /knowledge/ingest              → embed and store guide chunks
 TODO(T5.2): RAG retrieval
@@ -24,7 +28,7 @@ See docs/WC3_Coach_Design_Doc.md §3 (Python API) for the full design.
 
 from __future__ import annotations
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 
 from app.benchmarks.db import (
     fetch_benchmarks,
@@ -34,6 +38,7 @@ from app.benchmarks.db import (
 )
 from app.benchmarks.engine import run_benchmarks
 from app.benchmarks.models import BenchmarkResult
+from app.benchmarks.scoring import ScoredProblem, prioritize
 
 app = FastAPI(
     title="WC3 Coach API",
@@ -113,3 +118,41 @@ async def run_benchmarks_for_replay(replay_id: str) -> list[BenchmarkResult]:
 
         await persist_benchmarks(conn, replay_id, results)
         return results
+
+
+# ---------------------------------------------------------------------------
+# Prioritization endpoint (T3.3)
+# ---------------------------------------------------------------------------
+
+@app.get(
+    "/benchmarks/{replay_id}/top",
+    response_model=list[ScoredProblem],
+    summary="Return the top-N scored problems for the Orc player",
+    description=(
+        "Loads existing benchmark results (must have been computed via POST "
+        "/benchmarks/{replay_id}/run first) and returns the top-N highest-impact "
+        "problems for the Orc player, ranked by deviation score.\n\n"
+        "Parameters\n"
+        "----------\n"
+        "top_n    : Number of problems to return (default 5, max 20).\n"
+        "orc_slot : Player slot to analyse (1-based). If omitted, all slots are "
+        "scored (useful for debugging; for coaching always pass the Orc slot).\n\n"
+        "Returns 404 if the replay does not exist in the DB. "
+        "Returns an empty list if benchmarks have not been run yet."
+    ),
+)
+async def get_top_problems(
+    replay_id: str,
+    top_n: int = Query(default=5, ge=1, le=20, description="Number of top problems to return"),
+    orc_slot: int | None = Query(default=None, description="Orc player slot (1-based)"),
+) -> list[ScoredProblem]:
+    engine = get_engine()
+    async with engine.connect() as conn:
+        try:
+            await load_replay_timeline(conn, replay_id)
+        except ValueError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+        results = await fetch_benchmarks(conn, replay_id)
+
+    return prioritize(results, top_n=top_n, orc_slot=orc_slot)

@@ -60,10 +60,19 @@ A personal, locally-run platform for deliberate Warcraft III improvement:
 >   to the engine table (`benchmarks/references.py`) kept numerically identical
 >   to `timings.md`. All values `verified: community` (high-ladder/W3C analyses),
 >   patch 2.0; a few late-game T3 timings flagged low-confidence. No engine-logic
->   change; 56 pytest still pass.
-> Next up: EPIC 3 — T3.3 (deviation scoring & prioritization: weight deviations
-> by impact → surface the top 3–5 problems of a game, not 30 nitpicks).
-> Deaths/positions (T1.4, Observer API) remain a tracked follow-up.
+>   change; 56 pytest still pass. **Scope: Orc-only ("Orc sanctuary") — corpus
+>   only covers matchups where Orc fights.**
+> - T3.3: deviation scoring & prioritization — `apps/api-py/app/benchmarks/
+>   scoring.py` layers per-metric **impact weights** (economy > tech > hero
+>   progression; documented with rationale in `wc3-knowledge/scoring.md`, kept
+>   identical to code) over the engine's per-metric severity.
+>   `score = impact_weight × severity_multiplier × magnitude_factor`; pure/
+>   deterministic. `prioritize()` returns the Orc player's top-N `ScoredProblem`s
+>   (default 5) feeding the future `CoachReport.tips`. New `GET /benchmarks/
+>   {id}/top?top_n=&orc_slot=`. No ML (rules/weights only — XGBoost deferred).
+>   104 pytest pass (+48). EPIC 3 (deterministic strategy layer) complete.
+> Next up: EPIC 4 (APM trainer) or EPIC 5 (RAG + LLM coach over the scored
+> problems). Deaths/positions (T1.4, Observer API) remain a tracked follow-up.
 > See `docs/WC3_Coach_Design_Doc.md` and `docs/WC3_Coach_Project_Plan.md`
 > for full architecture and backlog.
 
