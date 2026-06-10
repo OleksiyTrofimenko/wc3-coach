@@ -26,6 +26,7 @@ import os
 from typing import Any
 
 import sqlalchemy as sa
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncConnection, create_async_engine
 
 from app.benchmarks.models import BenchmarkResult, PlayerInfo, TimelineEvent
@@ -65,18 +66,18 @@ def get_engine() -> Any:
 # game_events table (matches design doc §5.2)
 _GAME_EVENTS = sa.table(
     "game_events",
-    sa.column("replay_id", sa.Text),
+    sa.column("replay_id", UUID(as_uuid=False)),
     sa.column("slot", sa.Integer),
     sa.column("t_ms", sa.Integer),
     sa.column("type", sa.Text),
     sa.column("entity_ref", sa.Text),
-    sa.column("payload_json", sa.JSON),
+    sa.column("payload", sa.JSON),
 )
 
 # replay_players table
 _REPLAY_PLAYERS = sa.table(
     "replay_players",
-    sa.column("replay_id", sa.Text),
+    sa.column("replay_id", UUID(as_uuid=False)),
     sa.column("slot", sa.Integer),
     sa.column("race_id", sa.Text),
     sa.column("player_name", sa.Text),
@@ -87,15 +88,15 @@ _REPLAY_PLAYERS = sa.table(
 # replays table (just the duration)
 _REPLAYS = sa.table(
     "replays",
-    sa.column("id", sa.Text),
-    sa.column("duration", sa.Integer),
+    sa.column("id", UUID(as_uuid=False)),
+    sa.column("duration_ms", sa.Integer),
     sa.column("patch_id", sa.Text),
 )
 
 # benchmarks table (matches design doc §5.2)
 _BENCHMARKS = sa.table(
     "benchmarks",
-    sa.column("replay_id", sa.Text),
+    sa.column("replay_id", UUID(as_uuid=False)),
     sa.column("slot", sa.Integer),
     sa.column("metric", sa.Text),
     sa.column("value", sa.Float),
@@ -126,14 +127,14 @@ async def load_replay_timeline(
     """
     # Verify replay exists and get duration
     row = (await conn.execute(
-        sa.select(_REPLAYS.c.duration, _REPLAYS.c.patch_id)
+        sa.select(_REPLAYS.c.duration_ms, _REPLAYS.c.patch_id)
         .where(_REPLAYS.c.id == replay_id)
     )).fetchone()
 
     if row is None:
         raise ValueError(f"Replay not found: {replay_id!r}")
 
-    game_duration_ms: int = row.duration or 0
+    game_duration_ms: int = row.duration_ms or 0
     patch_id: str = row.patch_id or "patch:2.0"
 
     # Load players
@@ -171,7 +172,7 @@ async def load_replay_timeline(
             _GAME_EVENTS.c.t_ms,
             _GAME_EVENTS.c.type,
             _GAME_EVENTS.c.entity_ref,
-            _GAME_EVENTS.c.payload_json,
+            _GAME_EVENTS.c.payload,
         )
         .where(
             sa.and_(
@@ -188,7 +189,7 @@ async def load_replay_timeline(
             event_type=r.type,
             entity_ref=r.entity_ref or "",
             slot=r.slot,
-            payload=r.payload_json or {},
+            payload=r.payload or {},
         )
         for r in event_rows
     ]
