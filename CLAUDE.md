@@ -71,8 +71,21 @@ A personal, locally-run platform for deliberate Warcraft III improvement:
 >   (default 5) feeding the future `CoachReport.tips`. New `GET /benchmarks/
 >   {id}/top?top_n=&orc_slot=`. No ML (rules/weights only — XGBoost deferred).
 >   104 pytest pass (+48). EPIC 3 (deterministic strategy layer) complete.
+> - **First live end-to-end smoke test (2026-06-10):** brought up the full stack
+>   (Postgres+pgvector, Redis, Ollama) and ran a real `.w3g` (OvNE) through
+>   upload → parse/persist (api-node) → benchmarks+scoring → `GET /…/top`. Works;
+>   86 events + benchmarks for both slots persisted; Orc top-3 problems returned.
+>   Caught + fixed 5 bugs the build/unit tests couldn't (4 commits): `db:migrate`
+>   `--loader`→`--import` (Node 24); api-node crash when `pino-pretty` absent;
+>   api-py queries used wrong column names (`duration`→`duration_ms`,
+>   `payload_json`→`payload`) and `text` instead of `uuid` for id/FK columns;
+>   `benchmarks.expected/delta` made nullable (migration 0003) + shared-types.
+>   **Env quirk on this machine:** a native PostgreSQL 18 service owns host
+>   :5432, so the container is remapped to **:5433** via a gitignored
+>   `docker-compose.override.yml` + local `.env` (`DATABASE_URL=…localhost:5433`).
 > Next up: EPIC 4 (APM trainer) or EPIC 5 (RAG + LLM coach over the scored
-> problems). Deaths/positions (T1.4, Observer API) remain a tracked follow-up.
+> problems; Ollama container is up but models not pulled yet). Deaths/positions
+> (T1.4, Observer API) remain a tracked follow-up.
 > See `docs/WC3_Coach_Design_Doc.md` and `docs/WC3_Coach_Project_Plan.md`
 > for full architecture and backlog.
 
