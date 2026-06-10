@@ -13,6 +13,7 @@
 
 import { createHash } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import { resolve } from "node:path";
 import Fastify from "fastify";
 import multipart from "@fastify/multipart";
@@ -26,13 +27,20 @@ import { replayIngestQueue, pingRedis } from "./queue.js";
 
 const db = createDb(config.databaseUrl);
 
+// Pretty logs are a dev convenience: pino-pretty is an optional peer, not a
+// hard dependency. If it isn't installed, fall back to pino's default JSON
+// logger instead of crashing on boot ("unable to determine transport target").
+function resolveLogger(): true | { transport: { target: string; options: object } } {
+  try {
+    createRequire(import.meta.url).resolve("pino-pretty");
+    return { transport: { target: "pino-pretty", options: { colorize: true } } };
+  } catch {
+    return true;
+  }
+}
+
 const fastify = Fastify({
-  logger: {
-    transport: {
-      target: "pino-pretty",
-      options: { colorize: true },
-    },
-  },
+  logger: resolveLogger(),
 });
 
 await fastify.register(multipart, {
