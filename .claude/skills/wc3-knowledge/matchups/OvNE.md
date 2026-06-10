@@ -18,10 +18,15 @@
 
 ## Key timings — Orc (patch 2.0)
 
-- first_hero_timing: 62 000 ms (1:02) — Altar 60 s build + queue
-- tier2_timing (stronghold): 130 000 ms (2:10) — standard opener
-- expansion_timing: 330 000 ms (5:30) — mid-ladder standard
-- hero_level3_timing: 240 000 ms (4:00) — 2–3 creep camps
+| Metric | Reference | Window | Notes |
+|--------|-----------|--------|-------|
+| first_hero_timing | 62 000 ms (1:02) | ±15 000 ms | Altar 60 s build + queue |
+| tier2_timing (stronghold) | 130 000 ms (2:10) | ±20 000 ms | Standard opener |
+| tier3_timing (fortress) | 420 000 ms (7:00) | ±60 000 ms | Late game only |
+| expansion_timing | 330 000 ms (5:30) | ±60 000 ms | Mid-ladder standard; FE builds earlier |
+| hero_level3_timing | 240 000 ms (4:00) | ±30 000 ms | 2–3 creep camps |
+| hero_level5_timing | 480 000 ms (8:00) | ±60 000 ms | Full T2 engagement |
+| worker_count_10min | 14 workers | ±2 | Typical mid-game peon saturation |
 
 ## Standard Night Elf build order (NEvO) — Demon Hunter / Firelord opener
 
@@ -37,10 +42,15 @@
 
 ## Key timings — Night Elf (patch 2.0)
 
-- first_hero_timing: 62 000 ms (1:02)
-- tier2_timing (tree_of_ages): 150 000 ms (2:30)
-- expansion_timing: 360 000 ms (6:00) — NE expands later vs aggro Orc
-- hero_level3_timing: 270 000 ms (4:30)
+| Metric | Reference | Window | Notes |
+|--------|-----------|--------|-------|
+| first_hero_timing | 62 000 ms (1:02) | ±15 000 ms | Altar 60 s + queue |
+| tier2_timing (tree_of_ages) | 150 000 ms (2:30) | ±20 000 ms | Standard NE opener |
+| tier3_timing (tree_of_eternity) | 450 000 ms (7:30) | ±60 000 ms | Late game only |
+| expansion_timing | 360 000 ms (6:00) | ±60 000 ms | NE expands later vs aggressive Orc |
+| hero_level3_timing | 270 000 ms (4:30) | ±30 000 ms | Firelord/DH creep route |
+| hero_level5_timing | 540 000 ms (9:00) | ±60 000 ms | T2 power spike |
+| worker_count_10min | 12 workers | ±2 | Wisp-based; fewer needed than peons |
 
 ## Win conditions — Orc
 

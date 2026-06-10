@@ -88,42 +88,124 @@ Stronghold (T2) timing depends on whether the build is:
 
 ## Matchup: OvH (Orc vs Human) — patch 2.0
 
-**Provenance:** Community knowledge. `verified: community`. Patch 2.0.
-Added by Strategist in T3.1.
+**Provenance:** High-ladder community knowledge, Grubby/ToD/Th000-era references,
+W3Champions match analyses. `verified: community`. Patch: 2.0 (Reforged 2.00, build 6117).
+Updated by Strategist in T3.2 (was bare table from T3.1; full build order added).
+
+### Standard Orc build order (OvH) — Blademaster opener
+
+```
+0:00   5 peons start mining
+0:15   peon → build Altar of Storms
+0:30   peon → build Barracks
+1:00   Barracks complete → Blademaster
+1:00   peon → build Orc Burrow (food)
+1:30   Blademaster out → harass Human base or creep small camp
+2:00–2:15  Stronghold upgrade begins
+3:15   Stronghold complete → Shaman / Raider / T2 upgrades
+3:30–4:00  2nd hero (Far Seer or Shadow Hunter)
+6:00   Expansion (HU pressure typically delays to ~6:00)
+```
+
+### Standard Human build order (HvO) — Archmage FE opener
+
+```
+0:00   5 peasants mining; 1 peasant → Altar of Kings
+0:10   militia out (defend BM harass window)
+0:30   2nd peasant → Barracks
+0:45   3rd peasant → Blacksmith (required for Keep)
+1:10   Altar complete → Archmage
+1:30   Archmage out → creep with militia or defend
+2:45–3:00  Keep upgrade begins (requires Barracks + Blacksmith)
+4:00–4:30  Expansion (AM Brilliance Aura FE is HvO power pattern)
+5:30–6:00  Sorceresses / Spellbreakers online
+```
 
 ### Key reference timings — Orc (OvH, patch 2.0)
 
 | Metric | Reference | Window | Notes |
 |--------|-----------|--------|-------|
-| first_hero_timing | 62 000 ms (1:02) | ±15 000 ms | Altar 60 s |
-| tier2_timing (stronghold) | 135 000 ms (2:15) | ±20 000 ms | Slightly later vs Human (defensive awareness) |
-| expansion_timing | 360 000 ms (6:00) | ±60 000 ms | HU pressure often delays expo |
-| hero_level3_timing | 270 000 ms (4:30) | ±30 000 ms | Creep route vs HU harassment |
+| first_hero_timing | 62 000 ms (1:02) | ±15 000 ms | Altar 60 s; BM standard opener |
+| tier2_timing (stronghold) | 135 000 ms (2:15) | ±20 000 ms | Slightly later vs Human; BM first hits then T2 |
+| tier3_timing (fortress) | 450 000 ms (7:30) | ±60 000 ms | Fortress in drawn-out OvH games only |
+| expansion_timing | 360 000 ms (6:00) | ±60 000 ms | HU keep pressure often delays Orc expo |
+| hero_level3_timing | 270 000 ms (4:30) | ±30 000 ms | BM creep constrained by HU harassment |
+| hero_level5_timing | 480 000 ms (8:00) | ±60 000 ms | Mid-T2 fight hero level |
+| worker_count_10min | 14 workers | ±2 | Standard mid-game peon saturation |
 
 ### Key reference timings — Human (HvO, patch 2.0)
 
 | Metric | Reference | Window | Notes |
 |--------|-----------|--------|-------|
-| first_hero_timing | 70 000 ms (1:10) | ±15 000 ms | Altar 60 s + militia opener |
-| tier2_timing (keep) | 210 000 ms (3:30) | ±30 000 ms | Keep requires Castle path or Blacksmith |
-| expansion_timing | 270 000 ms (4:30) | ±60 000 ms | HU often FEs earlier |
-| hero_level3_timing | 240 000 ms (4:00) | ±30 000 ms | Archmage/Mountain King creep |
+| first_hero_timing | 70 000 ms (1:10) | ±15 000 ms | Altar 60 s + militia opener costs extra seconds |
+| tier2_timing (keep) | 210 000 ms (3:30) | ±30 000 ms | Keep requires Barracks + Blacksmith; starts 3:00–3:30 |
+| tier3_timing (castle) | 510 000 ms (8:30) | ±60 000 ms | Castle only in long games; very late |
+| expansion_timing | 270 000 ms (4:30) | ±60 000 ms | AM FE at 4:30 standard; top play goes 4:00 |
+| hero_level3_timing | 240 000 ms (4:00) | ±30 000 ms | AM/MK creep route with militia |
+| hero_level5_timing | 540 000 ms (9:00) | ±60 000 ms | Human heroes level slower in HvO |
+| worker_count_10min | 14 workers | ±2 | AM Brilliance Aura sustains peasant production |
 
 ---
 
 ## Matchup: OvUD (Orc vs Undead) — patch 2.0
 
-**Provenance:** Community knowledge. `verified: community`. Patch 2.0.
-Added by Strategist in T3.1.
+**Provenance:** High-ladder community knowledge, Grubby/Lyn/Soin-era references,
+W3Champions match analyses. `verified: community`. Patch: 2.0 (Reforged 2.00, build 6117).
+Updated by Strategist in T3.2 (was bare table from T3.1; full build order added).
+
+### Standard Orc build order (OvUD) — Blademaster opener
+
+```
+0:00   5 peons start mining
+0:15   peon → build Altar of Storms
+0:30   peon → build Barracks
+1:00   Barracks complete → Blademaster (or Far Seer)
+1:00   peon → build Orc Burrow (food)
+1:30   Blademaster out → creep small camp (avoid early UD base aggression)
+2:00–2:15  Stronghold upgrade begins
+3:15   Stronghold complete → Shaman / Raider / Kodo production
+3:30–4:00  2nd hero (Far Seer wolves or Shadow Hunter)
+5:00–5:30  Expansion (safer vs UD than vs HU; DK route is predictable)
+```
+
+### Standard Undead build order (UDvO) — Death Knight opener
+
+```
+0:00   3 acolytes haunt gold mines; 1 acolyte → Altar of Darkness
+0:30   acolyte → build Crypt
+1:00   Altar complete → Death Knight
+1:10   Crypt complete → Ghoul production (1–2 Ghouls)
+1:30–2:00  Death Knight out → creep or harass Orc workers
+2:00   acolyte → build Graveyard (required for Halls of the Dead upgrade)
+2:30   Necropolis → Halls of the Dead (T2) begins [65 s build; 100 gold, 180 lumber]
+3:00   Halls of the Dead complete → Crypt Fiend / Necromancer / Lich available
+3:30   2nd hero: Lich (standard) or Dread Lord
+7:00+  Expansion via Haunted Gold Mine
+```
+
+### Key reference timings — Orc (OvUD, patch 2.0)
+
+| Metric | Reference | Window | Notes |
+|--------|-----------|--------|-------|
+| first_hero_timing | 62 000 ms (1:02) | ±15 000 ms | Standard Altar 60 s; BM or FS opener |
+| tier2_timing (stronghold) | 135 000 ms (2:15) | ±20 000 ms | Stronghold ~2:15; FE variant delays to ~3:00 |
+| tier3_timing (fortress) | 420 000 ms (7:00) | ±60 000 ms | Fortress at ~7:00 if game is even; earlier if snowballing |
+| expansion_timing | 330 000 ms (5:30) | ±60 000 ms | Orc can expo safely ~5:30 if BM contested DK camps |
+| hero_level3_timing | 240 000 ms (4:00) | ±30 000 ms | BM reaches 3 while contesting UD creep route |
+| hero_level5_timing | 480 000 ms (8:00) | ±60 000 ms | Level 5 in sustained T2 fights |
+| worker_count_10min | 14 workers | ±2 | Standard mid-game peon saturation |
 
 ### Key reference timings — Undead (UDvO, patch 2.0)
 
 | Metric | Reference | Window | Notes |
 |--------|-----------|--------|-------|
-| first_hero_timing | 62 000 ms (1:02) | ±15 000 ms | Altar 60 s |
-| tier2_timing (slaughterhouse/halls) | 160 000 ms (2:40) | ±20 000 ms | UD T2 tech path |
-| expansion_timing | 420 000 ms (7:00) | ±60 000 ms | UD expands late typically |
-| hero_level3_timing | 270 000 ms (4:30) | ±30 000 ms | DK/Lich creep |
+| first_hero_timing | 62 000 ms (1:02) | ±15 000 ms | Altar 60 s; Death Knight standard opener |
+| tier2_timing (halls_of_the_dead) | 160 000 ms (2:40) | ±20 000 ms | Halls of the Dead upgrade starts ~2:30–2:40 |
+| tier3_timing (black_citadel) | 540 000 ms (9:00) | ±60 000 ms | Black Citadel (T3) very late; only in extended games |
+| expansion_timing | 420 000 ms (7:00) | ±60 000 ms | UD expands late via Haunted Mine; DK focus delays expo |
+| hero_level3_timing | 270 000 ms (4:30) | ±30 000 ms | DK/Lich creep route to level 3 by 4:30 |
+| hero_level5_timing | 540 000 ms (9:00) | ±60 000 ms | UD heroes level more slowly; sustained army fights |
+| worker_count_10min | 12 workers | ±2 | UD Acolytes; fewer needed due to Haunted Mine mechanics |
 
 ---
 

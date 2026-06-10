@@ -53,8 +53,16 @@ A personal, locally-run platform for deliberate Warcraft III improvement:
 >   /benchmarks/{id}/run`. State-dependent metrics (floating gold/lumber, supply
 >   blocks, army size, creep routes) are DEFERRED to T1.4, not faked. References
 >   seeded in `wc3-knowledge/timings.md`. 56 pytest pass (pure core, no DB).
-> Next up: EPIC 3 — T3.2 (strategic corpus seed: build orders/timings/win-cons
-> for 2–3 matchups, expanding the reference set the engine compares against).
+> - T3.2: strategic corpus seed — full matchup write-ups (build order both
+>   sides + key timings + win conditions + common mistakes) for **OvNE, OvH,
+>   OvUD** (`.claude/skills/wc3-knowledge/matchups/*.md`; OvH/OvUD new). Added
+>   tier3/hero_level5/worker_count reference rows for all four Orc-matchup sides
+>   to the engine table (`benchmarks/references.py`) kept numerically identical
+>   to `timings.md`. All values `verified: community` (high-ladder/W3C analyses),
+>   patch 2.0; a few late-game T3 timings flagged low-confidence. No engine-logic
+>   change; 56 pytest still pass.
+> Next up: EPIC 3 — T3.3 (deviation scoring & prioritization: weight deviations
+> by impact → surface the top 3–5 problems of a game, not 30 nitpicks).
 > Deaths/positions (T1.4, Observer API) remain a tracked follow-up.
 > See `docs/WC3_Coach_Design_Doc.md` and `docs/WC3_Coach_Project_Plan.md`
 > for full architecture and backlog.

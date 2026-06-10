@@ -137,15 +137,27 @@ _REFERENCE_TABLE: dict[tuple[str, str, str], ReferenceEntry] = {
     ),
     ("OvH", "orc", "tier2_timing"): ReferenceEntry(
         expected=135_000, window_ms=20_000,
-        notes="Stronghold slightly later vs HU due to defensive awareness",
+        notes="Stronghold starts ~2:15; BM harasses first, then T2",
+    ),
+    ("OvH", "orc", "tier3_timing"): ReferenceEntry(
+        expected=450_000, window_ms=60_000,
+        notes="Fortress at ~7:30 in drawn-out OvH games only",
     ),
     ("OvH", "orc", "expansion_timing"): ReferenceEntry(
         expected=360_000, window_ms=60_000,
-        notes="HU pressure often delays Orc expo to ~6:00",
+        notes="HU Keep pressure often delays Orc expo to ~6:00",
     ),
     ("OvH", "orc", "hero_level3_timing"): ReferenceEntry(
         expected=270_000, window_ms=30_000,
-        notes="Creep route constrained by HU harassment; ~4:30",
+        notes="BM creep route constrained by HU harassment; ~4:30",
+    ),
+    ("OvH", "orc", "hero_level5_timing"): ReferenceEntry(
+        expected=480_000, window_ms=60_000,
+        notes="Mid-T2 fight hero level; ~8:00",
+    ),
+    ("OvH", "orc", "worker_count_10min"): ReferenceEntry(
+        expected=14, window_ms=2,
+        notes="Standard mid-game peon saturation",
     ),
 
     # -----------------------------------------------------------------------
@@ -157,15 +169,27 @@ _REFERENCE_TABLE: dict[tuple[str, str, str], ReferenceEntry] = {
     ),
     ("HvO", "human", "tier2_timing"): ReferenceEntry(
         expected=210_000, window_ms=30_000,
-        notes="Keep requires Blacksmith or Castle path; starts ~3:30",
+        notes="Keep requires Barracks + Blacksmith; upgrade starts ~3:00–3:30",
+    ),
+    ("HvO", "human", "tier3_timing"): ReferenceEntry(
+        expected=510_000, window_ms=60_000,
+        notes="Castle (T3) only in long games; very late at ~8:30",
     ),
     ("HvO", "human", "expansion_timing"): ReferenceEntry(
         expected=270_000, window_ms=60_000,
-        notes="HU often fast-expands early vs Orc; ~4:30",
+        notes="AM Brilliance Aura FE at ~4:30; top play goes 4:00",
     ),
     ("HvO", "human", "hero_level3_timing"): ReferenceEntry(
         expected=240_000, window_ms=30_000,
-        notes="AM/MK creep route to level 3 by 4:00",
+        notes="AM/MK creep route with militia escort; level 3 by ~4:00",
+    ),
+    ("HvO", "human", "hero_level5_timing"): ReferenceEntry(
+        expected=540_000, window_ms=60_000,
+        notes="Human heroes level more slowly in HvO; ~9:00",
+    ),
+    ("HvO", "human", "worker_count_10min"): ReferenceEntry(
+        expected=14, window_ms=2,
+        notes="AM Brilliance Aura sustains peasant production; ~14 at 10 min",
     ),
 
     # -----------------------------------------------------------------------
@@ -177,15 +201,27 @@ _REFERENCE_TABLE: dict[tuple[str, str, str], ReferenceEntry] = {
     ),
     ("OvUD", "orc", "tier2_timing"): ReferenceEntry(
         expected=135_000, window_ms=20_000,
-        notes="Stronghold ~2:15 vs UD; earlier expo variant possible",
+        notes="Stronghold ~2:15 vs UD; FE variant delays to ~3:00",
+    ),
+    ("OvUD", "orc", "tier3_timing"): ReferenceEntry(
+        expected=420_000, window_ms=60_000,
+        notes="Fortress at ~7:00 if game is even; earlier if Orc is snowballing",
     ),
     ("OvUD", "orc", "expansion_timing"): ReferenceEntry(
         expected=330_000, window_ms=60_000,
-        notes="Orc can expo early vs UD if BM is safe; ~5:30",
+        notes="Orc can expo safely ~5:30 if BM contested DK creep camps",
     ),
     ("OvUD", "orc", "hero_level3_timing"): ReferenceEntry(
         expected=240_000, window_ms=30_000,
-        notes="BM creeps fast to 3 while pressuring UD tech",
+        notes="BM reaches level 3 while contesting UD creep route; ~4:00",
+    ),
+    ("OvUD", "orc", "hero_level5_timing"): ReferenceEntry(
+        expected=480_000, window_ms=60_000,
+        notes="Level 5 in sustained T2 fights; ~8:00",
+    ),
+    ("OvUD", "orc", "worker_count_10min"): ReferenceEntry(
+        expected=14, window_ms=2,
+        notes="Standard mid-game peon saturation",
     ),
 
     # -----------------------------------------------------------------------
@@ -197,15 +233,27 @@ _REFERENCE_TABLE: dict[tuple[str, str, str], ReferenceEntry] = {
     ),
     ("UDvO", "undead", "tier2_timing"): ReferenceEntry(
         expected=160_000, window_ms=20_000,
-        notes="UD T2 via Slaughterhouse/Graveyard path at ~2:40",
+        notes="Halls of the Dead upgrade starts ~2:30–2:40; requires Crypt + Graveyard",
+    ),
+    ("UDvO", "undead", "tier3_timing"): ReferenceEntry(
+        expected=540_000, window_ms=60_000,
+        notes="Black Citadel (T3) at ~9:00; only in extended games",
     ),
     ("UDvO", "undead", "expansion_timing"): ReferenceEntry(
         expected=420_000, window_ms=60_000,
-        notes="UD typically expands later; ~7:00 vs aggressive Orc",
+        notes="UD expands late via Haunted Mine; DK focus delays expo to ~7:00",
     ),
     ("UDvO", "undead", "hero_level3_timing"): ReferenceEntry(
         expected=270_000, window_ms=30_000,
-        notes="DK/Lich creep route to level 3 by 4:30",
+        notes="DK/Lich creep route to level 3 by ~4:30",
+    ),
+    ("UDvO", "undead", "hero_level5_timing"): ReferenceEntry(
+        expected=540_000, window_ms=60_000,
+        notes="UD heroes level more slowly; sustained army fights; ~9:00",
+    ),
+    ("UDvO", "undead", "worker_count_10min"): ReferenceEntry(
+        expected=12, window_ms=2,
+        notes="UD Acolytes; fewer needed due to Haunted Mine mechanics",
     ),
 }
 
