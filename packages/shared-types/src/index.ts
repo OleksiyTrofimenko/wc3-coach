@@ -147,9 +147,11 @@ export type BenchmarkSeverity = "info" | "minor" | "major" | "critical";
  *                       "hero_level_3_time", "floating_gold".
  * @property value     - Actual measured value (in units natural to the metric).
  * @property expected  - Reference value from the benchmark corpus for this
- *                       matchup + patch combination.
+ *                       matchup + patch combination. `null` when no reference
+ *                       exists for this metric (severity is then always "info").
  * @property delta     - Signed difference: value − expected.
  *                       Positive = later/more than expected; negative = earlier/less.
+ *                       `null` whenever `expected` is null.
  * @property severity  - Assessed impact tier; see {@link BenchmarkSeverity}.
  */
 export type BenchmarkResult = {
@@ -157,8 +159,8 @@ export type BenchmarkResult = {
   slot: number;
   metric: string;
   value: number;
-  expected: number;
-  delta: number;
+  expected: number | null;
+  delta: number | null;
   severity: BenchmarkSeverity;
 };
 

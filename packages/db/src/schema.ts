@@ -738,15 +738,16 @@ export const benchmarks = pgTable(
     value: real("value").notNull(),
     /**
      * Reference value from the benchmark corpus for this matchup + patch.
-     * Maps to BenchmarkResult.expected.
+     * NULLABLE: null when no reference exists for this metric/matchup/patch
+     * (in which case severity is always 'info'). Maps to BenchmarkResult.expected.
      */
-    expected: real("expected").notNull(),
+    expected: real("expected"),
     /**
      * Signed delta: value − expected.
      * Positive = later/more than expected; negative = earlier/less.
-     * Maps to BenchmarkResult.delta.
+     * NULLABLE: null whenever `expected` is null. Maps to BenchmarkResult.delta.
      */
-    delta: real("delta").notNull(),
+    delta: real("delta"),
     /**
      * Severity tier — branded to BenchmarkSeverity from shared-types.
      * Ordinal: info < minor < major < critical.
