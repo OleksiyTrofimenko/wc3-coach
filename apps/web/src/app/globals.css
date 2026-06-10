@@ -1,0 +1,117 @@
+/* WC3 Coach — global styles */
+/* Dark esports theme, gold/bronze Warcraft III aesthetic */
+
+:root {
+  /* Core palette — Warcraft III faction gold */
+  --gold: #c8972a;
+  --gold-light: #e8b84b;
+  --gold-dim: #8a6820;
+  --bronze: #a0602a;
+
+  /* Orc faction accent */
+  --orc-red: #b82020;
+  --orc-brown: #6b3a1f;
+
+  /* Night Elf faction accent */
+  --ne-purple: #5a2d8c;
+  --ne-teal: #1a7a5e;
+
+  /* Human faction accent */
+  --human-blue: #1a3a8c;
+
+  /* Undead faction accent */
+  --ud-sickly: #4a6b2a;
+
+  /* Severity colors */
+  --sev-info: #6b7280;
+  --sev-minor: #ca8a04;
+  --sev-major: #ea580c;
+  --sev-critical: #dc2626;
+
+  /* Surface */
+  --bg-void: #0a0a0c;
+  --bg-base: #0f0f14;
+  --bg-raised: #16161f;
+  --bg-elevated: #1e1e2a;
+  --bg-panel: #242432;
+
+  /* Text */
+  --text-primary: #e8e0d0;
+  --text-secondary: #a09880;
+  --text-muted: #6b6358;
+  --text-gold: #c8972a;
+
+  /* Border */
+  --border-dim: #2a2a38;
+  --border-gold: #5a4010;
+  --border-gold-bright: #8a6020;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* Warcraft-style panel with forged border */
+.wc3-panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-gold);
+  border-radius: 4px;
+  box-shadow:
+    inset 0 1px 0 rgba(200, 151, 42, 0.15),
+    0 4px 20px rgba(0, 0, 0, 0.6);
+}
+
+.wc3-panel-elevated {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-gold-bright);
+  border-radius: 4px;
+  box-shadow:
+    inset 0 1px 0 rgba(200, 151, 42, 0.25),
+    0 8px 32px rgba(0, 0, 0, 0.8);
+}
+
+/* Gold heading style */
+.wc3-heading {
+  color: var(--gold);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 20px rgba(200, 151, 42, 0.4);
+}
+
+/* Forged divider */
+.wc3-divider {
+  border: none;
+  border-top: 1px solid var(--border-gold);
+  opacity: 0.6;
+}
+
+/* Severity badge */
+.sev-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.sev-info    { background: var(--sev-info);     color: #e8e0d0; }
+.sev-minor   { background: var(--sev-minor);    color: #0a0a0c; }
+.sev-major   { background: var(--sev-major);    color: #0a0a0c; }
+.sev-critical { background: var(--sev-critical); color: #fff; }

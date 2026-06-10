@@ -3,7 +3,16 @@
   "extends": ["//"],
   "tasks": {
     "build": {
-      "outputs": []
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**"]
+    },
+    "dev": {
+      "dependsOn": ["^build"],
+      "persistent": true,
+      "cache": false
+    },
+    "typecheck": {
+      "dependsOn": ["^build"]
     }
   }
 }
