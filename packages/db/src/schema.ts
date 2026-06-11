@@ -50,6 +50,8 @@ import type {
   GameEventType,
   ReplayPlayer,
   BenchmarkSeverity,
+  CoachReport,
+  CoachTip,
 } from "@wc3-coach/shared-types";
 
 // ---------------------------------------------------------------------------
@@ -825,6 +827,71 @@ export const apmSessions = pgTable("apm_sessions", {
 
 export type ApmSessionRow = typeof apmSessions.$inferSelect;
 export type NewApmSessionRow = typeof apmSessions.$inferInsert;
+
+// ---------------------------------------------------------------------------
+// coach_reports
+// ---------------------------------------------------------------------------
+
+/**
+ * The LLM coach's synthesized output for one replay (EPIC 5, T5.3).
+ * Aligns field-for-field to CoachReport in shared-types — this row IS the
+ * persisted payload served to the dashboard.
+ *
+ * One report per replay: `replay_id` is UNIQUE so POST /coach/{id}/run is an
+ * idempotent upsert (a re-run replaces the previous report). The report is
+ * fully derived from deterministic inputs (scored benchmarks) + retrieved
+ * corpus chunks; `model` records which Ollama model produced it for provenance,
+ * since regenerating with a different model yields different prose.
+ *
+ * `tips` is the ordered CoachTip[] (3–5 prioritised tips). Stored as JSONB
+ * rather than a child table because tips are always read/written as a whole
+ * report and never queried individually.
+ *
+ * ON DELETE CASCADE: a report is meaningless without its replay.
+ *
+ * Design doc §7.3 (coach prompt contract → output), shared-types CoachReport.
+ */
+export const coachReports = pgTable(
+  "coach_reports",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    replayId: uuid("replay_id")
+      .notNull()
+      .references(() => replays.id, { onDelete: "cascade" }),
+    /** Matchup code, e.g. "OvH". Maps to CoachReport.matchup. */
+    matchup: text("matchup").notNull(),
+    /** Map name. Maps to CoachReport.mapName. */
+    mapName: text("map_name").notNull(),
+    /**
+     * Game result from the analysed (Orc) player's perspective.
+     * Branded to CoachReport['result']. Maps to CoachReport.result.
+     */
+    result: text("result")
+      .notNull()
+      .$type<CoachReport["result"]>(),
+    /** Game duration in milliseconds. Maps to CoachReport.durationMs. */
+    durationMs: integer("duration_ms").notNull(),
+    /**
+     * Ordered array of CoachTip objects (3–5 prioritised tips).
+     * JSONB; branded to CoachTip[]. Maps to CoachReport.tips.
+     */
+    tips: jsonb("tips").notNull().$type<CoachTip[]>(),
+    /**
+     * Ollama model tag that produced this report, e.g.
+     * "qwen2.5:14b-instruct-q4_K_M". Provenance — not part of the TS contract.
+     */
+    model: text("model").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (table) => [uniqueIndex("coach_reports_replay_idx").on(table.replayId)],
+);
+
+export type CoachReportRow = typeof coachReports.$inferSelect;
+export type NewCoachReportRow = typeof coachReports.$inferInsert;
 
 // ===========================================================================
 // KNOWLEDGE BASE (RAG) — design doc §5.4
