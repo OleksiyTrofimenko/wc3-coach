@@ -1,14 +1,15 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
-import type { BenchmarkResult } from "@wc3-coach/shared-types";
+import type { BenchmarkResult, CoachReport } from "@wc3-coach/shared-types";
 import type { ReplayResponse, ScoredProblem } from "@/types/analyzer";
-import { uploadReplay, getReplay, runBenchmarks, getTopProblems } from "@/lib/api";
+import { uploadReplay, getReplay, runBenchmarks, getTopProblems, runCoachReport } from "@/lib/api";
 import { UploadZone } from "@/components/UploadZone";
 import { StatusBar } from "@/components/StatusBar";
 import { GameSummary } from "@/components/GameSummary";
 import { ProblemCards } from "@/components/ProblemCards";
 import { BenchmarkTable } from "@/components/BenchmarkTable";
+import { CoachReport as CoachReportView } from "@/components/CoachReport";
 
 type Phase =
   | { kind: "idle" }
@@ -21,9 +22,20 @@ type Phase =
 
 const POLL_INTERVAL_MS = 1500;
 
+/** Three-state discriminated union for the async LLM coach report. */
+type CoachState =
+  | { kind: "idle" }
+  | { kind: "loading" }
+  | { kind: "loaded"; report: CoachReport }
+  | { kind: "error"; message: string };
+
 export default function AnalyzerPage() {
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
+  const [coachState, setCoachState] = useState<CoachState>({ kind: "idle" });
   const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Guard flag: set to true when reset() fires so in-flight LLM calls don't
+  // update state after the user has already reset the page.
+  const coachCancelledRef = useRef(false);
 
   const stopPoll = () => {
     if (pollRef.current !== null) {
@@ -60,6 +72,28 @@ export default function AnalyzerPage() {
               getTopProblems(replayId, orcPlayer.slot, 5),
             ]);
             setPhase({ kind: "done", replay, problems, benchmarks });
+
+            // Kick off the slow LLM coach report asynchronously — do NOT
+            // block the benchmarks/problems display above.
+            coachCancelledRef.current = false;
+            setCoachState({ kind: "loading" });
+            runCoachReport(replayId).then(
+              (report) => {
+                if (!coachCancelledRef.current) {
+                  setCoachState({ kind: "loaded", report });
+                }
+              },
+              (err: unknown) => {
+                if (!coachCancelledRef.current) {
+                  const msg = err instanceof Error ? err.message : "Unknown error";
+                  // Surface a user-friendly hint for the common 503 case.
+                  const friendly = msg.includes("503")
+                    ? "Coaching review unavailable — is the local LLM (Ollama) running?"
+                    : `Coaching review unavailable: ${msg}`;
+                  setCoachState({ kind: "error", message: friendly });
+                }
+              }
+            );
           } catch (err) {
             setPhase({
               kind: "error",
@@ -104,7 +138,9 @@ export default function AnalyzerPage() {
 
   const reset = () => {
     stopPoll();
+    coachCancelledRef.current = true;
     setPhase({ kind: "idle" });
+    setCoachState({ kind: "idle" });
   };
 
   const isBusy =
@@ -202,6 +238,37 @@ export default function AnalyzerPage() {
             <section className="section">
               <GameSummary replay={phase.replay} orcSlot={orcPlayer.slot} />
             </section>
+
+            {/* --- Coach report (LLM, async — ABOVE ProblemCards as the headline) --- */}
+            {coachState.kind === "loading" && (
+              <section className="section">
+                <div className="coach-loading wc3-panel-elevated">
+                  <span className="coach-loading__pulse" aria-hidden="true" />
+                  <div>
+                    <p className="coach-loading__title">The Mentor is writing your coaching review&hellip;</p>
+                    <p className="coach-loading__sub">
+                      The local LLM is analyzing your game — this takes a few seconds.
+                    </p>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {coachState.kind === "loaded" && (
+              <section className="section">
+                <CoachReportView report={coachState.report} />
+              </section>
+            )}
+
+            {coachState.kind === "error" && (
+              <section className="section">
+                <div className="coach-error-notice">
+                  <span className="coach-error-notice__icon">!</span>
+                  <p className="coach-error-notice__msg">{coachState.message}</p>
+                </div>
+              </section>
+            )}
+            {/* --- End coach report --- */}
 
             <section className="section">
               <ProblemCards
@@ -339,6 +406,66 @@ export default function AnalyzerPage() {
         .btn-reset:hover {
           background: rgba(200,151,42,0.1);
           border-color: var(--gold);
+        }
+
+        /* ---- Coach report loading panel ---- */
+        .coach-loading {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          padding: 1rem 1.25rem;
+        }
+        .coach-loading__pulse {
+          display: block;
+          width: 14px;
+          height: 14px;
+          border-radius: 50%;
+          background: var(--gold);
+          flex-shrink: 0;
+          animation: coachPulse 1.4s ease-in-out infinite;
+        }
+        @keyframes coachPulse {
+          0%, 100% { opacity: 1;   transform: scale(1);    box-shadow: 0 0 0 0 rgba(200,151,42,0.5); }
+          50%       { opacity: 0.6; transform: scale(0.85); box-shadow: 0 0 0 6px rgba(200,151,42,0); }
+        }
+        .coach-loading__title {
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: var(--gold);
+          margin-bottom: 0.2rem;
+        }
+        .coach-loading__sub {
+          font-size: 0.78rem;
+          color: var(--text-muted);
+        }
+
+        /* ---- Coach report non-fatal error notice ---- */
+        .coach-error-notice {
+          display: flex;
+          align-items: center;
+          gap: 0.6rem;
+          padding: 0.6rem 0.9rem;
+          background: rgba(220,38,38,0.06);
+          border: 1px solid rgba(220,38,38,0.25);
+          border-radius: 4px;
+        }
+        .coach-error-notice__icon {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          background: rgba(220,38,38,0.5);
+          color: #fff;
+          font-weight: 700;
+          font-size: 0.65rem;
+          flex-shrink: 0;
+        }
+        .coach-error-notice__msg {
+          font-size: 0.8rem;
+          color: #fca5a5;
+          line-height: 1.4;
         }
       `}</style>
     </main>

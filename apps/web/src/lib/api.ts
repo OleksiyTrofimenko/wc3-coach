@@ -4,7 +4,7 @@
  * /api/py/*   → api-py  at 8001
  */
 
-import type { BenchmarkResult } from "@wc3-coach/shared-types";
+import type { BenchmarkResult, CoachReport } from "@wc3-coach/shared-types";
 import type {
   UploadResponse,
   ReplayResponse,
@@ -66,4 +66,21 @@ export async function getTopProblems(
     throw new Error(`Top problems fetch failed (${res.status}): ${text}`);
   }
   return res.json() as Promise<ScoredProblem[]>;
+}
+
+/**
+ * Run the LLM coach for a replay and return the CoachReport.
+ * This call is idempotent (safe to re-run) but slow — the local LLM
+ * (qwen2.5:14b or similar) may take 5–30 seconds.
+ * Throws on 404 (unknown replay) or 503 (Ollama unreachable).
+ */
+export async function runCoachReport(replayId: string): Promise<CoachReport> {
+  const res = await fetch(`/api/py/coach/${replayId}/run`, {
+    method: "POST",
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Coach report failed (${res.status}): ${text}`);
+  }
+  return res.json() as Promise<CoachReport>;
 }
