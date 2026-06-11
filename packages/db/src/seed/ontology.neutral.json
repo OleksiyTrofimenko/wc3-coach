@@ -54,6 +54,465 @@
             { "level": 2, "manaCost": 0, "cooldown": 0, "description": "Passive. Increases Incinerate damage." },
             { "level": 3, "manaCost": 0, "cooldown": 0, "description": "Passive. Further increases Incinerate damage." }
           ]
+        },
+        {
+          "key": "soul_burn",
+          "name": "Soul Burn",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 90, "cooldown": 9, "description": "Burns the soul of a target enemy unit for 8 seconds, dealing 25 damage per second and preventing casting for the duration." },
+            { "level": 2, "manaCost": 115, "cooldown": 9, "description": "Deals 40 damage per second for 8 seconds." },
+            { "level": 3, "manaCost": 140, "cooldown": 9, "description": "Deals 55 damage per second for 8 seconds." }
+          ]
+        },
+        {
+          "key": "volcano",
+          "name": "Volcano",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 200, "cooldown": 180, "description": "Summons a volcano at the target area that shoots flaming boulders at nearby enemy units and structures for 45 seconds. Each boulder deals 100 damage to units and 250 to buildings." }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "naga_sea_witch",
+      "name": "Naga Sea Witch",
+      "fourcc": null,
+      "primaryAttr": "int",
+      "baseStats": {
+        "hp": 530,
+        "mana": 390,
+        "hpRegen": 0.25,
+        "manaRegen": 1.0,
+        "armor": 3,
+        "armorType": "hero",
+        "attackType": "hero",
+        "dps": 32,
+        "str": 16,
+        "agi": 17,
+        "int": 21,
+        "strPerLevel": 1.5,
+        "agiPerLevel": 1.5,
+        "intPerLevel": 2.5,
+        "moveSpeed": 320
+      },
+      "abilities": [
+        {
+          "key": "forked_lightning",
+          "name": "Forked Lightning",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 110, "cooldown": 9, "description": "Calls down a bolt of lightning that damages 3 target units for 150 damage each." },
+            { "level": 2, "manaCost": 130, "cooldown": 9, "description": "Damages 4 targets for 250 damage each." },
+            { "level": 3, "manaCost": 155, "cooldown": 9, "description": "Damages 5 targets for 350 damage each." }
+          ]
+        },
+        {
+          "key": "frost_arrows",
+          "name": "Frost Arrows",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 8, "cooldown": 0, "description": "Toggle (autocast). Adds a frost effect to each arrow, slowing target movement speed by 25% and attack rate by 25% for 2.5 seconds." },
+            { "level": 2, "manaCost": 8, "cooldown": 0, "description": "Slows movement by 35% and attack rate by 35%." },
+            { "level": 3, "manaCost": 8, "cooldown": 0, "description": "Slows movement by 50% and attack rate by 50%." }
+          ]
+        },
+        {
+          "key": "mana_shield",
+          "name": "Mana Shield",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 25, "cooldown": 2, "description": "Toggle. Creates a barrier of mana that absorbs damage, using mana instead of HP. 1 mana per 1 damage." },
+            { "level": 2, "manaCost": 25, "cooldown": 2, "description": "Absorbs damage more efficiently (1 mana per 1.5 damage)." },
+            { "level": 3, "manaCost": 25, "cooldown": 2, "description": "Absorbs damage efficiently (1 mana per 2 damage)." }
+          ]
+        },
+        {
+          "key": "tornado",
+          "name": "Tornado",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 200, "cooldown": 180, "description": "Summons a tornado that rains destruction on a target area. Slows ground units by 50%, damages air units, and disables buildings for up to 30 seconds." }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "dark_ranger",
+      "name": "Dark Ranger",
+      "fourcc": null,
+      "primaryAttr": "agi",
+      "baseStats": {
+        "hp": 530,
+        "mana": 255,
+        "hpRegen": 0.25,
+        "manaRegen": 1.0,
+        "armor": 2,
+        "armorType": "hero",
+        "attackType": "hero",
+        "dps": 30,
+        "str": 15,
+        "agi": 17,
+        "int": 16,
+        "strPerLevel": 1.5,
+        "agiPerLevel": 2.0,
+        "intPerLevel": 1.75,
+        "moveSpeed": 320
+      },
+      "abilities": [
+        {
+          "key": "silence",
+          "name": "Silence",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 65, "cooldown": 13, "description": "Silences all enemies in a target area for 5 seconds, preventing them from casting spells. 300 AoE." },
+            { "level": 2, "manaCost": 65, "cooldown": 13, "description": "Silences for 8 seconds." },
+            { "level": 3, "manaCost": 65, "cooldown": 13, "description": "Silences for 12 seconds." }
+          ]
+        },
+        {
+          "key": "black_arrow",
+          "name": "Black Arrow",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 11, "cooldown": 0, "description": "Toggle (autocast). Adds a Dark Minion summoning effect to each arrow. Slain enemy units spawn a Dark Minion for 30 seconds." },
+            { "level": 2, "manaCost": 11, "cooldown": 0, "description": "Spawns a stronger Dark Minion." },
+            { "level": 3, "manaCost": 11, "cooldown": 0, "description": "Spawns the most powerful Dark Minion." }
+          ]
+        },
+        {
+          "key": "life_drain",
+          "name": "Life Drain",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 5, "cooldown": 4, "description": "Drains the life from a target enemy unit, healing the Dark Ranger for 25 HP/s for 10 seconds. Channeled." },
+            { "level": 2, "manaCost": 5, "cooldown": 4, "description": "Heals for 50 HP/s." },
+            { "level": 3, "manaCost": 5, "cooldown": 4, "description": "Heals for 75 HP/s." }
+          ]
+        },
+        {
+          "key": "charm",
+          "name": "Charm",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 200, "cooldown": 180, "description": "Charms a target enemy non-hero unit permanently, converting it to fight for your side. Cannot charm units with more than 1200 HP." }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "pandaren_brewmaster",
+      "name": "Pandaren Brewmaster",
+      "fourcc": null,
+      "primaryAttr": "str",
+      "baseStats": {
+        "hp": 700,
+        "mana": 255,
+        "hpRegen": 0.25,
+        "manaRegen": 1.0,
+        "armor": 3,
+        "armorType": "hero",
+        "attackType": "hero",
+        "dps": 40,
+        "str": 23,
+        "agi": 16,
+        "int": 14,
+        "strPerLevel": 2.5,
+        "agiPerLevel": 1.5,
+        "intPerLevel": 1.5,
+        "moveSpeed": 300
+      },
+      "abilities": [
+        {
+          "key": "breath_of_fire",
+          "name": "Breath of Fire",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 90, "cooldown": 8, "description": "Spews a cone of fire dealing 85 damage to enemies in the affected area. Units affected by Drunken Haze take 10% bonus damage." },
+            { "level": 2, "manaCost": 110, "cooldown": 8, "description": "Deals 160 damage." },
+            { "level": 3, "manaCost": 130, "cooldown": 8, "description": "Deals 235 damage." }
+          ]
+        },
+        {
+          "key": "drunken_haze",
+          "name": "Drunken Haze",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 50, "cooldown": 8, "description": "Drenches a target area in brew, slowing enemy movement by 30% and reducing accuracy by 30% for 12 seconds." },
+            { "level": 2, "manaCost": 50, "cooldown": 8, "description": "Slows movement by 40% and reduces accuracy by 40%." },
+            { "level": 3, "manaCost": 50, "cooldown": 8, "description": "Slows movement by 50% and reduces accuracy by 50%." }
+          ]
+        },
+        {
+          "key": "drunken_brawler",
+          "name": "Drunken Brawler",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 0, "cooldown": 0, "description": "Passive. Gives a 15% chance to deal a critical strike for 3x damage and a 15% chance to evade attacks." },
+            { "level": 2, "manaCost": 0, "cooldown": 0, "description": "20% critical chance and 20% evasion chance." },
+            { "level": 3, "manaCost": 0, "cooldown": 0, "description": "25% critical chance and 25% evasion chance." }
+          ]
+        },
+        {
+          "key": "storm_earth_and_fire",
+          "name": "Storm, Earth, and Fire",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 100, "cooldown": 180, "description": "Splits the Brewmaster into three elemental spirits (Storm, Earth, Fire) each with unique abilities. The spirits last until killed or recalled. If all three are slain, the Brewmaster dies." }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "beastmaster",
+      "name": "Beastmaster",
+      "fourcc": null,
+      "primaryAttr": "str",
+      "baseStats": {
+        "hp": 700,
+        "mana": 255,
+        "hpRegen": 0.25,
+        "manaRegen": 1.0,
+        "armor": 3,
+        "armorType": "hero",
+        "attackType": "hero",
+        "dps": 43,
+        "str": 24,
+        "agi": 15,
+        "int": 14,
+        "strPerLevel": 2.75,
+        "agiPerLevel": 1.25,
+        "intPerLevel": 1.5,
+        "moveSpeed": 320
+      },
+      "abilities": [
+        {
+          "key": "summon_bear",
+          "name": "Summon Bear",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 100, "cooldown": 25, "description": "Summons a War Bear to fight for the Beastmaster. The bear lasts until killed." },
+            { "level": 2, "manaCost": 100, "cooldown": 25, "description": "Summons a stronger War Bear." },
+            { "level": 3, "manaCost": 100, "cooldown": 25, "description": "Summons a powerful War Bear." }
+          ]
+        },
+        {
+          "key": "summon_quilbeast",
+          "name": "Summon Quilbeast",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 75, "cooldown": 20, "description": "Summons a Quilbeast to fight for the Beastmaster. The Quilbeast has a ranged pierce attack." },
+            { "level": 2, "manaCost": 75, "cooldown": 20, "description": "Summons a stronger Quilbeast." },
+            { "level": 3, "manaCost": 75, "cooldown": 20, "description": "Summons a powerful Quilbeast." }
+          ]
+        },
+        {
+          "key": "summon_hawk",
+          "name": "Summon Hawk",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 50, "cooldown": 10, "description": "Summons a Hawk Scout to provide aerial vision. The hawk is invisible and does not attack." },
+            { "level": 2, "manaCost": 50, "cooldown": 10, "description": "Summons a hawk with longer vision range." },
+            { "level": 3, "manaCost": 50, "cooldown": 10, "description": "Summons a hawk with maximum vision range." }
+          ]
+        },
+        {
+          "key": "stampede",
+          "name": "Stampede",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 150, "cooldown": 180, "description": "Summons a herd of beasts that stampede through the target area, dealing damage and slowing all enemy units they trample. Each beast deals 75 damage and slows for 4 seconds." }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "pit_lord",
+      "name": "Pit Lord",
+      "fourcc": null,
+      "primaryAttr": "str",
+      "baseStats": {
+        "hp": 775,
+        "mana": 255,
+        "hpRegen": 0.25,
+        "manaRegen": 1.0,
+        "armor": 3,
+        "armorType": "hero",
+        "attackType": "hero",
+        "dps": 50,
+        "str": 26,
+        "agi": 13,
+        "int": 15,
+        "strPerLevel": 3.0,
+        "agiPerLevel": 1.0,
+        "intPerLevel": 1.75,
+        "moveSpeed": 270
+      },
+      "abilities": [
+        {
+          "key": "rain_of_fire",
+          "name": "Rain of Fire",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 125, "cooldown": 10, "description": "Calls down waves of fire, each wave dealing 25 damage to units in the target area over 4 seconds. 350 AoE." },
+            { "level": 2, "manaCost": 150, "cooldown": 10, "description": "Deals 50 damage per wave." },
+            { "level": 3, "manaCost": 175, "cooldown": 10, "description": "Deals 75 damage per wave." }
+          ]
+        },
+        {
+          "key": "howl_of_terror",
+          "name": "Howl of Terror",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 75, "cooldown": 20, "description": "Causes nearby enemy units to flee in terror for 4 seconds and reduces their attack damage by 10%. 500 AoE." },
+            { "level": 2, "manaCost": 75, "cooldown": 20, "description": "Flees for 5 seconds, reduces attack damage by 20%." },
+            { "level": 3, "manaCost": 75, "cooldown": 20, "description": "Flees for 6 seconds, reduces attack damage by 30%." }
+          ]
+        },
+        {
+          "key": "cleaving_attack",
+          "name": "Cleaving Attack",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 0, "cooldown": 0, "description": "Passive. Gives Pit Lord's attacks a cleaving effect, dealing 25% of normal attack damage to nearby units." },
+            { "level": 2, "manaCost": 0, "cooldown": 0, "description": "Passive. Deals 45% cleave damage." },
+            { "level": 3, "manaCost": 0, "cooldown": 0, "description": "Passive. Deals 65% cleave damage." }
+          ]
+        },
+        {
+          "key": "doom",
+          "name": "Doom",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 150, "cooldown": 180, "description": "Marks a target enemy unit with doom. After 15 seconds, the unit will die and spawn a powerful demon. The target takes 25 DPS while doomed." }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "goblin_tinker",
+      "name": "Goblin Tinker",
+      "fourcc": null,
+      "primaryAttr": "int",
+      "baseStats": {
+        "hp": 530,
+        "mana": 390,
+        "hpRegen": 0.25,
+        "manaRegen": 1.0,
+        "armor": 1,
+        "armorType": "hero",
+        "attackType": "hero",
+        "dps": 25,
+        "str": 16,
+        "agi": 15,
+        "int": 21,
+        "strPerLevel": 1.5,
+        "agiPerLevel": 1.0,
+        "intPerLevel": 3.0,
+        "moveSpeed": 300
+      },
+      "abilities": [
+        {
+          "key": "pocket_factory",
+          "name": "Pocket Factory",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 100, "cooldown": 30, "description": "Deploys a mechanical factory at the target location that produces Clockwerk Goblins at the rate of 1 per 3 seconds for 30 seconds." },
+            { "level": 2, "manaCost": 100, "cooldown": 30, "description": "Factory produces stronger Clockwerk Goblins." },
+            { "level": 3, "manaCost": 100, "cooldown": 30, "description": "Factory produces the most powerful Clockwerk Goblins." }
+          ]
+        },
+        {
+          "key": "cluster_rockets",
+          "name": "Cluster Rockets",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 110, "cooldown": 9, "description": "Launches a cluster of rockets that deal 105 damage to enemies in the target area. 200 AoE." },
+            { "level": 2, "manaCost": 135, "cooldown": 9, "description": "Deals 185 damage." },
+            { "level": 3, "manaCost": 160, "cooldown": 9, "description": "Deals 265 damage." }
+          ]
+        },
+        {
+          "key": "engineering_upgrade",
+          "name": "Engineering Upgrade",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 0, "cooldown": 0, "description": "Passive. Each level permanently upgrades the Tinker's movement speed and equipment. Level 1: increased attack range and +6 HP/s regen." },
+            { "level": 2, "manaCost": 0, "cooldown": 0, "description": "Passive. Further increases movement speed to 350 and +12 HP/s regen." },
+            { "level": 3, "manaCost": 0, "cooldown": 0, "description": "Passive. Maximum upgrades: movement 400, +18 HP/s regen." }
+          ]
+        },
+        {
+          "key": "robo_goblin",
+          "name": "Robo-Goblin",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 75, "cooldown": 20, "description": "Toggle. Transforms into a powerful mechanical robot, gaining a siege attack, bonus armor, and increased size. Movement speed is reduced while in this form." }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "goblin_alchemist",
+      "name": "Goblin Alchemist",
+      "fourcc": null,
+      "primaryAttr": "str",
+      "baseStats": {
+        "hp": 700,
+        "mana": 255,
+        "hpRegen": 0.25,
+        "manaRegen": 1.0,
+        "armor": 1,
+        "armorType": "hero",
+        "attackType": "hero",
+        "dps": 35,
+        "str": 22,
+        "agi": 14,
+        "int": 18,
+        "strPerLevel": 2.5,
+        "agiPerLevel": 1.25,
+        "intPerLevel": 2.0,
+        "moveSpeed": 270
+      },
+      "abilities": [
+        {
+          "key": "healing_spray",
+          "name": "Healing Spray",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 75, "cooldown": 8, "description": "Sprays a cone of healing chemicals, healing friendly units in the area for 25 HP per second for 8 seconds." },
+            { "level": 2, "manaCost": 75, "cooldown": 8, "description": "Heals for 50 HP/s." },
+            { "level": 3, "manaCost": 75, "cooldown": 8, "description": "Heals for 75 HP/s." }
+          ]
+        },
+        {
+          "key": "acid_bomb",
+          "name": "Acid Bomb",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 75, "cooldown": 10, "description": "Hurls an Acid Bomb at a target unit, reducing its armor by 3, dealing 15 DPS, and splashing damage in a small area for 12 seconds." },
+            { "level": 2, "manaCost": 75, "cooldown": 10, "description": "Reduces armor by 5 and deals 30 DPS." },
+            { "level": 3, "manaCost": 75, "cooldown": 10, "description": "Reduces armor by 7 and deals 45 DPS." }
+          ]
+        },
+        {
+          "key": "chemical_rage",
+          "name": "Chemical Rage",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 25, "cooldown": 2, "description": "Toggle. Causes the Alchemist to enter a chemical rage, greatly increasing his attack and movement speed and HP regen. +1.5 HP/s regen while active." },
+            { "level": 2, "manaCost": 25, "cooldown": 2, "description": "Increased bonuses. +3 HP/s regen." },
+            { "level": 3, "manaCost": 25, "cooldown": 2, "description": "Maximum bonuses. +4.5 HP/s regen." }
+          ]
+        },
+        {
+          "key": "transmute",
+          "name": "Transmute",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 150, "cooldown": 180, "description": "Instantly kills a target non-hero unit and converts it into gold equal to its original gold bounty. Cannot target heroes." }
+          ]
         }
       ]
     }

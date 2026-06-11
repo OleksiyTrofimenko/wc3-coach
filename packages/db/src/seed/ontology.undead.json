@@ -3,14 +3,760 @@
     "source": "community/liquipedia seed",
     "patch": "2.0",
     "verified": false,
-    "notes": "TODO(T2.2+): Undead ontology not yet seeded. The fixture replay is NvO, so Undead FourCCs are not required for end-to-end resolver tests against that fixture. Seed when an Undead-race fixture is added."
+    "notes": "Hand-curated patch-agnostic baseline (patch_id = NULL). Stats from WC3 Reforged patch 2.00 community reference (Liquipedia / WC3 wiki). FourCCs are null until confirmed from CASC extraction or a fixture replay containing Undead units. DPS values are approximate averages based on base damage range and attack speed; decimals rounded to nearest integer. Skeleton Warrior included as a summoned unit (food 0). Destroyer is the morphed form of Obsidian Statue; included with food 0 since no additional food cost beyond the Statue it replaces. Ziggurat, Spirit Tower, and Nerubian Tower are modelled as separate building entries — the two tower upgrades are in-place morphs of the Ziggurat."
   },
   "race": {
     "key": "undead",
     "name": "Undead"
   },
-  "units": [],
-  "buildings": [],
-  "heroes": [],
-  "upgrades": []
+  "units": [
+    {
+      "key": "acolyte",
+      "name": "Acolyte",
+      "fourcc": null,
+      "hp": 250,
+      "armor": 0,
+      "armorType": "unarmored",
+      "attackType": "normal",
+      "dps": 11,
+      "gold": 75,
+      "lumber": 0,
+      "food": 1,
+      "buildTime": 15,
+      "techReq": []
+    },
+    {
+      "key": "ghoul",
+      "name": "Ghoul",
+      "fourcc": null,
+      "hp": 340,
+      "armor": 1,
+      "armorType": "medium",
+      "attackType": "normal",
+      "dps": 19,
+      "gold": 120,
+      "lumber": 0,
+      "food": 2,
+      "buildTime": 20,
+      "techReq": [{ "type": "building", "key": "crypt" }]
+    },
+    {
+      "key": "crypt_fiend",
+      "name": "Crypt Fiend",
+      "fourcc": null,
+      "hp": 500,
+      "armor": 1,
+      "armorType": "medium",
+      "attackType": "pierce",
+      "dps": 23,
+      "gold": 215,
+      "lumber": 40,
+      "food": 3,
+      "buildTime": 28,
+      "techReq": [{ "type": "building", "key": "crypt" }]
+    },
+    {
+      "key": "gargoyle",
+      "name": "Gargoyle",
+      "fourcc": null,
+      "hp": 400,
+      "armor": 1,
+      "armorType": "medium",
+      "attackType": "pierce",
+      "dps": 20,
+      "gold": 165,
+      "lumber": 30,
+      "food": 3,
+      "buildTime": 27,
+      "techReq": [{ "type": "building", "key": "crypt" }]
+    },
+    {
+      "key": "necromancer",
+      "name": "Necromancer",
+      "fourcc": null,
+      "hp": 290,
+      "armor": 0,
+      "armorType": "unarmored",
+      "attackType": "magic",
+      "dps": 13,
+      "gold": 145,
+      "lumber": 20,
+      "food": 2,
+      "buildTime": 22,
+      "techReq": [{ "type": "building", "key": "temple_of_the_damned" }]
+    },
+    {
+      "key": "banshee",
+      "name": "Banshee",
+      "fourcc": null,
+      "hp": 240,
+      "armor": 0,
+      "armorType": "unarmored",
+      "attackType": "magic",
+      "dps": 11,
+      "gold": 155,
+      "lumber": 25,
+      "food": 2,
+      "buildTime": 22,
+      "techReq": [{ "type": "building", "key": "temple_of_the_damned" }]
+    },
+    {
+      "key": "meat_wagon",
+      "name": "Meat Wagon",
+      "fourcc": null,
+      "hp": 345,
+      "armor": 5,
+      "armorType": "heavy",
+      "attackType": "siege",
+      "dps": 28,
+      "gold": 230,
+      "lumber": 65,
+      "food": 4,
+      "buildTime": 35,
+      "techReq": [{ "type": "building", "key": "graveyard" }]
+    },
+    {
+      "key": "abomination",
+      "name": "Abomination",
+      "fourcc": null,
+      "hp": 1200,
+      "armor": 3,
+      "armorType": "heavy",
+      "attackType": "normal",
+      "dps": 38,
+      "gold": 250,
+      "lumber": 60,
+      "food": 5,
+      "buildTime": 38,
+      "techReq": [{ "type": "building", "key": "slaughterhouse" }]
+    },
+    {
+      "key": "obsidian_statue",
+      "name": "Obsidian Statue",
+      "fourcc": null,
+      "hp": 700,
+      "armor": 5,
+      "armorType": "heavy",
+      "attackType": "magic",
+      "dps": 22,
+      "gold": 230,
+      "lumber": 50,
+      "food": 3,
+      "buildTime": 30,
+      "techReq": [{ "type": "building", "key": "boneyard" }]
+    },
+    {
+      "key": "frost_wyrm",
+      "name": "Frost Wyrm",
+      "fourcc": null,
+      "hp": 1500,
+      "armor": 3,
+      "armorType": "heavy",
+      "attackType": "siege",
+      "dps": 61,
+      "gold": 385,
+      "lumber": 185,
+      "food": 7,
+      "buildTime": 65,
+      "techReq": [{ "type": "building", "key": "boneyard" }]
+    },
+    {
+      "key": "destroyer",
+      "name": "Destroyer",
+      "fourcc": null,
+      "hp": 900,
+      "armor": 5,
+      "armorType": "heavy",
+      "attackType": "magic",
+      "dps": 52,
+      "gold": 0,
+      "lumber": 0,
+      "food": 0,
+      "buildTime": 0,
+      "techReq": [
+        { "type": "building", "key": "sacrificial_pit" },
+        { "type": "unit", "key": "obsidian_statue" }
+      ]
+    },
+    {
+      "key": "shade",
+      "name": "Shade",
+      "fourcc": null,
+      "hp": 300,
+      "armor": 0,
+      "armorType": "unarmored",
+      "attackType": "normal",
+      "dps": 0,
+      "gold": 150,
+      "lumber": 0,
+      "food": 2,
+      "buildTime": 20,
+      "techReq": [{ "type": "building", "key": "altar_of_darkness" }]
+    },
+    {
+      "key": "skeleton_warrior",
+      "name": "Skeleton Warrior",
+      "fourcc": null,
+      "hp": 225,
+      "armor": 1,
+      "armorType": "light",
+      "attackType": "normal",
+      "dps": 15,
+      "gold": 0,
+      "lumber": 0,
+      "food": 0,
+      "buildTime": 0,
+      "techReq": []
+    }
+  ],
+  "buildings": [
+    {
+      "key": "necropolis",
+      "name": "Necropolis",
+      "fourcc": null,
+      "hp": 1500,
+      "armor": 5,
+      "gold": 385,
+      "lumber": 185,
+      "buildTime": 100,
+      "provides": [{ "type": "unit", "key": "acolyte" }]
+    },
+    {
+      "key": "halls_of_the_dead",
+      "name": "Halls of the Dead",
+      "fourcc": null,
+      "hp": 1800,
+      "armor": 5,
+      "gold": 215,
+      "lumber": 135,
+      "buildTime": 60,
+      "provides": [{ "type": "unit", "key": "acolyte" }]
+    },
+    {
+      "key": "black_citadel",
+      "name": "Black Citadel",
+      "fourcc": null,
+      "hp": 2500,
+      "armor": 5,
+      "gold": 215,
+      "lumber": 200,
+      "buildTime": 75,
+      "provides": [{ "type": "unit", "key": "acolyte" }]
+    },
+    {
+      "key": "altar_of_darkness",
+      "name": "Altar of Darkness",
+      "fourcc": null,
+      "hp": 900,
+      "armor": 5,
+      "gold": 180,
+      "lumber": 50,
+      "buildTime": 60,
+      "provides": [
+        { "type": "hero", "key": "death_knight" },
+        { "type": "hero", "key": "lich" },
+        { "type": "hero", "key": "dreadlord" },
+        { "type": "hero", "key": "crypt_lord" }
+      ]
+    },
+    {
+      "key": "crypt",
+      "name": "Crypt",
+      "fourcc": null,
+      "hp": 1100,
+      "armor": 5,
+      "gold": 150,
+      "lumber": 0,
+      "buildTime": 60,
+      "provides": [
+        { "type": "unit", "key": "ghoul" },
+        { "type": "unit", "key": "crypt_fiend" },
+        { "type": "unit", "key": "gargoyle" }
+      ]
+    },
+    {
+      "key": "graveyard",
+      "name": "Graveyard",
+      "fourcc": null,
+      "hp": 800,
+      "armor": 5,
+      "gold": 145,
+      "lumber": 0,
+      "buildTime": 40,
+      "provides": [
+        { "type": "unit", "key": "meat_wagon" },
+        { "type": "upgrade", "key": "unholy_strength" },
+        { "type": "upgrade", "key": "creature_carapace" },
+        { "type": "upgrade", "key": "creature_attack" },
+        { "type": "upgrade", "key": "cannibalize" },
+        { "type": "upgrade", "key": "ghoul_frenzy" }
+      ]
+    },
+    {
+      "key": "tomb_of_relics",
+      "name": "Tomb of Relics",
+      "fourcc": null,
+      "hp": 750,
+      "armor": 5,
+      "gold": 145,
+      "lumber": 0,
+      "buildTime": 40,
+      "provides": []
+    },
+    {
+      "key": "slaughterhouse",
+      "name": "Slaughterhouse",
+      "fourcc": null,
+      "hp": 1100,
+      "armor": 5,
+      "gold": 150,
+      "lumber": 100,
+      "buildTime": 60,
+      "provides": [
+        { "type": "unit", "key": "abomination" },
+        { "type": "upgrade", "key": "web" }
+      ]
+    },
+    {
+      "key": "temple_of_the_damned",
+      "name": "Temple of the Damned",
+      "fourcc": null,
+      "hp": 1100,
+      "armor": 5,
+      "gold": 150,
+      "lumber": 100,
+      "buildTime": 60,
+      "provides": [
+        { "type": "unit", "key": "necromancer" },
+        { "type": "unit", "key": "banshee" },
+        { "type": "upgrade", "key": "necromancer_adept_training" },
+        { "type": "upgrade", "key": "banshee_adept_training" },
+        { "type": "upgrade", "key": "skeletal_mastery" }
+      ]
+    },
+    {
+      "key": "boneyard",
+      "name": "Boneyard",
+      "fourcc": null,
+      "hp": 1100,
+      "armor": 5,
+      "gold": 150,
+      "lumber": 125,
+      "buildTime": 60,
+      "provides": [
+        { "type": "unit", "key": "obsidian_statue" },
+        { "type": "unit", "key": "frost_wyrm" },
+        { "type": "upgrade", "key": "freezing_breath" }
+      ]
+    },
+    {
+      "key": "sacrificial_pit",
+      "name": "Sacrificial Pit",
+      "fourcc": null,
+      "hp": 750,
+      "armor": 5,
+      "gold": 100,
+      "lumber": 50,
+      "buildTime": 40,
+      "provides": [
+        { "type": "unit", "key": "destroyer" },
+        { "type": "upgrade", "key": "burrow" }
+      ]
+    },
+    {
+      "key": "ziggurat",
+      "name": "Ziggurat",
+      "fourcc": null,
+      "hp": 550,
+      "armor": 5,
+      "gold": 160,
+      "lumber": 40,
+      "buildTime": 35,
+      "provides": []
+    },
+    {
+      "key": "spirit_tower",
+      "name": "Spirit Tower",
+      "fourcc": null,
+      "hp": 550,
+      "armor": 5,
+      "gold": 60,
+      "lumber": 20,
+      "buildTime": 20,
+      "provides": []
+    },
+    {
+      "key": "nerubian_tower",
+      "name": "Nerubian Tower",
+      "fourcc": null,
+      "hp": 550,
+      "armor": 5,
+      "gold": 40,
+      "lumber": 80,
+      "buildTime": 20,
+      "provides": [
+        { "type": "upgrade", "key": "stone_form" }
+      ]
+    }
+  ],
+  "heroes": [
+    {
+      "key": "death_knight",
+      "name": "Death Knight",
+      "fourcc": null,
+      "primaryAttr": "str",
+      "baseStats": {
+        "hp": 600,
+        "mana": 255,
+        "hpRegen": 0.25,
+        "manaRegen": 1.0,
+        "armor": 2,
+        "armorType": "hero",
+        "attackType": "hero",
+        "dps": 40,
+        "str": 21,
+        "agi": 15,
+        "int": 16,
+        "strPerLevel": 3.0,
+        "agiPerLevel": 1.5,
+        "intPerLevel": 1.75,
+        "moveSpeed": 320
+      },
+      "abilities": [
+        {
+          "key": "death_coil",
+          "name": "Death Coil",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 75,  "cooldown": 6, "description": "Hurls an unholy bolt that damages an enemy unit for 100 HP or heals a friendly undead unit for 200 HP." },
+            { "level": 2, "manaCost": 100, "cooldown": 6, "description": "Damages an enemy for 200 HP or heals a friendly undead unit for 400 HP." },
+            { "level": 3, "manaCost": 125, "cooldown": 6, "description": "Damages an enemy for 300 HP or heals a friendly undead unit for 600 HP." }
+          ]
+        },
+        {
+          "key": "death_pact",
+          "name": "Death Pact",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 50,  "cooldown": 30, "description": "Kills a target friendly undead unit and converts 50% of its HP to the Death Knight's HP." },
+            { "level": 2, "manaCost": 50,  "cooldown": 30, "description": "Kills a target friendly undead unit and converts 75% of its HP to the Death Knight's HP." },
+            { "level": 3, "manaCost": 50,  "cooldown": 30, "description": "Kills a target friendly undead unit and converts its full HP to the Death Knight's HP." }
+          ]
+        },
+        {
+          "key": "unholy_aura",
+          "name": "Unholy Aura",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 0, "cooldown": 0, "description": "Passive. Increases the movement speed and HP regeneration of nearby friendly units by a small amount." },
+            { "level": 2, "manaCost": 0, "cooldown": 0, "description": "Passive. Greater movement speed and HP regeneration bonus to nearby friendly units." },
+            { "level": 3, "manaCost": 0, "cooldown": 0, "description": "Passive. Large movement speed and HP regeneration bonus to nearby friendly units." }
+          ]
+        },
+        {
+          "key": "animate_dead",
+          "name": "Animate Dead",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 175, "cooldown": 180, "description": "Raises up to 6 corpses from the dead as invulnerable skeleton warriors for 40 seconds." }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "lich",
+      "name": "Lich",
+      "fourcc": null,
+      "primaryAttr": "int",
+      "baseStats": {
+        "hp": 450,
+        "mana": 351,
+        "hpRegen": 0.25,
+        "manaRegen": 1.0,
+        "armor": 0,
+        "armorType": "hero",
+        "attackType": "hero",
+        "dps": 33,
+        "str": 14,
+        "agi": 13,
+        "int": 21,
+        "strPerLevel": 1.75,
+        "agiPerLevel": 1.5,
+        "intPerLevel": 3.0,
+        "moveSpeed": 270
+      },
+      "abilities": [
+        {
+          "key": "frost_nova",
+          "name": "Frost Nova",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 125, "cooldown": 6,  "description": "Blasts enemy units near a target enemy unit with freezing ice. Deals 100 damage to the primary target and 75 AoE damage, slowing attack/movement speed." },
+            { "level": 2, "manaCost": 150, "cooldown": 6,  "description": "Deals 150 damage to the primary target and 100 AoE damage with a bigger slow." },
+            { "level": 3, "manaCost": 175, "cooldown": 6,  "description": "Deals 200 damage to the primary target and 150 AoE damage with maximum slow." }
+          ]
+        },
+        {
+          "key": "frost_armor",
+          "name": "Frost Armor",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 50, "cooldown": 4, "description": "Creates a shield of frost around a target friendly unit, adding 3 armor and slowing melee attackers for 5 sec." },
+            { "level": 2, "manaCost": 50, "cooldown": 4, "description": "Adds 5 armor and slows melee attackers for 7 sec." },
+            { "level": 3, "manaCost": 50, "cooldown": 4, "description": "Adds 7 armor and slows melee attackers for 9 sec." }
+          ]
+        },
+        {
+          "key": "dark_ritual",
+          "name": "Dark Ritual",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 0, "cooldown": 30, "description": "Sacrifices a target friendly undead unit to convert 33% of its HP into mana for the Lich." },
+            { "level": 2, "manaCost": 0, "cooldown": 30, "description": "Converts 50% of the sacrificed unit's HP into mana." },
+            { "level": 3, "manaCost": 0, "cooldown": 30, "description": "Converts 66% of the sacrificed unit's HP into mana." }
+          ]
+        },
+        {
+          "key": "death_and_decay",
+          "name": "Death and Decay",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 200, "cooldown": 180, "description": "Destroys an area, dealing 4% of max HP per second to units and 2% to buildings in a large AoE for 35 seconds." }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "dreadlord",
+      "name": "Dreadlord",
+      "fourcc": null,
+      "primaryAttr": "str",
+      "baseStats": {
+        "hp": 575,
+        "mana": 255,
+        "hpRegen": 0.25,
+        "manaRegen": 1.0,
+        "armor": 2,
+        "armorType": "hero",
+        "attackType": "hero",
+        "dps": 38,
+        "str": 19,
+        "agi": 15,
+        "int": 18,
+        "strPerLevel": 2.75,
+        "agiPerLevel": 1.5,
+        "intPerLevel": 2.0,
+        "moveSpeed": 300
+      },
+      "abilities": [
+        {
+          "key": "carrion_swarm",
+          "name": "Carrion Swarm",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 110, "cooldown": 7, "description": "Sends a swarm of bats that deals 75 damage to every enemy unit in a line." },
+            { "level": 2, "manaCost": 140, "cooldown": 7, "description": "Sends a swarm of bats that deals 150 damage to every enemy unit in a line." },
+            { "level": 3, "manaCost": 170, "cooldown": 7, "description": "Sends a swarm of bats that deals 225 damage to every enemy unit in a line." }
+          ]
+        },
+        {
+          "key": "sleep",
+          "name": "Sleep",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 50,  "cooldown": 8, "description": "Puts a target enemy unit to sleep, rendering it unable to act. Hero units sleep for a reduced duration." },
+            { "level": 2, "manaCost": 75,  "cooldown": 8, "description": "Sleep duration extended. Hero units affected for longer." },
+            { "level": 3, "manaCost": 100, "cooldown": 8, "description": "Maximum sleep duration. Heroes are fully affected." }
+          ]
+        },
+        {
+          "key": "vampiric_aura",
+          "name": "Vampiric Aura",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 0, "cooldown": 0, "description": "Passive. Nearby friendly melee units receive 15% of the damage dealt as life." },
+            { "level": 2, "manaCost": 0, "cooldown": 0, "description": "Passive. Nearby friendly melee units receive 25% of the damage dealt as life." },
+            { "level": 3, "manaCost": 0, "cooldown": 0, "description": "Passive. Nearby friendly melee units receive 35% of the damage dealt as life." }
+          ]
+        },
+        {
+          "key": "inferno",
+          "name": "Inferno",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 175, "cooldown": 180, "description": "Summons an Infernal that deals 100 AoE damage and stuns for 3 seconds on landing. The Infernal lasts 180 seconds." }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "crypt_lord",
+      "name": "Crypt Lord",
+      "fourcc": null,
+      "primaryAttr": "str",
+      "baseStats": {
+        "hp": 625,
+        "mana": 255,
+        "hpRegen": 0.25,
+        "manaRegen": 1.0,
+        "armor": 3,
+        "armorType": "hero",
+        "attackType": "hero",
+        "dps": 47,
+        "str": 22,
+        "agi": 13,
+        "int": 15,
+        "strPerLevel": 3.0,
+        "agiPerLevel": 1.25,
+        "intPerLevel": 1.75,
+        "moveSpeed": 290
+      },
+      "abilities": [
+        {
+          "key": "impale",
+          "name": "Impale",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 100, "cooldown": 9, "description": "Spikes of bone erupt from the ground, damaging and throwing enemy land units into the air in a line (75 dmg + stun)." },
+            { "level": 2, "manaCost": 100, "cooldown": 9, "description": "Deals 100 damage and stuns in a longer line." },
+            { "level": 3, "manaCost": 100, "cooldown": 9, "description": "Deals 125 damage and stuns in the maximum line." }
+          ]
+        },
+        {
+          "key": "spiked_carapace",
+          "name": "Spiked Carapace",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 0, "cooldown": 0, "description": "Passive. Adds 3 armor and returns 10% of the damage received from melee attackers." },
+            { "level": 2, "manaCost": 0, "cooldown": 0, "description": "Passive. Adds 5 armor and returns 20% of damage from melee attackers." },
+            { "level": 3, "manaCost": 0, "cooldown": 0, "description": "Passive. Adds 7 armor and returns 30% of damage from melee attackers." }
+          ]
+        },
+        {
+          "key": "carrion_beetles",
+          "name": "Carrion Beetles",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 25, "cooldown": 7, "description": "Summons a Scarab Beetle from a target corpse that attacks enemies. Up to 2 beetles at once." },
+            { "level": 2, "manaCost": 25, "cooldown": 7, "description": "Summons a more powerful Scarab Beetle. Up to 4 beetles at once." },
+            { "level": 3, "manaCost": 25, "cooldown": 7, "description": "Summons the most powerful Scarab Beetle. Up to 6 beetles at once." }
+          ]
+        },
+        {
+          "key": "locust_swarm",
+          "name": "Locust Swarm",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 150, "cooldown": 180, "description": "Releases a swarm of locusts that attack nearby enemy units, dealing 290 total damage while healing the Crypt Lord for a portion of the damage dealt." }
+          ]
+        }
+      ]
+    }
+  ],
+  "upgrades": [
+    {
+      "key": "unholy_strength",
+      "name": "Unholy Strength",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 75,  "lumber": 75,  "researchTime": 60, "effect": "+1 melee attack damage for Ghouls and Abominations" },
+        { "level": 2, "gold": 150, "lumber": 175, "researchTime": 75, "effect": "+2 melee attack damage" },
+        { "level": 3, "gold": 225, "lumber": 275, "researchTime": 90, "effect": "+3 melee attack damage" }
+      ]
+    },
+    {
+      "key": "creature_carapace",
+      "name": "Creature Carapace",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 75,  "lumber": 75,  "researchTime": 60, "effect": "+1 armor for all Undead units" },
+        { "level": 2, "gold": 150, "lumber": 175, "researchTime": 75, "effect": "+2 armor" },
+        { "level": 3, "gold": 225, "lumber": 275, "researchTime": 90, "effect": "+3 armor" }
+      ]
+    },
+    {
+      "key": "creature_attack",
+      "name": "Creature Attack",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 75,  "lumber": 75,  "researchTime": 60, "effect": "+1 ranged attack damage for Crypt Fiends and Gargoyles" },
+        { "level": 2, "gold": 150, "lumber": 175, "researchTime": 75, "effect": "+2 ranged attack damage" },
+        { "level": 3, "gold": 225, "lumber": 275, "researchTime": 90, "effect": "+3 ranged attack damage" }
+      ]
+    },
+    {
+      "key": "web",
+      "name": "Web",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 125, "lumber": 50, "researchTime": 45, "effect": "Allows Crypt Fiends to use Web, binding and grounding air units." }
+      ]
+    },
+    {
+      "key": "burrow",
+      "name": "Burrow",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 50, "lumber": 25, "researchTime": 30, "effect": "Allows Ghouls and Acolytes to Burrow underground, becoming invisible." }
+      ]
+    },
+    {
+      "key": "cannibalize",
+      "name": "Cannibalize",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 75, "lumber": 0, "researchTime": 30, "effect": "Allows Ghouls to Cannibalize a corpse, consuming it to restore HP." }
+      ]
+    },
+    {
+      "key": "ghoul_frenzy",
+      "name": "Ghoul Frenzy",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 100, "lumber": 50, "researchTime": 45, "effect": "Increases Ghoul attack speed by 20% and adds a small HP regeneration bonus." }
+      ]
+    },
+    {
+      "key": "necromancer_adept_training",
+      "name": "Necromancer Adept Training",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 100, "lumber": 50,  "researchTime": 60, "effect": "Upgrades Necromancer to Adept level, unlocking Cripple." },
+        { "level": 2, "gold": 100, "lumber": 150, "researchTime": 75, "effect": "Upgrades Necromancer to Master level." }
+      ]
+    },
+    {
+      "key": "banshee_adept_training",
+      "name": "Banshee Adept Training",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 100, "lumber": 50,  "researchTime": 60, "effect": "Upgrades Banshee to Adept level, unlocking Curse." },
+        { "level": 2, "gold": 100, "lumber": 150, "researchTime": 75, "effect": "Upgrades Banshee to Master level." }
+      ]
+    },
+    {
+      "key": "skeletal_mastery",
+      "name": "Skeletal Mastery",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 50, "lumber": 100, "researchTime": 45, "effect": "Increases Skeleton Warriors raised by Necromancers to a maximum of 3 per cast instead of 2." }
+      ]
+    },
+    {
+      "key": "stone_form",
+      "name": "Stone Form",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 50, "lumber": 100, "researchTime": 35, "effect": "Allows Gargoyles to use Stone Form, becoming invulnerable stationary structures with heavy armor." }
+      ]
+    },
+    {
+      "key": "freezing_breath",
+      "name": "Freezing Breath",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 100, "lumber": 100, "researchTime": 45, "effect": "Allows Frost Wyrms to permanently slow the attack speed of buildings they attack." }
+      ]
+    }
+  ]
 }

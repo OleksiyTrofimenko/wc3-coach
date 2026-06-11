@@ -219,7 +219,12 @@
       "gold": 180,
       "lumber": 50,
       "buildTime": 60,
-      "provides": []
+      "provides": [
+        { "type": "hero", "key": "demon_hunter" },
+        { "type": "hero", "key": "keeper_of_the_grove" },
+        { "type": "hero", "key": "priestess_of_the_moon" },
+        { "type": "hero", "key": "warden" }
+      ]
     },
     {
       "key": "moon_well",
@@ -327,7 +332,260 @@
       ]
     }
   ],
-  "heroes": [],
+  "heroes": [
+    {
+      "key": "demon_hunter",
+      "name": "Demon Hunter",
+      "fourcc": null,
+      "primaryAttr": "agi",
+      "baseStats": {
+        "hp": 600,
+        "mana": 255,
+        "hpRegen": 0.25,
+        "manaRegen": 1.0,
+        "armor": 3,
+        "armorType": "hero",
+        "attackType": "hero",
+        "dps": 45,
+        "str": 17,
+        "agi": 22,
+        "int": 14,
+        "strPerLevel": 1.5,
+        "agiPerLevel": 2.75,
+        "intPerLevel": 1.75,
+        "moveSpeed": 320
+      },
+      "abilities": [
+        {
+          "key": "mana_burn",
+          "name": "Mana Burn",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 50, "cooldown": 8, "description": "Sends a wave of force into a target unit's mind, burning 75 mana and dealing damage equal to the mana burned." },
+            { "level": 2, "manaCost": 50, "cooldown": 8, "description": "Burns 150 mana." },
+            { "level": 3, "manaCost": 50, "cooldown": 8, "description": "Burns 225 mana." }
+          ]
+        },
+        {
+          "key": "immolation",
+          "name": "Immolation",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 25, "cooldown": 2, "description": "Toggle. When active, burns nearby enemy units for 10 DPS and drains 4 mana per second. 200 AoE." },
+            { "level": 2, "manaCost": 25, "cooldown": 2, "description": "Burns nearby enemies for 20 DPS, drains 8 mana per second." },
+            { "level": 3, "manaCost": 25, "cooldown": 2, "description": "Burns nearby enemies for 30 DPS, drains 12 mana per second." }
+          ]
+        },
+        {
+          "key": "evasion",
+          "name": "Evasion",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 0, "cooldown": 0, "description": "Passive. Gives the Demon Hunter a 15% chance to evade attacks." },
+            { "level": 2, "manaCost": 0, "cooldown": 0, "description": "Passive. 20% evasion chance." },
+            { "level": 3, "manaCost": 0, "cooldown": 0, "description": "Passive. 25% evasion chance." }
+          ]
+        },
+        {
+          "key": "metamorphosis",
+          "name": "Metamorphosis",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 200, "cooldown": 180, "description": "Transforms into a powerful demon form for 60 seconds. Gains ranged siege attack, bonus HP, increased armor, and Immolation activates automatically." }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "keeper_of_the_grove",
+      "name": "Keeper of the Grove",
+      "fourcc": null,
+      "primaryAttr": "int",
+      "baseStats": {
+        "hp": 530,
+        "mana": 390,
+        "hpRegen": 0.25,
+        "manaRegen": 1.0,
+        "armor": 2,
+        "armorType": "hero",
+        "attackType": "hero",
+        "dps": 30,
+        "str": 17,
+        "agi": 17,
+        "int": 22,
+        "strPerLevel": 1.75,
+        "agiPerLevel": 1.25,
+        "intPerLevel": 2.5,
+        "moveSpeed": 300
+      },
+      "abilities": [
+        {
+          "key": "entangling_roots",
+          "name": "Entangling Roots",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 75, "cooldown": 12, "description": "Causes roots to grow around a target unit, rooting it and dealing 10 damage per second for 9 seconds." },
+            { "level": 2, "manaCost": 75, "cooldown": 12, "description": "Roots the target for 12 seconds, dealing 20 DPS." },
+            { "level": 3, "manaCost": 75, "cooldown": 12, "description": "Roots the target for 15 seconds, dealing 30 DPS." }
+          ]
+        },
+        {
+          "key": "force_of_nature",
+          "name": "Force of Nature",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 125, "cooldown": 25, "description": "Transforms target trees into Treants for 60 seconds. Up to 3 Treants per cast." },
+            { "level": 2, "manaCost": 125, "cooldown": 25, "description": "Summons up to 4 stronger Treants." },
+            { "level": 3, "manaCost": 125, "cooldown": 25, "description": "Summons up to 5 powerful Treants." }
+          ]
+        },
+        {
+          "key": "thorns_aura",
+          "name": "Thorns Aura",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 0, "cooldown": 0, "description": "Passive aura. Causes nearby friendly units to deal 15% of the physical damage received back to the attacker as magic damage." },
+            { "level": 2, "manaCost": 0, "cooldown": 0, "description": "Returns 30% of physical damage as magic." },
+            { "level": 3, "manaCost": 0, "cooldown": 0, "description": "Returns 50% of physical damage as magic." }
+          ]
+        },
+        {
+          "key": "tranquility",
+          "name": "Tranquility",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 200, "cooldown": 180, "description": "Calls upon the forces of nature to restore HP to nearby friendly units, healing 60 HP per second for 30 seconds. 700 AoE." }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "priestess_of_the_moon",
+      "name": "Priestess of the Moon",
+      "fourcc": null,
+      "primaryAttr": "agi",
+      "baseStats": {
+        "hp": 530,
+        "mana": 255,
+        "hpRegen": 0.25,
+        "manaRegen": 1.0,
+        "armor": 2,
+        "armorType": "hero",
+        "attackType": "hero",
+        "dps": 32,
+        "str": 15,
+        "agi": 20,
+        "int": 17,
+        "strPerLevel": 1.5,
+        "agiPerLevel": 2.0,
+        "intPerLevel": 2.0,
+        "moveSpeed": 320
+      },
+      "abilities": [
+        {
+          "key": "searing_arrows",
+          "name": "Searing Arrows",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 6, "cooldown": 0, "description": "Toggle (autocast). Adds 30 bonus damage to each arrow attack. Costs 6 mana per shot." },
+            { "level": 2, "manaCost": 6, "cooldown": 0, "description": "Adds 55 bonus damage per shot." },
+            { "level": 3, "manaCost": 6, "cooldown": 0, "description": "Adds 80 bonus damage per shot." }
+          ]
+        },
+        {
+          "key": "trueshot_aura",
+          "name": "Trueshot Aura",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 0, "cooldown": 0, "description": "Passive aura. Increases ranged attack damage of nearby friendly units by 10%." },
+            { "level": 2, "manaCost": 0, "cooldown": 0, "description": "Increases ranged damage by 20%." },
+            { "level": 3, "manaCost": 0, "cooldown": 0, "description": "Increases ranged damage by 30%." }
+          ]
+        },
+        {
+          "key": "scout",
+          "name": "Scout",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 25, "cooldown": 10, "description": "Sends a scout owl to the target position, granting vision of the area." },
+            { "level": 2, "manaCost": 25, "cooldown": 10, "description": "Summons a faster scout owl that lasts longer." },
+            { "level": 3, "manaCost": 25, "cooldown": 10, "description": "Summons an even more powerful scout owl." }
+          ]
+        },
+        {
+          "key": "starfall",
+          "name": "Starfall",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 200, "cooldown": 180, "description": "Calls a rain of meteors on enemy units around the Priestess, dealing 60 DPS to land units for 30 seconds. 700 AoE." }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "warden",
+      "name": "Warden",
+      "fourcc": null,
+      "primaryAttr": "agi",
+      "baseStats": {
+        "hp": 600,
+        "mana": 255,
+        "hpRegen": 0.25,
+        "manaRegen": 1.0,
+        "armor": 3,
+        "armorType": "hero",
+        "attackType": "hero",
+        "dps": 38,
+        "str": 18,
+        "agi": 24,
+        "int": 15,
+        "strPerLevel": 1.75,
+        "agiPerLevel": 2.5,
+        "intPerLevel": 1.75,
+        "moveSpeed": 320
+      },
+      "abilities": [
+        {
+          "key": "fan_of_knives",
+          "name": "Fan of Knives",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 90, "cooldown": 10, "description": "Throws knives at up to 6 nearby enemy units, each dealing 130 damage." },
+            { "level": 2, "manaCost": 90, "cooldown": 10, "description": "Throws knives at up to 6 enemies, each dealing 205 damage." },
+            { "level": 3, "manaCost": 90, "cooldown": 10, "description": "Throws knives at up to 6 enemies, each dealing 280 damage." }
+          ]
+        },
+        {
+          "key": "blink",
+          "name": "Blink",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 35, "cooldown": 7, "description": "Teleports the Warden to the target location within 900 range." },
+            { "level": 2, "manaCost": 35, "cooldown": 7, "description": "Teleports to target within 1100 range." },
+            { "level": 3, "manaCost": 35, "cooldown": 7, "description": "Teleports to target within 1400 range." }
+          ]
+        },
+        {
+          "key": "shadow_strike",
+          "name": "Shadow Strike",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 65, "cooldown": 8, "description": "Hurls a poisoned dagger dealing 100 damage instantly and 10 DPS for 30 seconds, also slowing the target by 10%." },
+            { "level": 2, "manaCost": 65, "cooldown": 8, "description": "Deals 125 damage and 20 DPS for 30 seconds, slowing by 20%." },
+            { "level": 3, "manaCost": 65, "cooldown": 8, "description": "Deals 150 damage and 30 DPS for 30 seconds, slowing by 40%." }
+          ]
+        },
+        {
+          "key": "vengeance",
+          "name": "Vengeance",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 175, "cooldown": 180, "description": "Summons an Avatar of Vengeance, a powerful spirit with siege attack and spell immunity. The avatar also summons Lesser Vengeances when enemy units die nearby." }
+          ]
+        }
+      ]
+    }
+  ],
   "upgrades": [
     {
       "key": "ne_melee_weapon_upgrade",

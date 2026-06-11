@@ -3,14 +3,752 @@
     "source": "community/liquipedia seed",
     "patch": "2.0",
     "verified": false,
-    "notes": "TODO(T2.2+): Human ontology not yet seeded. The fixture replay is NvO, so Human FourCCs are not required for end-to-end resolver tests against that fixture. Seed when a Human-race fixture is added."
+    "notes": "Hand-curated patch-agnostic baseline (patch_id = NULL). Stats from WC3 Reforged patch 2.00 community reference (Liquipedia / WC3 wiki). FourCCs are null throughout — no Human-race fixture has been run through the w3gjs resolver yet; fill confirmed values after CASC extraction or a Human-containing replay fixture. Militia (Peasant call-to-arms) is omitted; it shares the Peasant unit and adds no distinct ontology row. Tower upgrades (Guard/Cannon/Arcane) are modelled as separate building entries upgraded from Scout Tower."
   },
   "race": {
     "key": "human",
     "name": "Human"
   },
-  "units": [],
-  "buildings": [],
-  "heroes": [],
-  "upgrades": []
+  "units": [
+    {
+      "key": "peasant",
+      "name": "Peasant",
+      "fourcc": null,
+      "hp": 250,
+      "armor": 0,
+      "armorType": "unarmored",
+      "attackType": "normal",
+      "dps": 11,
+      "gold": 75,
+      "lumber": 0,
+      "food": 1,
+      "buildTime": 15,
+      "techReq": []
+    },
+    {
+      "key": "footman",
+      "name": "Footman",
+      "fourcc": null,
+      "hp": 420,
+      "armor": 2,
+      "armorType": "heavy",
+      "attackType": "normal",
+      "dps": 16,
+      "gold": 135,
+      "lumber": 0,
+      "food": 2,
+      "buildTime": 20,
+      "techReq": [{ "type": "building", "key": "human_barracks" }]
+    },
+    {
+      "key": "rifleman",
+      "name": "Rifleman",
+      "fourcc": null,
+      "hp": 505,
+      "armor": 0,
+      "armorType": "medium",
+      "attackType": "pierce",
+      "dps": 21,
+      "gold": 205,
+      "lumber": 30,
+      "food": 3,
+      "buildTime": 28,
+      "techReq": [{ "type": "building", "key": "human_barracks" }]
+    },
+    {
+      "key": "knight",
+      "name": "Knight",
+      "fourcc": null,
+      "hp": 825,
+      "armor": 5,
+      "armorType": "heavy",
+      "attackType": "normal",
+      "dps": 37,
+      "gold": 245,
+      "lumber": 60,
+      "food": 4,
+      "buildTime": 36,
+      "techReq": [{ "type": "building", "key": "human_barracks" }]
+    },
+    {
+      "key": "priest",
+      "name": "Priest",
+      "fourcc": null,
+      "hp": 305,
+      "armor": 0,
+      "armorType": "unarmored",
+      "attackType": "magic",
+      "dps": 13,
+      "gold": 135,
+      "lumber": 10,
+      "food": 2,
+      "buildTime": 22,
+      "techReq": [{ "type": "building", "key": "arcane_sanctum" }]
+    },
+    {
+      "key": "sorceress",
+      "name": "Sorceress",
+      "fourcc": null,
+      "hp": 275,
+      "armor": 0,
+      "armorType": "unarmored",
+      "attackType": "magic",
+      "dps": 12,
+      "gold": 155,
+      "lumber": 20,
+      "food": 2,
+      "buildTime": 22,
+      "techReq": [{ "type": "building", "key": "arcane_sanctum" }]
+    },
+    {
+      "key": "spell_breaker",
+      "name": "Spell Breaker",
+      "fourcc": null,
+      "hp": 625,
+      "armor": 3,
+      "armorType": "heavy",
+      "attackType": "normal",
+      "dps": 25,
+      "gold": 215,
+      "lumber": 30,
+      "food": 3,
+      "buildTime": 30,
+      "techReq": [{ "type": "building", "key": "arcane_sanctum" }]
+    },
+    {
+      "key": "mortar_team",
+      "name": "Mortar Team",
+      "fourcc": null,
+      "hp": 360,
+      "armor": 0,
+      "armorType": "unarmored",
+      "attackType": "siege",
+      "dps": 28,
+      "gold": 180,
+      "lumber": 70,
+      "food": 3,
+      "buildTime": 30,
+      "techReq": [{ "type": "building", "key": "workshop" }]
+    },
+    {
+      "key": "flying_machine",
+      "name": "Flying Machine",
+      "fourcc": null,
+      "hp": 280,
+      "armor": 2,
+      "armorType": "medium",
+      "attackType": "pierce",
+      "dps": 17,
+      "gold": 135,
+      "lumber": 20,
+      "food": 2,
+      "buildTime": 22,
+      "techReq": [{ "type": "building", "key": "workshop" }]
+    },
+    {
+      "key": "gryphon_rider",
+      "name": "Gryphon Rider",
+      "fourcc": null,
+      "hp": 800,
+      "armor": 3,
+      "armorType": "heavy",
+      "attackType": "normal",
+      "dps": 44,
+      "gold": 280,
+      "lumber": 70,
+      "food": 5,
+      "buildTime": 40,
+      "techReq": [{ "type": "building", "key": "gryphon_aviary" }]
+    },
+    {
+      "key": "dragonhawk_rider",
+      "name": "Dragonhawk Rider",
+      "fourcc": null,
+      "hp": 575,
+      "armor": 1,
+      "armorType": "medium",
+      "attackType": "pierce",
+      "dps": 26,
+      "gold": 255,
+      "lumber": 45,
+      "food": 4,
+      "buildTime": 35,
+      "techReq": [{ "type": "building", "key": "gryphon_aviary" }]
+    },
+    {
+      "key": "siege_engine",
+      "name": "Siege Engine",
+      "fourcc": null,
+      "hp": 525,
+      "armor": 5,
+      "armorType": "heavy",
+      "attackType": "siege",
+      "dps": 32,
+      "gold": 195,
+      "lumber": 60,
+      "food": 4,
+      "buildTime": 35,
+      "techReq": [{ "type": "building", "key": "workshop" }]
+    }
+  ],
+  "buildings": [
+    {
+      "key": "town_hall",
+      "name": "Town Hall",
+      "fourcc": null,
+      "hp": 1800,
+      "armor": 5,
+      "gold": 385,
+      "lumber": 185,
+      "buildTime": 100,
+      "provides": [{ "type": "unit", "key": "peasant" }]
+    },
+    {
+      "key": "keep",
+      "name": "Keep",
+      "fourcc": null,
+      "hp": 2400,
+      "armor": 5,
+      "gold": 215,
+      "lumber": 135,
+      "buildTime": 60,
+      "provides": [{ "type": "unit", "key": "peasant" }]
+    },
+    {
+      "key": "castle",
+      "name": "Castle",
+      "fourcc": null,
+      "hp": 3000,
+      "armor": 5,
+      "gold": 215,
+      "lumber": 200,
+      "buildTime": 75,
+      "provides": [{ "type": "unit", "key": "peasant" }]
+    },
+    {
+      "key": "altar_of_kings",
+      "name": "Altar of Kings",
+      "fourcc": null,
+      "hp": 900,
+      "armor": 5,
+      "gold": 180,
+      "lumber": 50,
+      "buildTime": 60,
+      "provides": [
+        { "type": "hero", "key": "paladin" },
+        { "type": "hero", "key": "archmage" },
+        { "type": "hero", "key": "mountain_king" },
+        { "type": "hero", "key": "blood_mage" }
+      ]
+    },
+    {
+      "key": "farm",
+      "name": "Farm",
+      "fourcc": null,
+      "hp": 500,
+      "armor": 5,
+      "gold": 80,
+      "lumber": 20,
+      "buildTime": 30,
+      "provides": []
+    },
+    {
+      "key": "human_barracks",
+      "name": "Barracks",
+      "fourcc": null,
+      "hp": 1100,
+      "armor": 5,
+      "gold": 160,
+      "lumber": 0,
+      "buildTime": 60,
+      "provides": [
+        { "type": "unit", "key": "footman" },
+        { "type": "unit", "key": "rifleman" },
+        { "type": "unit", "key": "knight" }
+      ]
+    },
+    {
+      "key": "lumber_mill",
+      "name": "Lumber Mill",
+      "fourcc": null,
+      "hp": 800,
+      "armor": 5,
+      "gold": 120,
+      "lumber": 0,
+      "buildTime": 40,
+      "provides": [
+        { "type": "upgrade", "key": "masonry" },
+        { "type": "upgrade", "key": "improved_masonry" }
+      ]
+    },
+    {
+      "key": "blacksmith",
+      "name": "Blacksmith",
+      "fourcc": null,
+      "hp": 1100,
+      "armor": 5,
+      "gold": 140,
+      "lumber": 0,
+      "buildTime": 60,
+      "provides": [
+        { "type": "upgrade", "key": "iron_forged_swords" },
+        { "type": "upgrade", "key": "studded_leather_armor" },
+        { "type": "upgrade", "key": "black_gunpowder" },
+        { "type": "upgrade", "key": "defend" }
+      ]
+    },
+    {
+      "key": "workshop",
+      "name": "Workshop",
+      "fourcc": null,
+      "hp": 1100,
+      "armor": 5,
+      "gold": 200,
+      "lumber": 80,
+      "buildTime": 60,
+      "provides": [
+        { "type": "unit", "key": "mortar_team" },
+        { "type": "unit", "key": "flying_machine" },
+        { "type": "unit", "key": "siege_engine" }
+      ]
+    },
+    {
+      "key": "arcane_sanctum",
+      "name": "Arcane Sanctum",
+      "fourcc": null,
+      "hp": 1100,
+      "armor": 5,
+      "gold": 150,
+      "lumber": 100,
+      "buildTime": 60,
+      "provides": [
+        { "type": "unit", "key": "priest" },
+        { "type": "unit", "key": "sorceress" },
+        { "type": "unit", "key": "spell_breaker" },
+        { "type": "upgrade", "key": "priest_adept_training" },
+        { "type": "upgrade", "key": "sorceress_adept_training" },
+        { "type": "upgrade", "key": "magic_sentry" },
+        { "type": "upgrade", "key": "animal_war_training" }
+      ]
+    },
+    {
+      "key": "gryphon_aviary",
+      "name": "Gryphon Aviary",
+      "fourcc": null,
+      "hp": 1100,
+      "armor": 5,
+      "gold": 150,
+      "lumber": 100,
+      "buildTime": 60,
+      "provides": [
+        { "type": "unit", "key": "gryphon_rider" },
+        { "type": "unit", "key": "dragonhawk_rider" }
+      ]
+    },
+    {
+      "key": "arcane_vault",
+      "name": "Arcane Vault",
+      "fourcc": null,
+      "hp": 800,
+      "armor": 5,
+      "gold": 150,
+      "lumber": 30,
+      "buildTime": 40,
+      "provides": []
+    },
+    {
+      "key": "scout_tower",
+      "name": "Scout Tower",
+      "fourcc": null,
+      "hp": 200,
+      "armor": 5,
+      "gold": 30,
+      "lumber": 20,
+      "buildTime": 15,
+      "provides": [
+        { "type": "building", "key": "guard_tower" },
+        { "type": "building", "key": "cannon_tower" },
+        { "type": "building", "key": "arcane_tower" }
+      ]
+    },
+    {
+      "key": "guard_tower",
+      "name": "Guard Tower",
+      "fourcc": null,
+      "hp": 500,
+      "armor": 5,
+      "gold": 60,
+      "lumber": 20,
+      "buildTime": 20,
+      "provides": []
+    },
+    {
+      "key": "cannon_tower",
+      "name": "Cannon Tower",
+      "fourcc": null,
+      "hp": 500,
+      "armor": 5,
+      "gold": 90,
+      "lumber": 60,
+      "buildTime": 25,
+      "provides": []
+    },
+    {
+      "key": "arcane_tower",
+      "name": "Arcane Tower",
+      "fourcc": null,
+      "hp": 500,
+      "armor": 5,
+      "gold": 60,
+      "lumber": 20,
+      "buildTime": 20,
+      "provides": []
+    }
+  ],
+  "heroes": [
+    {
+      "key": "paladin",
+      "name": "Paladin",
+      "fourcc": null,
+      "primaryAttr": "str",
+      "baseStats": {
+        "hp": 625,
+        "mana": 255,
+        "hpRegen": 0.25,
+        "manaRegen": 1.0,
+        "armor": 2,
+        "armorType": "hero",
+        "attackType": "hero",
+        "dps": 34,
+        "str": 22,
+        "agi": 12,
+        "int": 18,
+        "strPerLevel": 3.0,
+        "agiPerLevel": 1.25,
+        "intPerLevel": 1.75,
+        "moveSpeed": 290
+      },
+      "abilities": [
+        {
+          "key": "holy_light",
+          "name": "Holy Light",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 65, "cooldown": 6, "description": "Heals a friendly unit for 200 HP or deals 100 HP to an undead unit." },
+            { "level": 2, "manaCost": 65, "cooldown": 6, "description": "Heals a friendly unit for 400 HP or deals 200 HP to an undead unit." },
+            { "level": 3, "manaCost": 65, "cooldown": 6, "description": "Heals a friendly unit for 600 HP or deals 300 HP to an undead unit." }
+          ]
+        },
+        {
+          "key": "divine_shield",
+          "name": "Divine Shield",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 25, "cooldown": 35, "description": "Makes the Paladin invulnerable for 5 seconds." },
+            { "level": 2, "manaCost": 25, "cooldown": 35, "description": "Makes the Paladin invulnerable for 8 seconds." },
+            { "level": 3, "manaCost": 25, "cooldown": 35, "description": "Makes the Paladin invulnerable for 12 seconds." }
+          ]
+        },
+        {
+          "key": "devotion_aura",
+          "name": "Devotion Aura",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 0, "cooldown": 0, "description": "Passive aura. Gives +1 armor to nearby friendly ground units." },
+            { "level": 2, "manaCost": 0, "cooldown": 0, "description": "Passive aura. Gives +2 armor to nearby friendly ground units." },
+            { "level": 3, "manaCost": 0, "cooldown": 0, "description": "Passive aura. Gives +3 armor to nearby friendly ground units." }
+          ]
+        },
+        {
+          "key": "resurrection",
+          "name": "Resurrection",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 225, "cooldown": 180, "description": "Resurrects up to 6 dead friendly units in the target area for 180 seconds." }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "archmage",
+      "name": "Archmage",
+      "fourcc": null,
+      "primaryAttr": "int",
+      "baseStats": {
+        "hp": 500,
+        "mana": 375,
+        "hpRegen": 0.25,
+        "manaRegen": 1.0,
+        "armor": 1,
+        "armorType": "hero",
+        "attackType": "hero",
+        "dps": 25,
+        "str": 14,
+        "agi": 14,
+        "int": 27,
+        "strPerLevel": 1.5,
+        "agiPerLevel": 1.5,
+        "intPerLevel": 3.0,
+        "moveSpeed": 300
+      },
+      "abilities": [
+        {
+          "key": "blizzard",
+          "name": "Blizzard",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 125, "cooldown": 6, "description": "Calls a blizzard at a target area, dealing 60 DPS and slowing units." },
+            { "level": 2, "manaCost": 175, "cooldown": 6, "description": "Blizzard deals 110 DPS and slows units." },
+            { "level": 3, "manaCost": 225, "cooldown": 6, "description": "Blizzard deals 170 DPS and slows units." }
+          ]
+        },
+        {
+          "key": "summon_water_elemental",
+          "name": "Summon Water Elemental",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 125, "cooldown": 30, "description": "Summons a Water Elemental with 500 HP lasting 60 seconds." },
+            { "level": 2, "manaCost": 125, "cooldown": 30, "description": "Summons a Water Elemental with 750 HP lasting 60 seconds." },
+            { "level": 3, "manaCost": 125, "cooldown": 30, "description": "Summons a Water Elemental with 1000 HP lasting 60 seconds." }
+          ]
+        },
+        {
+          "key": "brilliance_aura",
+          "name": "Brilliance Aura",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 0, "cooldown": 0, "description": "Passive aura. Increases mana regeneration of nearby friendly units by 0.75 mana/sec." },
+            { "level": 2, "manaCost": 0, "cooldown": 0, "description": "Passive aura. Increases mana regeneration of nearby friendly units by 1.5 mana/sec." },
+            { "level": 3, "manaCost": 0, "cooldown": 0, "description": "Passive aura. Increases mana regeneration of nearby friendly units by 2.25 mana/sec." }
+          ]
+        },
+        {
+          "key": "mass_teleport",
+          "name": "Mass Teleport",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 50, "cooldown": 20, "description": "Teleports up to 5 friendly units to a target friendly unit or building after a 3-second channelling delay." }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "mountain_king",
+      "name": "Mountain King",
+      "fourcc": null,
+      "primaryAttr": "str",
+      "baseStats": {
+        "hp": 700,
+        "mana": 255,
+        "hpRegen": 0.25,
+        "manaRegen": 1.0,
+        "armor": 3,
+        "armorType": "hero",
+        "attackType": "hero",
+        "dps": 47,
+        "str": 25,
+        "agi": 14,
+        "int": 16,
+        "strPerLevel": 3.0,
+        "agiPerLevel": 1.5,
+        "intPerLevel": 1.5,
+        "moveSpeed": 290
+      },
+      "abilities": [
+        {
+          "key": "storm_bolt",
+          "name": "Storm Bolt",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 75, "cooldown": 9, "description": "Hurls a magical hammer that deals 175 damage and stuns the target for 3 seconds." },
+            { "level": 2, "manaCost": 100, "cooldown": 9, "description": "Deals 275 damage and stuns the target for 4 seconds." },
+            { "level": 3, "manaCost": 125, "cooldown": 9, "description": "Deals 375 damage and stuns the target for 5 seconds." }
+          ]
+        },
+        {
+          "key": "thunder_clap",
+          "name": "Thunder Clap",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 90, "cooldown": 8, "description": "Slams the ground dealing 60 damage and slowing nearby enemies by 50% for 4 seconds." },
+            { "level": 2, "manaCost": 110, "cooldown": 8, "description": "Deals 100 damage and slows nearby enemies by 50% for 5 seconds." },
+            { "level": 3, "manaCost": 130, "cooldown": 8, "description": "Deals 140 damage and slows nearby enemies by 50% for 6 seconds." }
+          ]
+        },
+        {
+          "key": "bash",
+          "name": "Bash",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 0, "cooldown": 0, "description": "Passive. 15% chance to bash an enemy for bonus 25 damage and stun for 1 second." },
+            { "level": 2, "manaCost": 0, "cooldown": 0, "description": "Passive. 20% chance to bash for bonus 50 damage and stun for 1 second." },
+            { "level": 3, "manaCost": 0, "cooldown": 0, "description": "Passive. 25% chance to bash for bonus 75 damage and stun for 1 second." }
+          ]
+        },
+        {
+          "key": "avatar",
+          "name": "Avatar",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 150, "cooldown": 180, "description": "Transforms the Mountain King into an Avatar: +500 HP, +10 damage, +3 armor, spell immunity for 20 seconds." }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "blood_mage",
+      "name": "Blood Mage",
+      "fourcc": null,
+      "primaryAttr": "int",
+      "baseStats": {
+        "hp": 500,
+        "mana": 315,
+        "hpRegen": 0.25,
+        "manaRegen": 1.0,
+        "armor": 1,
+        "armorType": "hero",
+        "attackType": "hero",
+        "dps": 27,
+        "str": 16,
+        "agi": 13,
+        "int": 21,
+        "strPerLevel": 1.5,
+        "agiPerLevel": 1.5,
+        "intPerLevel": 3.0,
+        "moveSpeed": 300
+      },
+      "abilities": [
+        {
+          "key": "flame_strike",
+          "name": "Flame Strike",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 135, "cooldown": 9, "description": "Conjures a pillar of fire dealing 90 DPS to ground units in an area for 3 seconds." },
+            { "level": 2, "manaCost": 160, "cooldown": 9, "description": "Pillar of fire deals 130 DPS for 3 seconds." },
+            { "level": 3, "manaCost": 185, "cooldown": 9, "description": "Pillar of fire deals 175 DPS for 3 seconds." }
+          ]
+        },
+        {
+          "key": "banish",
+          "name": "Banish",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 75, "cooldown": 8, "description": "Sends a unit to the Ethereal plane for 7 seconds: +66% magic damage taken, cannot attack." },
+            { "level": 2, "manaCost": 75, "cooldown": 8, "description": "Ethereal for 14 seconds." },
+            { "level": 3, "manaCost": 75, "cooldown": 8, "description": "Ethereal for 21 seconds." }
+          ]
+        },
+        {
+          "key": "siphon_mana",
+          "name": "Siphon Mana",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 0, "cooldown": 12, "description": "Drains mana from a target unit at 50 mana/sec for 8 seconds, transferring it to the caster." },
+            { "level": 2, "manaCost": 0, "cooldown": 12, "description": "Drains mana at 75 mana/sec for 8 seconds." },
+            { "level": 3, "manaCost": 0, "cooldown": 12, "description": "Drains mana at 100 mana/sec for 8 seconds." }
+          ]
+        },
+        {
+          "key": "phoenix",
+          "name": "Phoenix",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 300, "cooldown": 180, "description": "Summons a Phoenix that deals 75 DPS to enemies (splash); burns own HP at 40 HP/sec. Can re-hatch from egg." }
+          ]
+        }
+      ]
+    }
+  ],
+  "upgrades": [
+    {
+      "key": "iron_forged_swords",
+      "name": "Iron Forged Swords",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 75,  "lumber": 75,  "researchTime": 60, "effect": "+1 melee attack damage for Footmen and Knights" },
+        { "level": 2, "gold": 150, "lumber": 175, "researchTime": 75, "effect": "+2 melee attack damage for Footmen and Knights" },
+        { "level": 3, "gold": 225, "lumber": 275, "researchTime": 90, "effect": "+3 melee attack damage for Footmen and Knights" }
+      ]
+    },
+    {
+      "key": "studded_leather_armor",
+      "name": "Studded Leather Armor",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 75,  "lumber": 75,  "researchTime": 60, "effect": "+1 armor for ground melee units" },
+        { "level": 2, "gold": 150, "lumber": 175, "researchTime": 75, "effect": "+2 armor for ground melee units" },
+        { "level": 3, "gold": 225, "lumber": 275, "researchTime": 90, "effect": "+3 armor for ground melee units" }
+      ]
+    },
+    {
+      "key": "black_gunpowder",
+      "name": "Black Gunpowder",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 75,  "lumber": 75,  "researchTime": 60, "effect": "+1 ranged attack damage for Riflemen" },
+        { "level": 2, "gold": 150, "lumber": 175, "researchTime": 75, "effect": "+2 ranged attack damage for Riflemen" },
+        { "level": 3, "gold": 225, "lumber": 275, "researchTime": 90, "effect": "+3 ranged attack damage for Riflemen" }
+      ]
+    },
+    {
+      "key": "defend",
+      "name": "Defend",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 50, "lumber": 150, "researchTime": 45, "effect": "Enables Footman ability: reduces pierce damage taken by 50% at the cost of movement speed while active." }
+      ]
+    },
+    {
+      "key": "masonry",
+      "name": "Masonry",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 50,  "lumber": 75,  "researchTime": 60, "effect": "+10% HP and +1 armor for Human buildings" },
+        { "level": 2, "gold": 100, "lumber": 175, "researchTime": 75, "effect": "+20% HP and +2 armor for Human buildings" },
+        { "level": 3, "gold": 150, "lumber": 275, "researchTime": 90, "effect": "+30% HP and +3 armor for Human buildings" }
+      ]
+    },
+    {
+      "key": "improved_masonry",
+      "name": "Improved Masonry",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 100, "lumber": 150, "researchTime": 60, "effect": "Allows Farms to be upgraded into Improved Farms, increasing HP." }
+      ]
+    },
+    {
+      "key": "priest_adept_training",
+      "name": "Priest Adept Training",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 100, "lumber": 50,  "researchTime": 60, "effect": "Upgrades Priest to Adept level, unlocking Dispel Magic." },
+        { "level": 2, "gold": 100, "lumber": 150, "researchTime": 75, "effect": "Upgrades Priest to Master level, unlocking Inner Fire." }
+      ]
+    },
+    {
+      "key": "sorceress_adept_training",
+      "name": "Sorceress Adept Training",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 100, "lumber": 50,  "researchTime": 60, "effect": "Upgrades Sorceress to Adept level, unlocking Slow." },
+        { "level": 2, "gold": 100, "lumber": 150, "researchTime": 75, "effect": "Upgrades Sorceress to Master level, unlocking Invisibility." }
+      ]
+    },
+    {
+      "key": "magic_sentry",
+      "name": "Magic Sentry",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 50, "lumber": 50, "researchTime": 30, "effect": "Allows Priests to use Magic Sentry, revealing invisible units around them." }
+      ]
+    },
+    {
+      "key": "animal_war_training",
+      "name": "Animal War Training",
+      "fourcc": null,
+      "levels": [
+        { "level": 1, "gold": 100, "lumber": 75, "researchTime": 45, "effect": "Increases Gryphon Rider HP by 100 and adds a lightning attack that hits a second target." }
+      ]
+    }
+  ]
 }

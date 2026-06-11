@@ -221,7 +221,9 @@
       "buildTime": 60,
       "provides": [
         { "type": "hero", "key": "blademaster" },
-        { "type": "hero", "key": "shadow_hunter" }
+        { "type": "hero", "key": "shadow_hunter" },
+        { "type": "hero", "key": "far_seer" },
+        { "type": "hero", "key": "tauren_chieftain" }
       ]
     },
     {
@@ -331,6 +333,132 @@
     }
   ],
   "heroes": [
+    {
+      "key": "far_seer",
+      "name": "Far Seer",
+      "fourcc": "Ofar",
+      "primaryAttr": "int",
+      "baseStats": {
+        "hp": 530,
+        "mana": 390,
+        "hpRegen": 0.25,
+        "manaRegen": 1.0,
+        "armor": 1,
+        "armorType": "hero",
+        "attackType": "hero",
+        "dps": 27,
+        "str": 18,
+        "agi": 16,
+        "int": 21,
+        "strPerLevel": 1.75,
+        "agiPerLevel": 1.25,
+        "intPerLevel": 2.5,
+        "moveSpeed": 300
+      },
+      "abilities": [
+        {
+          "key": "chain_lightning",
+          "name": "Chain Lightning",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 80, "cooldown": 8, "description": "Hurls a bolt of lightning that jumps to 4 targets, dealing 85 damage to the first and 33% less per jump." },
+            { "level": 2, "manaCost": 105, "cooldown": 8, "description": "Jumps to 6 targets, dealing 130 damage to the first." },
+            { "level": 3, "manaCost": 140, "cooldown": 8, "description": "Jumps to 8 targets, dealing 185 damage to the first." }
+          ]
+        },
+        {
+          "key": "far_sight",
+          "name": "Far Sight",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 50, "cooldown": 10, "description": "Reveals a target area for 30 seconds, giving vision and disabling invisibility for enemy units in the area." },
+            { "level": 2, "manaCost": 50, "cooldown": 10, "description": "Reveals a larger area for 45 seconds." },
+            { "level": 3, "manaCost": 50, "cooldown": 10, "description": "Reveals an even larger area for 60 seconds." }
+          ]
+        },
+        {
+          "key": "feral_spirit",
+          "name": "Feral Spirit",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 100, "cooldown": 35, "description": "Summons 2 Spirit Wolves for 60 seconds. Each wolf has 200 HP." },
+            { "level": 2, "manaCost": 100, "cooldown": 35, "description": "Summons 2 stronger Spirit Wolves (350 HP) with Invisibility." },
+            { "level": 3, "manaCost": 100, "cooldown": 35, "description": "Summons 2 powerful Spirit Wolves (500 HP) with Invisibility and Critical Strike." }
+          ]
+        },
+        {
+          "key": "earthquake",
+          "name": "Earthquake",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 150, "cooldown": 180, "description": "Summons an earthquake at target area for 25 seconds. Slows enemy land units by 25% and deals damage to buildings. 350 AoE." }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tauren_chieftain",
+      "name": "Tauren Chieftain",
+      "fourcc": "Otch",
+      "primaryAttr": "str",
+      "baseStats": {
+        "hp": 775,
+        "mana": 255,
+        "hpRegen": 0.25,
+        "manaRegen": 1.0,
+        "armor": 2,
+        "armorType": "hero",
+        "attackType": "hero",
+        "dps": 48,
+        "str": 26,
+        "agi": 14,
+        "int": 16,
+        "strPerLevel": 3.0,
+        "agiPerLevel": 1.0,
+        "intPerLevel": 1.75,
+        "moveSpeed": 300
+      },
+      "abilities": [
+        {
+          "key": "shockwave",
+          "name": "Shockwave",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 90, "cooldown": 8, "description": "Sends a wave of force in the target direction dealing 100 damage to land units in a line." },
+            { "level": 2, "manaCost": 115, "cooldown": 8, "description": "Deals 175 damage in a line." },
+            { "level": 3, "manaCost": 140, "cooldown": 8, "description": "Deals 250 damage in a line." }
+          ]
+        },
+        {
+          "key": "war_stomp",
+          "name": "War Stomp",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 80, "cooldown": 8, "description": "Slams the ground stunning nearby enemy land units for 2 seconds and dealing 25 damage. 25 AoE." },
+            { "level": 2, "manaCost": 80, "cooldown": 8, "description": "Stuns for 3 seconds, dealing 50 damage. 35 AoE." },
+            { "level": 3, "manaCost": 80, "cooldown": 8, "description": "Stuns for 4 seconds, dealing 75 damage. 50 AoE." }
+          ]
+        },
+        {
+          "key": "endurance_aura",
+          "name": "Endurance Aura",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 0, "cooldown": 0, "description": "Passive aura. Increases nearby friendly units' movement speed by 10% and attack rate by 10%." },
+            { "level": 2, "manaCost": 0, "cooldown": 0, "description": "Increases movement speed by 15% and attack rate by 15%." },
+            { "level": 3, "manaCost": 0, "cooldown": 0, "description": "Increases movement speed by 20% and attack rate by 20%." }
+          ]
+        },
+        {
+          "key": "reincarnation",
+          "name": "Reincarnation",
+          "fourcc": null,
+          "levels": [
+            { "level": 1, "manaCost": 0, "cooldown": 240, "description": "Passive. When the Tauren Chieftain dies, he automatically restores to life with full HP and mana after a brief delay." }
+          ]
+        }
+      ]
+    },
     {
       "key": "blademaster",
       "name": "Blademaster",

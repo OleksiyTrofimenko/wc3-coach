@@ -33,6 +33,49 @@ async function readJson<T>(relPath: string): Promise<T> {
   return JSON.parse(raw) as T;
 }
 
+/**
+ * Throw if any ontology key (within units/buildings/heroes/upgrades, or hero
+ * ability keys) appears in more than one race seed. The DB dedups on key alone,
+ * so duplicates would cause silent cross-race overwrites.
+ */
+function assertGloballyUniqueKeys(seeds: RaceSeedFile[]): void {
+  const collisions: string[] = [];
+  for (const cat of ["units", "buildings", "heroes", "upgrades"] as const) {
+    const seen = new Map<string, string>(); // key -> first race that used it
+    for (const seed of seeds) {
+      for (const item of seed[cat]) {
+        const prev = seen.get(item.key);
+        if (prev && prev !== seed.race.key) {
+          collisions.push(`${cat}: "${item.key}" in both "${prev}" and "${seed.race.key}"`);
+        } else {
+          seen.set(item.key, seed.race.key);
+        }
+      }
+    }
+  }
+  // Hero ability keys collide too (hero_abilities dedups on heroId+key, but keep
+  // ability keys distinct per hero — different heroes may legitimately reuse a
+  // generic ability key, so we only check within a single hero here).
+  for (const seed of seeds) {
+    for (const hero of seed.heroes) {
+      const seen = new Set<string>();
+      for (const ability of hero.abilities) {
+        if (seen.has(ability.key)) {
+          collisions.push(`abilities: "${ability.key}" duplicated within hero "${hero.key}" (${seed.race.key})`);
+        }
+        seen.add(ability.key);
+      }
+    }
+  }
+  if (collisions.length > 0) {
+    throw new Error(
+      "[db:seed] Ontology key collisions detected (keys must be globally unique " +
+        "across races — see assertGloballyUniqueKeys):\n  " +
+        collisions.join("\n  "),
+    );
+  }
+}
+
 async function main(): Promise<void> {
   const databaseUrl = process.env["DATABASE_URL"];
   if (!databaseUrl) {
@@ -68,6 +111,9 @@ async function main(): Promise<void> {
       "ontology.nightelf.json",
       "ontology.human.json",
       "ontology.undead.json",
+      // Neutral tavern heroes (Naga Sea Witch, Pandaren, Pit Lord, …) — pickable
+      // in 1v1 and faced across all Orc matchups, so they belong in the ontology.
+      "ontology.neutral.json",
     ];
 
     const seeds: RaceSeedFile[] = [];
@@ -75,6 +121,13 @@ async function main(): Promise<void> {
       const seed = await readJson<RaceSeedFile>(file);
       seeds.push(seed);
     }
+
+    // Guard: ontology keys must be globally unique across races. The upsert and
+    // the UNIQUE(key, patch_id) constraint both dedup on key alone (NOT race),
+    // so two races sharing a key would silently overwrite each other's row.
+    // Fail loudly here instead. (e.g. Orc + Human both naming a building
+    // "barracks" — Human's must be a distinct key like "human_barracks".)
+    assertGloballyUniqueKeys(seeds);
 
     const result = await importOntology(db, seeds);
     console.log(
