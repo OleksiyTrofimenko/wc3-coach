@@ -19,8 +19,9 @@ Prioritization endpoint (T3.3):
 Knowledge corpus ingestion (T5.1):
     POST /knowledge/ingest              → embed and store guide chunks (idempotent)
 
-TODO(T5.2): RAG retrieval
+RAG retrieval (T5.2):
     POST /rag/query                     → top-k relevant chunks for a game situation
+
 TODO(T5.3): LLM coach
     POST /coach/report/{replay_id}      → CoachReport (3–5 prioritised tips)
 
@@ -30,6 +31,7 @@ See docs/WC3_Coach_Design_Doc.md §3 (Python API) for the full design.
 from __future__ import annotations
 
 from fastapi import FastAPI, HTTPException, Query
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.benchmarks.db import (
     fetch_benchmarks,
@@ -41,6 +43,8 @@ from app.benchmarks.engine import run_benchmarks
 from app.benchmarks.models import BenchmarkResult
 from app.benchmarks.scoring import ScoredProblem, prioritize
 from app.rag.ingest import ingest_corpus
+from app.rag.models import RetrievedChunk
+from app.rag.retrieval import retrieve
 
 app = FastAPI(
     title="WC3 Coach API",
@@ -145,7 +149,9 @@ async def run_benchmarks_for_replay(replay_id: str) -> list[BenchmarkResult]:
 )
 async def get_top_problems(
     replay_id: str,
-    top_n: int = Query(default=5, ge=1, le=20, description="Number of top problems to return"),
+    top_n: int = Query(
+        default=5, ge=1, le=20, description="Number of top problems to return"
+    ),
     orc_slot: int | None = Query(default=None, description="Orc player slot (1-based)"),
 ) -> list[ScoredProblem]:
     engine = get_engine()
@@ -181,5 +187,63 @@ async def knowledge_ingest() -> dict[str, int]:
     """Run the corpus ingest pipeline and return a summary."""
     try:
         return await ingest_corpus()
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+# ---------------------------------------------------------------------------
+# RAG retrieval endpoint (T5.2)
+# ---------------------------------------------------------------------------
+
+
+class RagQueryRequest(BaseModel):
+    """Request body for POST /rag/query."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    query: str = Field(
+        description="Natural-language description of a game situation or problem.",
+        min_length=1,
+    )
+    top_k: int = Field(
+        default=5,
+        alias="topK",
+        ge=1,
+        le=20,
+        description="Number of chunks to return (1–20).",
+    )
+    matchup: str | None = Field(
+        default=None,
+        description=(
+            "Optional matchup filter (e.g. 'OvH', 'OvNE', 'OvUD'). "
+            "When set, restricts results to that matchup's guide chunks plus "
+            "matchup-agnostic reference docs (timings, scoring, glossary, ontology). "
+            "When omitted, all chunks are searched."
+        ),
+    )
+
+
+@app.post(
+    "/rag/query",
+    response_model=list[RetrievedChunk],
+    summary="Retrieve the top-k most relevant knowledge chunks for a query",
+    description=(
+        "Embeds *query* via Ollama bge-m3 and returns the top-k knowledge chunks "
+        "from the corpus by cosine similarity (pgvector HNSW index).  "
+        "When *matchup* is provided, results are restricted to that matchup's "
+        "guide plus general reference documents (timings, scoring, glossary, "
+        "ontology).  Each returned chunk includes the cosine similarity score "
+        "and the parent document title.  "
+        "Requires Ollama to be running with bge-m3 pulled."
+    ),
+)
+async def rag_query(body: RagQueryRequest) -> list[RetrievedChunk]:
+    """Embed the query and return top-k relevant knowledge chunks."""
+    try:
+        return await retrieve(
+            query=body.query,
+            top_k=body.top_k,
+            matchup=body.matchup,
+        )
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc

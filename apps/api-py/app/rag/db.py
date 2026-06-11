@@ -44,6 +44,8 @@ from pgvector.sqlalchemy import Vector
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncConnection, create_async_engine
 
+from app.rag.models import RetrievedChunk
+
 # ---------------------------------------------------------------------------
 # Engine factory — same pattern as benchmarks/db.py
 # ---------------------------------------------------------------------------
@@ -185,6 +187,79 @@ async def insert_chunks(
             for text, embedding in zip(chunk_texts, embeddings, strict=True)
         ],
     )
+
+
+async def search_chunks(
+    conn: AsyncConnection,
+    query_embedding: list[float],
+    top_k: int,
+    matchup: str | None,
+) -> list[RetrievedChunk]:
+    """
+    Return the *top_k* knowledge chunks nearest to *query_embedding* by cosine
+    distance, optionally filtered by matchup.
+
+    Parameters
+    ----------
+    conn:
+        Active async connection (read-only; no transaction needed).
+    query_embedding:
+        1024-dimensional float vector produced by embed_texts for the query.
+    top_k:
+        Maximum number of chunks to return (LIMIT clause).
+    matchup:
+        When provided (e.g. "OvH"), restrict to chunks whose parent doc has
+        ``matchup = :matchup`` OR ``matchup IS NULL`` (general reference docs
+        such as timings, scoring, glossary, ontology apply to all matchups).
+        When None, all chunks are searched regardless of matchup.
+
+    Returns
+    -------
+    list[RetrievedChunk]
+        Ordered ascending by cosine distance (i.e. descending by similarity),
+        length ≤ top_k.
+    """
+    # pgvector cosine distance column expression — returns a float between 0 and 2.
+    # We label it so we can reference it in ORDER BY without repeating the expr.
+    distance_col = _KNOWLEDGE_CHUNKS.c.embedding.cosine_distance(query_embedding)
+
+    stmt = (
+        sa.select(
+            _KNOWLEDGE_CHUNKS.c.chunk_text,
+            _KNOWLEDGE_DOCS.c.title.label("doc_title"),
+            _KNOWLEDGE_DOCS.c.matchup,
+            distance_col.label("distance"),
+        )
+        .select_from(
+            _KNOWLEDGE_CHUNKS.join(
+                _KNOWLEDGE_DOCS,
+                _KNOWLEDGE_CHUNKS.c.doc_id == _KNOWLEDGE_DOCS.c.id,
+            )
+        )
+        .order_by(sa.text("distance"))
+        .limit(top_k)
+    )
+
+    if matchup is not None:
+        stmt = stmt.where(
+            sa.or_(
+                _KNOWLEDGE_DOCS.c.matchup == matchup,
+                _KNOWLEDGE_DOCS.c.matchup.is_(None),
+            )
+        )
+
+    rows = (await conn.execute(stmt)).fetchall()
+
+    return [
+        RetrievedChunk(
+            chunkText=row.chunk_text,
+            docTitle=row.doc_title,
+            matchup=row.matchup,
+            distance=float(row.distance),
+            score=1.0 - float(row.distance),
+        )
+        for row in rows
+    ]
 
 
 async def count_docs(conn: AsyncConnection) -> int:
