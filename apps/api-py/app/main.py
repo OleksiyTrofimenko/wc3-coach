@@ -22,8 +22,9 @@ Knowledge corpus ingestion (T5.1):
 RAG retrieval (T5.2):
     POST /rag/query                     → top-k relevant chunks for a game situation
 
-TODO(T5.3): LLM coach
-    POST /coach/report/{replay_id}      → CoachReport (3–5 prioritised tips)
+LLM coach (T5.3):
+    POST /coach/{replay_id}/run         → generate CoachReport (3-5 prioritised tips)
+    GET  /coach/{replay_id}             → fetch existing CoachReport
 
 See docs/WC3_Coach_Design_Doc.md §3 (Python API) for the full design.
 """
@@ -42,6 +43,9 @@ from app.benchmarks.db import (
 from app.benchmarks.engine import run_benchmarks
 from app.benchmarks.models import BenchmarkResult
 from app.benchmarks.scoring import ScoredProblem, prioritize
+from app.coach.db import fetch_report
+from app.coach.models import CoachReport
+from app.coach.service import generate_coach_report
 from app.rag.ingest import ingest_corpus
 from app.rag.models import RetrievedChunk
 from app.rag.retrieval import retrieve
@@ -247,3 +251,82 @@ async def rag_query(body: RagQueryRequest) -> list[RetrievedChunk]:
         )
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+# ---------------------------------------------------------------------------
+# LLM coach endpoints (T5.3)
+# ---------------------------------------------------------------------------
+
+
+@app.post(
+    "/coach/{replay_id}/run",
+    response_model=CoachReport,
+    summary="Generate an LLM coach report for a replay",
+    description=(
+        "Runs the full LLM coach pipeline for the given replay:\n"
+        "1. Loads/computes benchmarks (self-contained — safe on fresh replays).\n"
+        "2. Prioritises top-N scored problems for the Orc player.\n"
+        "3. Retrieves relevant strategy chunks from the knowledge corpus (RAG).\n"
+        "4. Calls Ollama (qwen2.5:14b) to synthesise 3-5 actionable coaching tips.\n"
+        "5. Persists the report (upsert — idempotent, re-running overwrites).\n\n"
+        "Returns 404 if the replay does not exist in the DB.\n"
+        "Returns 422 if neither player is Orc (outside 'Orc sanctuary' scope).\n"
+        "Returns 503 if Ollama is unreachable or returns an error.\n\n"
+        "Requires Ollama running with qwen2.5:14b-instruct-q4_K_M AND bge-m3 pulled."
+    ),
+)
+async def run_coach(replay_id: str) -> CoachReport:
+    """Generate (or regenerate) the LLM coach report for a replay."""
+    try:
+        return await generate_coach_report(replay_id)
+    except ValueError as exc:
+        msg = str(exc)
+        if msg.startswith("orc_sanctuary:"):
+            raise HTTPException(
+                status_code=422,
+                detail=(
+                    "This replay does not contain an Orc player. "
+                    "The coach only analyses games where Orc is one of the players "
+                    "('Orc sanctuary' project scope)."
+                ),
+            ) from exc
+        raise HTTPException(status_code=404, detail=msg) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@app.get(
+    "/coach/{replay_id}",
+    response_model=CoachReport,
+    summary="Fetch the stored LLM coach report for a replay",
+    description=(
+        "Returns the coach report that was previously generated and stored for "
+        "the given replay_id.\n\n"
+        "Returns 404 with 'replay not found' if the replay_id does not exist.\n"
+        "Returns 404 with 'no coach report yet' if the replay exists but no report "
+        "has been generated (use POST /coach/{id}/run to generate one)."
+    ),
+)
+async def get_coach_report(replay_id: str) -> CoachReport:
+    """Fetch the stored coach report for a replay."""
+    engine = get_engine()
+    async with engine.connect() as conn:
+        # First verify replay exists (consistent 404 semantics)
+        try:
+            await load_replay_timeline(conn, replay_id)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=404, detail="replay not found"
+            ) from exc
+
+        report = await fetch_report(conn, replay_id)
+
+    if report is None:
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                f"No coach report yet for replay {replay_id!r}. "
+                "POST /coach/{replay_id}/run to generate one."
+            ),
+        )
+    return report
