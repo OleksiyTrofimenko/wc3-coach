@@ -161,6 +161,11 @@ export default function AnalyzerPage() {
         <div className="header-inner">
           <h1 className="site-title wc3-heading">WC3 Coach</h1>
           <span className="site-sub">Replay Analyzer — Orc Sanctuary</span>
+          <nav className="site-nav">
+            <a href="/" className="nav-link nav-link--active">Analyzer</a>
+            <span className="nav-sep">|</span>
+            <a href="/trainer" className="nav-link">APM Trainer</a>
+          </nav>
         </div>
       </header>
 
@@ -315,7 +320,7 @@ export default function AnalyzerPage() {
           margin: 0 auto;
           padding: 0.75rem 0;
           display: flex;
-          align-items: baseline;
+          align-items: center;
           gap: 0.75rem;
         }
         .site-title { font-size: 1.25rem; }
@@ -324,6 +329,22 @@ export default function AnalyzerPage() {
           color: var(--text-muted);
           letter-spacing: 0.04em;
         }
+        .site-nav {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-left: auto;
+        }
+        .nav-link {
+          font-size: 0.8rem;
+          color: var(--text-muted);
+          text-decoration: none;
+          letter-spacing: 0.04em;
+          transition: color 0.12s;
+        }
+        .nav-link:hover { color: var(--text-secondary); }
+        .nav-link--active { color: var(--gold); }
+        .nav-sep { color: var(--border-gold-bright); font-size: 0.7rem; }
 
         .page-body {
           max-width: 760px;
