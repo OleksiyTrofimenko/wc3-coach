@@ -225,6 +225,39 @@ _REFERENCE_TABLE: dict[tuple[str, str, str], ReferenceEntry] = {
     ),
 
     # -----------------------------------------------------------------------
+    # OvO — Orc mirror (both slots use the same reference row)
+    # matchup code is 'OvO' for both the analysed player and the opponent.
+    # -----------------------------------------------------------------------
+    ("OvO", "orc", "first_hero_timing"): ReferenceEntry(
+        expected=62_000, window_ms=15_000,
+        notes="Standard Altar 60 s; BM or FS opener; same reference for both mirror slots",
+    ),
+    ("OvO", "orc", "tier2_timing"): ReferenceEntry(
+        expected=130_000, window_ms=20_000,
+        notes="Stronghold starts ~2:10; identical to OvNE standard opener (same build)",
+    ),
+    ("OvO", "orc", "tier3_timing"): ReferenceEntry(
+        expected=420_000, window_ms=60_000,
+        notes="Fortress at ~7:00 in drawn-out OvO games; low-confidence timing",
+    ),
+    ("OvO", "orc", "expansion_timing"): ReferenceEntry(
+        expected=330_000, window_ms=60_000,
+        notes="BM-first expo ~5:30; FS-first variant can expo ~4:30 — 5:30 is the conservative benchmark",
+    ),
+    ("OvO", "orc", "hero_level3_timing"): ReferenceEntry(
+        expected=240_000, window_ms=30_000,
+        notes="BM or FS reaches level 3 by 4:00 with 2–3 creep camps",
+    ),
+    ("OvO", "orc", "hero_level5_timing"): ReferenceEntry(
+        expected=480_000, window_ms=60_000,
+        notes="Level 5 in sustained T2 engagement at ~8:00; low-confidence",
+    ),
+    ("OvO", "orc", "worker_count_10min"): ReferenceEntry(
+        expected=14, window_ms=2,
+        notes="Standard mid-game peon saturation; same for both mirror slots",
+    ),
+
+    # -----------------------------------------------------------------------
     # UDvO — Undead (analysed player is Undead vs Orc)
     # -----------------------------------------------------------------------
     ("UDvO", "undead", "first_hero_timing"): ReferenceEntry(
@@ -270,7 +303,9 @@ _MATCHUP_CODE_MAP: dict[tuple[str, str], str] = {
     ("human", "orc"): "HvO",
     ("orc", "undead"): "OvUD",
     ("undead", "orc"): "UDvO",
-    # Mirror pairs — expand as T3.2 grows the corpus
+    # Orc mirror — both slots resolve to the same matchup code
+    ("orc", "orc"): "OvO",
+    # Other mirror/cross pairs — expand as corpus grows
     ("nightelf", "human"): "NEvH",
     ("human", "nightelf"): "HvNE",
     ("nightelf", "undead"): "NEvUD",

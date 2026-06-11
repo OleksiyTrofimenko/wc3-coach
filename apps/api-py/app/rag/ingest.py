@@ -65,6 +65,12 @@ _CORPUS_FILES: list[dict[str, str | None]] = [
         "matchup": "OvUD",
         "source": "manual",
     },
+    {
+        "rel_path": "matchups/OvO.md",
+        "title": "OvO Matchup Guide",
+        "matchup": "OvO",
+        "source": "manual",
+    },
     # Reference / general docs (matchup=None)
     {
         "rel_path": "timings.md",
@@ -87,6 +93,12 @@ _CORPUS_FILES: list[dict[str, str | None]] = [
     {
         "rel_path": "ontology.md",
         "title": "WC3 Ontology Reference",
+        "matchup": None,
+        "source": "manual",
+    },
+    {
+        "rel_path": "hotkeys.md",
+        "title": "WC3 Hotkey Reference (Classic)",
         "matchup": None,
         "source": "manual",
     },

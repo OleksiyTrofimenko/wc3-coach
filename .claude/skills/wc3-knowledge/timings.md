@@ -209,6 +209,48 @@ Updated by Strategist in T3.2 (was bare table from T3.1; full build order added)
 
 ---
 
+## Matchup: OvO (Orc vs Orc mirror) — patch 2.0
+
+**Provenance:** High-ladder community knowledge, W3Champions mirror-game analyses.
+`verified: community`. Patch: 2.0 (Reforged 2.00, build 6117). Added by Strategist in T3.2.
+
+Both sides are Orc; the same reference row applies to both slots. The matchup code
+for the analysed player is 'OvO'; for the opponent it is also 'OvO' (mirror pair —
+only one code needed, unlike asymmetric matchups).
+
+### Standard Orc build order (OvO) — Blademaster opener
+
+```
+0:00   5 peons start mining
+0:15   peon → build Altar of Storms
+0:30   peon → build Barracks
+~0:45  resume 6th peon
+1:00   Barracks complete → Blademaster
+1:00   peon → build Orc Burrow (food)
+1:30   Blademaster out → scout / contest enemy BM / harass peons
+2:10   Stronghold upgrade begins [100 gold, 200 lumber, 60 s build]
+2:30   2nd Orc Burrow
+3:15   Stronghold complete → Raider / Shaman available; queue Raiders immediately
+3:30   2nd hero (Far Seer or Shadow Hunter)
+5:00–5:30  Expansion (after T2 spike; FS-first variant can go ~4:30)
+```
+
+### Key reference timings — Orc (OvO, patch 2.0)
+
+Both players use the same row; the mirror has symmetric benchmarks.
+
+| Metric | Reference | Window | Notes |
+|--------|-----------|--------|-------|
+| first_hero_timing | 62 000 ms (1:02) | ±15 000 ms | Standard Altar 60 s; BM or FS opener |
+| tier2_timing (stronghold) | 130 000 ms (2:10) | ±20 000 ms | Same as OvNE standard opener |
+| tier3_timing (fortress) | 420 000 ms (7:00) | ±60 000 ms | Late-game only; `verified: community, low-confidence` |
+| expansion_timing | 330 000 ms (5:30) | ±60 000 ms | BM-first expo; FS-first can go ~4:30 |
+| hero_level3_timing | 240 000 ms (4:00) | ±30 000 ms | BM or FS reaches level 3 by 4:00 with 2–3 camps |
+| hero_level5_timing | 480 000 ms (8:00) | ±60 000 ms | Level 5 in T2 engagement; `verified: community, low-confidence` |
+| worker_count_10min | 14 workers | ±2 | Standard mid-game peon saturation; same for both sides |
+
+---
+
 ## Worker production continuity — proxy metric
 
 Worker idle gaps are measured as the time between consecutive worker train
