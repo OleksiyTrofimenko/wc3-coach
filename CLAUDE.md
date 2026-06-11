@@ -104,8 +104,11 @@ A personal, locally-run platform for deliberate Warcraft III improvement:
 >   **Env quirk on this machine:** a native PostgreSQL 18 service owns host
 >   :5432, so the container is remapped to **:5433** via a gitignored
 >   `docker-compose.override.yml` + local `.env` (`DATABASE_URL=…localhost:5433`).
-> Next up: EPIC 4 (APM trainer) is the main remaining greenfield epic. Near-term
-> follow-up: render the `CoachReport.tips` in `apps/web` (in progress — Director).
+> - **T6 follow-up (2026-06-11):** the `CoachReport.tips` are rendered in
+>   `apps/web` (Mentor Review panel above the cold ProblemCards; async-loaded so
+>   the slow local-LLM call never blocks the benchmark display). The full
+>   upload → parse → benchmark → coach loop is now visible end-to-end.
+> Next up: EPIC 4 (APM trainer) is the main remaining greenfield epic.
 > Deaths/positions (T1.4, Observer API) remain a tracked follow-up, as does
 > promoting `ScoredProblem` into shared-types + the JSON-Schema→pydantic
 > generator (TODO T0.4).
