@@ -7,7 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A personal, locally-run platform for deliberate Warcraft III improvement:
 **APM Trainer + Replay Analyzer + AI Coach**.
 
-> **Current state:** EPIC 0 complete; EPIC 1 done (T1.1–T1.3); EPIC 2 done (T2.1–T2.3); EPIC 3 in progress (T3.1 done).
+> **Current state:** EPIC 0 complete; EPIC 1 done (T1.1–T1.3); EPIC 2 done
+> (T2.1–T2.3); EPIC 3 done (T3.1–T3.3); EPIC 5 done (T5.1–T5.3, RAG + LLM coach).
 > - T0.1: monorepo skeleton — `apps/`, `packages/`, `db/`, `turbo.json`,
 >   `pnpm-workspace.yaml`. `corepack pnpm install && corepack pnpm turbo build`
 >   works end-to-end.
@@ -75,6 +76,26 @@ A personal, locally-run platform for deliberate Warcraft III improvement:
 >   (Postgres+pgvector, Redis, Ollama) and ran a real `.w3g` (OvNE) through
 >   upload → parse/persist (api-node) → benchmarks+scoring → `GET /…/top`. Works;
 >   86 events + benchmarks for both slots persisted; Orc top-3 problems returned.
+> - **EPIC 5 — RAG + LLM coach (T5.1–T5.3), 2026-06-11:** the headline layer.
+>   T5.0: pulled `bge-m3` (1024-dim embeddings) + `qwen2.5:14b-instruct-q4_K_M`
+>   into Ollama. T5.1: `apps/api-py/app/rag/` — pure markdown chunker
+>   (heading-split + breadcrumb + long-section sub-split), async Ollama bge-m3
+>   embed client, and a SQLAlchemy/asyncpg DB layer storing the wc3-knowledge
+>   corpus into `knowledge_docs`+`knowledge_chunks` (pgvector `Vector(1024)`);
+>   idempotent upsert by `(title,source)`. `POST /knowledge/ingest` + `python -m
+>   app.rag.seed` (live: 7 docs / 78 chunks). T5.2: `search_chunks` pgvector
+>   cosine nearest-search (score = 1−distance) with a matchup filter that keeps
+>   the requested matchup + matchup-agnostic refs and excludes other matchups;
+>   `retrieve()` + `POST /rag/query`. T5.3: `apps/api-py/app/coach/` — scored
+>   problems → per-problem RAG retrieve+dedupe → pure prompt builder (design-doc
+>   §7.3) → Ollama qwen2.5 chat with **structured JSON output** → `CoachReport`
+>   (3–5 `CoachTip`s). New `coach_reports` table (**migration 0004**, one row per
+>   replay, branded to shared-types). `POST /coach/{id}/run` + `GET /coach/{id}`
+>   (404/422-"Orc sanctuary"/503). **Principle #4 hardened after live testing:**
+>   CONTEXT spells out the opponent race (model had said "Undead" in an OvNE
+>   game) and the system prompt bans cross-matchup material + raw-ms/restated
+>   timings. Live OvNE run returns clean, matchup-correct, M:SS-timed tips.
+>   212 pytest (pure chunker/prompt/tip tests; embeddings/LLM/DB are live-only).
 >   Caught + fixed 5 bugs the build/unit tests couldn't (4 commits): `db:migrate`
 >   `--loader`→`--import` (Node 24); api-node crash when `pino-pretty` absent;
 >   api-py queries used wrong column names (`duration`→`duration_ms`,
@@ -83,9 +104,11 @@ A personal, locally-run platform for deliberate Warcraft III improvement:
 >   **Env quirk on this machine:** a native PostgreSQL 18 service owns host
 >   :5432, so the container is remapped to **:5433** via a gitignored
 >   `docker-compose.override.yml` + local `.env` (`DATABASE_URL=…localhost:5433`).
-> Next up: EPIC 4 (APM trainer) or EPIC 5 (RAG + LLM coach over the scored
-> problems; Ollama container is up but models not pulled yet). Deaths/positions
-> (T1.4, Observer API) remain a tracked follow-up.
+> Next up: EPIC 4 (APM trainer) is the main remaining greenfield epic. Near-term
+> follow-up: render the `CoachReport.tips` in `apps/web` (in progress — Director).
+> Deaths/positions (T1.4, Observer API) remain a tracked follow-up, as does
+> promoting `ScoredProblem` into shared-types + the JSON-Schema→pydantic
+> generator (TODO T0.4).
 > See `docs/WC3_Coach_Design_Doc.md` and `docs/WC3_Coach_Project_Plan.md`
 > for full architecture and backlog.
 
