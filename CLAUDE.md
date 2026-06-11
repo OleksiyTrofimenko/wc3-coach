@@ -108,7 +108,26 @@ A personal, locally-run platform for deliberate Warcraft III improvement:
 >   `apps/web` (Mentor Review panel above the cold ProblemCards; async-loaded so
 >   the slow local-LLM call never blocks the benchmark display). The full
 >   upload → parse → benchmark → coach loop is now visible end-to-end.
-> Next up: EPIC 4 (APM trainer) is the main remaining greenfield epic.
+> - **EPIC 4 started — T4.1 drill engine core (2026-06-11):** `apps/web/src/
+>   trainer/engine/` — a render-agnostic drill engine (pure TS, **injected clock**
+>   so it's deterministic/testable; no React/DOM in core). Scenario state machine
+>   (idle→countdown→running→finished) + per-step recording → pure `scoring.ts`
+>   computes EPM/APM/accuracy/reaction/score → `DrillResult` (shared-types). First
+>   drill category: **hotkey/control-group** (`scenarios/hotkeys.ts`, 3 scenarios).
+>   New **`/trainer`** route (App Router) with global keydown capture (consumes
+>   matched keys to suppress browser Ctrl+1.. tab-switch), live combo/score/timer,
+>   results summary; nav links between Analyzer and Trainer. First test runner in
+>   `apps/web` (vitest, 30 unit tests on the pure engine/scoring). `apm_sessions`
+>   persistence is a localStorage stub (deferred to T4.6). **Hotkey values are NOT
+>   asserted inline** — they mirror the new `.claude/skills/wc3-knowledge/
+>   hotkeys.md` (single source of truth, confidence-flagged like the rest of the
+>   corpus). Strategist review corrected hero-jump F2→F1 + Headhunter T→H and
+>   flagged the Stronghold-upgrade S-vs-U ambiguity (that drill step is **omitted**
+>   pending in-game verification under T4.2, rather than drilling a guessed key —
+>   a wrong hotkey trains harmful muscle memory). Full `turbo build test` green
+>   (12/12), web typecheck clean.
+> Next up: **T4.2** (per-race hotkey drills — verify the flagged keys in-game first),
+> then T4.3 micro / T4.4 build-order drills, T4.5 juice (Director), T4.6 progress.
 > Deaths/positions (T1.4, Observer API) remain a tracked follow-up, as does
 > promoting `ScoredProblem` into shared-types + the JSON-Schema→pydantic
 > generator (TODO T0.4).
