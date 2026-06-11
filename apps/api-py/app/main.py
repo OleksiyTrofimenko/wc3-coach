@@ -16,8 +16,9 @@ Prioritization endpoint (T3.3):
     GET  /benchmarks/{replay_id}/top    → top-N scored problems for the Orc player
                                           ?top_n=5 (default)  ?orc_slot=<int> (optional)
 
-TODO(T5.1): Knowledge corpus ingestion
-    POST /knowledge/ingest              → embed and store guide chunks
+Knowledge corpus ingestion (T5.1):
+    POST /knowledge/ingest              → embed and store guide chunks (idempotent)
+
 TODO(T5.2): RAG retrieval
     POST /rag/query                     → top-k relevant chunks for a game situation
 TODO(T5.3): LLM coach
@@ -39,6 +40,7 @@ from app.benchmarks.db import (
 from app.benchmarks.engine import run_benchmarks
 from app.benchmarks.models import BenchmarkResult
 from app.benchmarks.scoring import ScoredProblem, prioritize
+from app.rag.ingest import ingest_corpus
 
 app = FastAPI(
     title="WC3 Coach API",
@@ -156,3 +158,28 @@ async def get_top_problems(
         results = await fetch_benchmarks(conn, replay_id)
 
     return prioritize(results, top_n=top_n, orc_slot=orc_slot)
+
+
+# ---------------------------------------------------------------------------
+# Knowledge corpus ingestion (T5.1)
+# ---------------------------------------------------------------------------
+
+
+@app.post(
+    "/knowledge/ingest",
+    summary="Embed and store the WC3 knowledge corpus",
+    description=(
+        "Chunks all guide documents under the wc3-knowledge corpus, embeds each "
+        "chunk via Ollama bge-m3, and stores the results in knowledge_docs + "
+        "knowledge_chunks (pgvector).  "
+        "Idempotent — re-running deletes and re-inserts existing docs by "
+        "(title, source) key, so no rows are duplicated.  "
+        "Requires Ollama to be running with bge-m3 pulled."
+    ),
+)
+async def knowledge_ingest() -> dict[str, int]:
+    """Run the corpus ingest pipeline and return a summary."""
+    try:
+        return await ingest_corpus()
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
