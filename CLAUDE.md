@@ -126,8 +126,28 @@ A personal, locally-run platform for deliberate Warcraft III improvement:
 >   pending in-game verification under T4.2, rather than drilling a guessed key —
 >   a wrong hotkey trains harmful muscle memory). Full `turbo build test` green
 >   (12/12), web typecheck clean.
+> - **Ontology expansion — all 4 races seeded (2026-06-11):** the Orc player faces
+>   any race, so OvNE/OvH/OvUD/OvO all need full opponent data. Filled the stub
+>   **Human** + **Undead** ontologies (units/buildings/heroes/upgrades), completed
+>   heroes for **Night Elf** (0→4), **Orc** (2→4), and **neutral tavern** heroes
+>   (1→8). Wired `ontology.neutral.json` into `db:seed` (was never loaded). Added
+>   the **OvO (Orc mirror)** matchup (`matchups/OvO.md` + timings.md block + 7
+>   `references.py` rows + `(orc,orc)→OvO` map). RAG re-seeded: **9 docs / 114
+>   chunks**, all four Orc matchups retrievable. **Data-integrity fix:** the seed
+>   upsert + `UNIQUE(key,patch_id)` dedup on key ALONE (not race), so Orc+Human
+>   both naming a building `barracks` silently overwrote each other → renamed
+>   Human's to `human_barracks` + added a fail-loud `assertGloballyUniqueKeys()`
+>   guard in `run.ts`. Live DB verified per-race (Orc 11u/12b/4h/7up, Human
+>   12/16/4/10, Undead 13/14/4/12, NE 11/12/4/6, neutral 8 heroes). All stats
+>   `verified:false` (community/Liquipedia, patch 2.0); CASC cross-check pending.
+>   212 pytest + `turbo build` green. **Env:** DB on **:5433**, DBeaver-connectable
+>   (host localhost, db/user/pass all `wc3coach`).
 > Next up: **T4.2** (per-race hotkey drills — verify the flagged keys in-game first),
 > then T4.3 micro / T4.4 build-order drills, T4.5 juice (Director), T4.6 progress.
+> Ontology follow-ups: expand the prose `wc3-knowledge/ontology.md` (still Orc/NE
+> only) so the LLM coach gets Human/Undead unit stats in RAG too; consider
+> race-scoped ontology keys `(race_id,key,patch_id)` if benchmarks ever consume
+> per-race lookups (current design assumes globally-unique keys, now guard-enforced).
 > Deaths/positions (T1.4, Observer API) remain a tracked follow-up, as does
 > promoting `ScoredProblem` into shared-types + the JSON-Schema→pydantic
 > generator (TODO T0.4).
