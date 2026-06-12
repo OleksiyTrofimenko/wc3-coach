@@ -96,7 +96,7 @@ class TestFindSupplyBlocks:
             _ev(1, 12_000, "train", "unit:grunt"),  # used 8→11 == cap → blocked
         ]
         pts = reconstruct_supply(evs, slot=1, game_duration_ms=600_000)
-        blocks = find_supply_blocks(pts)
+        blocks = find_supply_blocks(pts, 600_000)
         assert len(blocks) == 1
         assert blocks[0].start_ms == 12_000
         assert blocks[0].end_ms == 40_000
@@ -105,7 +105,27 @@ class TestFindSupplyBlocks:
     def test_no_block_when_under_cap(self) -> None:
         evs = [_ev(1, 10_000, "train", "unit:grunt")]  # used 8 < cap 11
         pts = reconstruct_supply(evs, slot=1, game_duration_ms=600_000)
-        assert find_supply_blocks(pts) == []
+        assert find_supply_blocks(pts, 600_000) == []
+
+    def test_trailing_block_closed_at_game_end(self) -> None:
+        # Capped at 12s and never resolved (no more burrows) → block runs to the
+        # game end (the worst case: stayed food-capped until losing).
+        evs = [
+            _ev(1, 10_000, "train", "unit:grunt"),  # used 5→8
+            _ev(1, 12_000, "train", "unit:grunt"),  # used 8→11 == cap → blocked
+        ]
+        pts = reconstruct_supply(evs, slot=1, game_duration_ms=300_000)
+        blocks = find_supply_blocks(pts, 300_000)
+        assert len(blocks) == 1
+        assert blocks[0].start_ms == 12_000
+        assert blocks[0].end_ms == 300_000
+
+    def test_expand_event_credits_main_hall_food(self) -> None:
+        # An `expand` event (any building key, even unresolved) must add +11 cap
+        # on completion — keyed off the event type, not the building key.
+        evs = [_ev(1, 100_000, "expand", "building:oexp")]  # unresolved FourCC
+        pts = reconstruct_supply(evs, slot=1, game_duration_ms=600_000)
+        assert pts[-1].cap == 11 + 11  # 100_000 + 100s completion
 
     def test_at_100_hard_cap_is_not_a_block(self) -> None:
         # Reach exactly 100 food via burrows + many units → cap == 100 is NOT a
@@ -119,7 +139,7 @@ class TestFindSupplyBlocks:
             evs.append(_ev(1, 50_000 + i * 100, "train", "unit:tauren"))  # 5+95=100
         pts = reconstruct_supply(evs, slot=1, game_duration_ms=600_000)
         # used hits 100 and cap is 100 → cap < 100 is False → no block flagged.
-        assert find_supply_blocks(pts) == []
+        assert find_supply_blocks(pts, 600_000) == []
 
 
 class TestSeverity:
@@ -150,4 +170,15 @@ class TestSupplyBlockMetric:
     def test_orc_no_block_is_info(self) -> None:
         r = supply_block_approx([], ORC, "rid", game_duration_ms=600_000)
         assert r.value == 0.0
+        assert r.severity == "info"
+
+    def test_unresolved_units_return_info_not_false_clean(self) -> None:
+        # If most train refs are unresolved (unknown food), the supply curve is
+        # unreliable → info ("can't assess"), NOT a falsely-clean 0/no-block.
+        evs = [
+            _ev(1, 10_000, "train", "unit:ogru"),  # unresolved FourCC, unknown food
+            _ev(1, 12_000, "train", "unit:ogru"),
+            _ev(1, 14_000, "train", "unit:ogru"),
+        ]
+        r = supply_block_approx(evs, ORC, "rid", game_duration_ms=600_000)
         assert r.severity == "info"

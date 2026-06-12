@@ -168,13 +168,17 @@ def reconstruct_supply(
                 deltas.append((e.t_ms, HERO_FOOD, 0))
 
         elif e.event_type in ("build", "expand") and kind == "building":
-            if key == _BURROW_KEY:
-                done = e.t_ms + _BURROW_BUILD_S * 1000
-                deltas.append((done, 0, BURROW_FOOD))
-            elif key == _GREAT_HALL_KEY:
-                # Second+ Great Hall = expansion → adds main-hall food on completion.
+            if e.event_type == "expand" or key == _GREAT_HALL_KEY:
+                # Expansion = a 2nd main hall → +main-hall food on completion.
+                # The parser tags expansion halls as `expand` REGARDLESS of FourCC
+                # resolution (oexp/ogre etc.), so we key off the event type, not
+                # the (often-unresolved) building key — otherwise the credit is
+                # silently lost and the sim over-reports a phantom block.
                 done = e.t_ms + _GREAT_HALL_BUILD_S * 1000
                 deltas.append((done, 0, MAIN_HALL_FOOD))
+            elif key == _BURROW_KEY:
+                done = e.t_ms + _BURROW_BUILD_S * 1000
+                deltas.append((done, 0, BURROW_FOOD))
 
     deltas.sort(key=lambda d: d[0])
 
@@ -203,14 +207,21 @@ class SupplyBlock:
         return self.end_ms - self.start_ms
 
 
-def find_supply_blocks(points: list[SupplyPoint]) -> list[SupplyBlock]:
+def find_supply_blocks(
+    points: list[SupplyPoint],
+    game_duration_ms: int,
+) -> list[SupplyBlock]:
     """
     Return intervals where used >= cap AND cap < 100 (capped by too few burrows,
     the coachable mistake — NOT the expected max-army 100 cap).
 
     A block runs from the moment `used` first reaches `cap` until the next point
     where either the cap rises above used (a burrow finished) or `used` is no
-    longer >= cap. The block's end is bounded by that resolving event's time.
+    longer >= cap. A block that is STILL OPEN at the last event is closed at
+    `game_duration_ms` — a player who stays food-capped until the game ends
+    (never builds the burrow) is the worst real case and must be counted, not
+    dropped. (Caveat: late blocks are the least reliable given the no-deaths
+    over-estimate of `used` — see module docstring.)
     """
     blocks: list[SupplyBlock] = []
     block_start: int | None = None
@@ -223,9 +234,10 @@ def find_supply_blocks(points: list[SupplyPoint]) -> list[SupplyBlock]:
             blocks.append(SupplyBlock(block_start, p.t_ms))
             block_start = None
 
-    # An unresolved block (still capped at the last point) is left OPEN — we do
-    # not invent an end time past the last event, so it is not counted as a
-    # measured block duration (avoids fabricating time the replay doesn't cover).
+    # Close a still-open trailing block at game end (capped until they lost).
+    if block_start is not None and game_duration_ms > block_start:
+        blocks.append(SupplyBlock(block_start, game_duration_ms))
+
     return blocks
 
 
@@ -257,6 +269,19 @@ def severity_for_supply_block(duration_ms: int) -> BenchmarkSeverity:
 # ---------------------------------------------------------------------------
 
 
+def _supply_info(replay_id: str, slot: int) -> BenchmarkResult:
+    """A no-op info result (non-Orc, or supply not assessable)."""
+    return BenchmarkResult(
+        replayId=replay_id,
+        slot=slot,
+        metric="supply_block_approx",
+        value=0.0,
+        expected=0.0,
+        delta=0.0,
+        severity="info",
+    )
+
+
 def supply_block_approx(
     events: list[TimelineEvent],
     player: PlayerInfo,
@@ -275,18 +300,29 @@ def supply_block_approx(
     severity : severity_for_supply_block(value).
     """
     if player.race_id != "race:orc":
-        return BenchmarkResult(
-            replayId=replay_id,
-            slot=player.slot,
-            metric="supply_block_approx",
-            value=0.0,
-            expected=0.0,
-            delta=0.0,
-            severity="info",
+        return _supply_info(replay_id, player.slot)
+
+    # Confidence guard: the supply curve is only meaningful if the player's
+    # trained units actually resolved to known food costs. If the refs are
+    # mostly unresolved (resolver runs non-fatally), `used` never rises and we
+    # would silently report a falsely-CLEAN 0 — so return info ("can't assess")
+    # instead of implying no block.
+    train_units = [
+        e for e in events
+        if e.slot == player.slot
+        and e.event_type == "train"
+        and e.entity_ref.startswith("unit:")
+    ]
+    if train_units:
+        known = sum(
+            1 for e in train_units
+            if e.entity_ref.split(":", 1)[1] in ORC_UNIT_FOOD
         )
+        if known / len(train_units) < 0.5:
+            return _supply_info(replay_id, player.slot)
 
     points = reconstruct_supply(events, player.slot, game_duration_ms)
-    blocks = find_supply_blocks(points)
+    blocks = find_supply_blocks(points, game_duration_ms)
     longest = max((b.duration_ms for b in blocks), default=0)
 
     return BenchmarkResult(

@@ -134,6 +134,13 @@ def _magnitude_factor(result: BenchmarkResult) -> float:
             return min(abs_delta / 3.0 * 1.0, 3.0)
         return 1.0  # info — unreachable due to early return in score_deviation
 
+    # supply_block_approx: value/delta is a block DURATION (ms), not a lateness
+    # delta — its severity tiers (10/25/45 s) are far below the generic
+    # 30k/60k/120k time thresholds, which would clamp every block to magnitude
+    # 1.0. Scale on its own 45 s reference so a 135 s block out-ranks a 45 s one.
+    if result.metric == "supply_block_approx":
+        return min(max(1.0, delta / 45_000), 3.0)
+
     # Time-based metrics (ms).  Only positive delta is penalised.
     if sev == "minor":
         return max(1.0, delta / 30_000)

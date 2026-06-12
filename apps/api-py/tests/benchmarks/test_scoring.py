@@ -430,9 +430,14 @@ class TestIntegration:
         # The fix: expansion is INFO for 1-base Orc → never surfaced, never #1.
         assert "expansion_timing" not in {p.metric for p in problems}
         assert problems[0].metric != "expansion_timing"
-        # The genuine top problem is a real economy failure (worker count/gap), critical.
+        # The genuine top problem is a real economy failure (the fixture trains
+        # units + a hero with no burrows → a supply block, plus a worker gap),
+        # not the (info-level) expansion.
         assert problems[0].metric in {
-            "worker_count_approx_10min", "worker_production_gap_approx", "tier2_timing"
+            "supply_block_approx",
+            "worker_count_approx_10min",
+            "worker_production_gap_approx",
+            "tier2_timing",
         }
         assert problems[0].severity == "critical"
 
