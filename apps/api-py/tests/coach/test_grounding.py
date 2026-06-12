@@ -159,6 +159,20 @@ class TestClockTimes:
         assert "7:15" in offenders
         assert "4:00" not in offenders
 
+    def test_fabricated_time_is_substring_of_real_time_is_flagged(self) -> None:
+        # The review finding: "2:00" must NOT be considered grounded just because
+        # "12:00" appears in the allowed text (substring false-negative).
+        tip = "You expanded at 2:00."
+        allowed = "Game duration 12:00. No expansion taken — info"
+        offenders = find_ungrounded_numbers(tip, allowed)
+        assert "2:00" in offenders
+
+    def test_real_time_with_digit_neighbour_still_grounded(self) -> None:
+        # A standalone "12:00" in the tip IS grounded by "12:00" in allowed.
+        tip = "By 12:00 you were still on one base."
+        allowed = "Game duration 12:00."
+        assert is_grounded(tip, allowed)
+
     def test_clock_time_in_chunk_text_is_allowed(self) -> None:
         tip = "Expand around 5:30 in OvNE."
         # "5:30" appears in the RAG chunk
@@ -313,6 +327,16 @@ class TestCleanFallbackDetail:
         s = "No expansion taken — 1-base play (standard for Orc; only worth noting in very long games)"
         # '— 1-base' is not a severity word, so nothing is stripped.
         assert _clean_fallback_detail(s) == s
+
+    def test_does_not_truncate_descriptive_severity_word(self) -> None:
+        # Review finding: a severity word used descriptively mid-text (not as the
+        # trailing tag) must NOT trigger truncation.
+        s = "Hero never reached level 3 — major power-spike deficit"
+        assert _clean_fallback_detail(s) == s
+
+    def test_strips_only_trailing_severity_tag(self) -> None:
+        s = "First hero at 2:09, 67s late (expected 1:02) — major"
+        assert _clean_fallback_detail(s) == "First hero at 2:09, 67s late (expected 1:02)"
 
 
 # ---------------------------------------------------------------------------

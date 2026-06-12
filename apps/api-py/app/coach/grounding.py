@@ -137,6 +137,18 @@ _RESOURCE_RE = re.compile(
 )
 
 
+def _clock_token_grounded(token: str, norm_allowed: str) -> bool:
+    """
+    True if *token* (an "M:SS" clock time) appears in *norm_allowed* as a
+    standalone time, i.e. NOT immediately preceded or followed by a digit or
+    colon. This prevents a fabricated "2:00" from matching inside "12:00", or
+    "1:02" from matching inside "11:02" — the substring false-negative that let
+    hallucinated times slip past the guard.
+    """
+    pattern = r"(?<![\d:])" + re.escape(token) + r"(?![\d:])"
+    return re.search(pattern, norm_allowed) is not None
+
+
 def find_ungrounded_numbers(tip_text: str, allowed_text: str) -> list[str]:
     """
     Return the list of numeric expressions in *tip_text* that do NOT appear
@@ -163,12 +175,12 @@ def find_ungrounded_numbers(tip_text: str, allowed_text: str) -> list[str]:
     offenders: list[str] = []
 
     # ---- (a) Clock times ----
-    # Core = the full "M:SS" token; must be present verbatim in allowed text.
+    # Core = the full "M:SS" token; must appear as a STANDALONE time in allowed
+    # text — not as a substring of a longer time (so a fabricated "2:00" is NOT
+    # considered grounded just because "12:00" appears in the allowed text).
     for m in _CLOCK_TIME_RE.finditer(norm_tip):
         token = m.group(1)  # e.g. "7:15" already lowercased / normalised
-        if token not in norm_allowed:
-            # Find the original (un-normalised) surface form for reporting
-            # The normalisation of times is identity (digits and colons unchanged)
+        if not _clock_token_grounded(token, norm_allowed):
             offenders.append(token)
 
     # ---- (b) Duration phrases ----

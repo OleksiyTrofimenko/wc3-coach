@@ -57,7 +57,7 @@ from app.benchmarks.scoring import ScoredProblem, prioritize
 from app.coach.db import load_replay_meta, upsert_report
 from app.coach.grounding import find_ungrounded_numbers
 from app.coach.models import CoachReport, CoachTip
-from app.coach.prompt import build_messages
+from app.coach.prompt import _fmt_duration, build_messages
 from app.rag.models import RetrievedChunk
 from app.rag.ollama import CHAT_MODEL, chat
 from app.rag.retrieval import retrieve
@@ -312,8 +312,14 @@ def _parse_tips_from_llm(
 # "... 136s late (expected 4:30) — critical". This reads as alarmist jargon in a
 # user-facing tip (and contradicts win-framing), so we strip it when a summary is
 # used as a grounded fallback detail. The severity still drives priority order.
+# Matches ONLY a trailing "— <severity>" tag at the very end of a summary
+# (e.g. "...136s late (expected 4:30) — critical"). Anchored to end-of-string so
+# a severity word used descriptively mid-sentence ("— major power-spike deficit")
+# is NOT truncated. An optional "economic deficit"/"deficit" tail is tolerated
+# for any legacy summaries.
 _SEVERITY_TAIL_RE = re.compile(
-    r"\s*[—-]\s*(?:critical|major|minor|info)\b.*$", re.IGNORECASE
+    r"\s*[—-]\s*(?:critical|major|minor|info)(?:\s+(?:economic\s+)?deficit)?\s*$",
+    re.IGNORECASE,
 )
 
 
@@ -543,14 +549,19 @@ async def generate_coach_report(
 
     # Build the allowed_text for grounding validation (T5.4).
     # This is the union of every number the model is *permitted* to use:
-    # - Every scored-problem summary (template-generated, not LLM; contains all
-    #   the M:SS times, deltas, and counts the model should echo).
-    # - Every retrieved knowledge chunk (corpus text that may contain times and
-    #   stats the model is allowed to reference).
-    # Kept as plain concatenation so find_ungrounded_numbers can do a fast
-    # substring search without re-parsing structure.
-    allowed_text = "\n".join(p.summary for p in problems) + "\n" + "\n".join(
-        c.chunk_text for c in deduped_chunks
+    # - The CONTEXT facts the prompt also shows (matchup, map, and the game
+    #   Duration as M:SS — a legit tip may cite the game-end time, so it must be
+    #   grounded, not flagged as fabricated).
+    # - Every scored-problem summary (template-generated; contains all the M:SS
+    #   times, deltas, and counts the model should echo).
+    # - Every retrieved knowledge chunk (corpus text the model may reference).
+    context_facts = f"{matchup} {map_name} {_fmt_duration(game_duration_ms)}"
+    allowed_text = (
+        context_facts
+        + "\n"
+        + "\n".join(p.summary for p in problems)
+        + "\n"
+        + "\n".join(c.chunk_text for c in deduped_chunks)
     )
 
     # -------------------------------------------------------------------------
