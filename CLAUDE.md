@@ -190,8 +190,10 @@ A personal, locally-run platform for deliberate Warcraft III improvement:
 >   game) — entity/ability grounding is a possible future enhancement, not T5.4.
 > Next up: **T4.2** (per-race hotkey drills — verify the flagged keys in-game first),
 > then T4.3 micro / T4.4 build-order drills, T4.5 juice (Director), T4.6 progress.
-> Ontology follow-ups: expand the prose `wc3-knowledge/ontology.md` (still Orc/NE
-> only) so the LLM coach gets Human/Undead unit stats in RAG too; consider
+> Ontology follow-ups: ~~expand the prose `ontology.md` with Human/Undead~~ ✅ DONE
+> (2026-06-12, HEAD `f2ae255`): filled Human (12u/16b/4h+abilities/10up) + Undead
+> (13/14/4+abilities/12) prose tables mirroring the seed JSON exactly → RAG
+> 12 docs/165 chunks; OvH/OvUD coaching now has opponent-army data. Consider
 > race-scoped ontology keys `(race_id,key,patch_id)` if benchmarks ever consume
 > per-race lookups (current design assumes globally-unique keys, now guard-enforced).
 > Deaths/positions (T1.4, Observer API) remain a tracked follow-up, as does
