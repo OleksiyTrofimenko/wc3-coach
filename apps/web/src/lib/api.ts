@@ -9,6 +9,9 @@ import type {
   UploadResponse,
   ReplayResponse,
   ScoredProblem,
+  ReportSummary,
+  FeedbackRequest,
+  TipFeedback,
 } from "@/types/analyzer";
 
 /** Upload a .w3g file. Returns replayId + initial status. */
@@ -83,4 +86,71 @@ export async function runCoachReport(replayId: string): Promise<CoachReport> {
     throw new Error(`Coach report failed (${res.status}): ${text}`);
   }
   return res.json() as Promise<CoachReport>;
+}
+
+// ---------------------------------------------------------------------------
+// Coach history & feedback (T6 — Director: review/feedback UI)
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetch the analyzed-replay history.
+ * Returns ReportSummary[] newest-first from GET /coach.
+ */
+export async function getCoachHistory(): Promise<ReportSummary[]> {
+  const res = await fetch("/api/py/coach");
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`History fetch failed (${res.status}): ${text}`);
+  }
+  return res.json() as Promise<ReportSummary[]>;
+}
+
+/**
+ * Fetch the full CoachReport for a single replay.
+ * Returns null on 404 (report not yet generated).
+ */
+export async function getCoachReportById(
+  replayId: string
+): Promise<CoachReport | null> {
+  const res = await fetch(`/api/py/coach/${replayId}`);
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Coach report fetch failed (${res.status}): ${text}`);
+  }
+  return res.json() as Promise<CoachReport>;
+}
+
+/**
+ * Submit feedback for a single tip (or whole-report feedback when tipPriority is null).
+ * Returns the created TipFeedback row.
+ */
+export async function submitFeedback(
+  replayId: string,
+  body: FeedbackRequest
+): Promise<TipFeedback> {
+  const res = await fetch(`/api/py/coach/${replayId}/feedback`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Feedback submit failed (${res.status}): ${text}`);
+  }
+  return res.json() as Promise<TipFeedback>;
+}
+
+/**
+ * Fetch all feedback rows for a replay, newest-first.
+ */
+export async function getReplayFeedback(
+  replayId: string
+): Promise<TipFeedback[]> {
+  const res = await fetch(`/api/py/coach/${replayId}/feedback`);
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Feedback fetch failed (${res.status}): ${text}`);
+  }
+  return res.json() as Promise<TipFeedback[]>;
 }

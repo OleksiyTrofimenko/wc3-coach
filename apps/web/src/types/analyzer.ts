@@ -50,3 +50,62 @@ export type UploadResponse = {
   status: ReplayStatus;
   deduplicated: boolean;
 };
+
+// ---------------------------------------------------------------------------
+// Coach history & feedback (T6 — Director: review/feedback UI)
+// ---------------------------------------------------------------------------
+
+/**
+ * Summary row returned by GET /coach (history list).
+ * Matches the api-py ReportSummary schema exactly.
+ */
+export type ReportSummary = {
+  replayId: string;
+  matchup: string;
+  mapName: string;
+  result: "win" | "loss" | "unknown";
+  durationMs: number;
+  createdAt: string; // ISO 8601
+  tipCount: number;
+  feedbackCount: number;
+};
+
+/**
+ * Feedback verdict options for a single tip or whole-report feedback.
+ */
+export type FeedbackVerdict = "wrong" | "good" | "partly";
+
+/**
+ * Feedback category options.
+ */
+export type FeedbackCategory =
+  | "timing"
+  | "advice"
+  | "hero"
+  | "priority"
+  | "tone"
+  | "other";
+
+/**
+ * Request body for POST /coach/{replayId}/feedback.
+ */
+export type FeedbackRequest = {
+  tipPriority: number | null; // null = whole-report feedback
+  verdict: FeedbackVerdict;
+  category?: FeedbackCategory;
+  note?: string;
+};
+
+/**
+ * Response from POST /coach/{replayId}/feedback and rows in
+ * GET /coach/{replayId}/feedback.
+ */
+export type TipFeedback = {
+  id: string;
+  replayId: string;
+  tipPriority: number | null;
+  verdict: FeedbackVerdict;
+  category?: FeedbackCategory;
+  note?: string;
+  createdAt: string; // ISO 8601
+};

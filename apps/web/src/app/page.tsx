@@ -164,6 +164,8 @@ export default function AnalyzerPage() {
           <nav className="site-nav">
             <a href="/" className="nav-link nav-link--active">Analyzer</a>
             <span className="nav-sep">|</span>
+            <a href="/history" className="nav-link">History</a>
+            <span className="nav-sep">|</span>
             <a href="/trainer" className="nav-link">APM Trainer</a>
           </nav>
         </div>
