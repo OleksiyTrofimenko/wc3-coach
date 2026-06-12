@@ -50,7 +50,7 @@ from app.coach.grounding import (
     normalize_for_match,
 )
 from app.coach.models import CoachTip
-from app.coach.service import _ground_tips
+from app.coach.service import _clean_fallback_detail, _ground_tips
 
 
 # ---------------------------------------------------------------------------
@@ -281,6 +281,28 @@ class TestFalsePositiveGuard:
 
 
 # ---------------------------------------------------------------------------
+# _clean_fallback_detail
+# ---------------------------------------------------------------------------
+
+
+class TestCleanFallbackDetail:
+    def test_strips_critical_tail(self) -> None:
+        s = "Hero reached level 3 at 6:46, 136s late (expected 4:30) — critical"
+        assert _clean_fallback_detail(s) == (
+            "Hero reached level 3 at 6:46, 136s late (expected 4:30)"
+        )
+
+    def test_strips_major_with_extra_words(self) -> None:
+        s = "First hero at 2:09, 67s late (expected 1:02) — major"
+        assert _clean_fallback_detail(s).endswith("(expected 1:02)")
+
+    def test_leaves_neutral_summary_untouched(self) -> None:
+        s = "No expansion taken — 1-base play (standard for Orc; only worth noting in very long games)"
+        # '— 1-base' is not a severity word, so nothing is stripped.
+        assert _clean_fallback_detail(s) == s
+
+
+# ---------------------------------------------------------------------------
 # _ground_tips helper
 # ---------------------------------------------------------------------------
 
@@ -320,9 +342,8 @@ class TestGroundTips:
         ]
         result = _ground_tips(tips, self._problems(), self._allowed())
         assert len(result) == 1
-        assert result[0].detail == (
-            "No expansion taken (expected by 5:30) — critical economic deficit"
-        )
+        # Fallback detail = the summary with its '— <severity>' jargon tail stripped.
+        assert result[0].detail == "No expansion taken (expected by 5:30)"
         # Title was not ungrounded, so it is preserved
         assert result[0].title == "Take your expansion"
 
@@ -387,11 +408,9 @@ class TestGroundTips:
             )
         ]
         result = _ground_tips(tips, self._problems(), self._allowed())
-        # Both were bad → both replaced
+        # Both were bad → both replaced (detail = summary minus severity tail)
         assert result[0].title == "Expansion Timing"
-        assert result[0].detail == (
-            "No expansion taken (expected by 5:30) — critical economic deficit"
-        )
+        assert result[0].detail == "No expansion taken (expected by 5:30)"
 
     def test_second_tip_replacement_uses_correct_problem(self) -> None:
         tips = [
@@ -406,8 +425,8 @@ class TestGroundTips:
         ]
         result = _ground_tips(tips, self._problems(), self._allowed())
         assert result[0].detail == "No expansion taken (expected by 5:30)."
-        # second tip replaced with the tier2_timing summary
-        assert result[1].detail == "T2 (Stronghold) at 3:50, 110s late — major"
+        # second tip replaced with the tier2_timing summary (severity tail stripped)
+        assert result[1].detail == "T2 (Stronghold) at 3:50, 110s late"
 
     def test_empty_tips_returns_empty(self) -> None:
         assert _ground_tips([], self._problems(), self._allowed()) == []

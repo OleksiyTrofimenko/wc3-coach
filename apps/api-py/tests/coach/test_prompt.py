@@ -308,6 +308,24 @@ class TestReferenceMaterialSection:
 # ---------------------------------------------------------------------------
 
 
+class TestResultTone:
+    def test_win_gets_refinement_tone(self) -> None:
+        msgs = build_messages("OvH", "Map", "win", 720_000, [], [])
+        user = msgs[1]["content"]
+        assert "WON" in user
+        assert "refinement" in user.lower() or "tighten" in user.lower()
+
+    def test_loss_gets_direct_tone(self) -> None:
+        msgs = build_messages("OvH", "Map", "loss", 720_000, [], [])
+        user = msgs[1]["content"]
+        assert "LOST" in user
+
+    def test_unknown_result_no_tone_note(self) -> None:
+        msgs = build_messages("OvH", "Map", "unknown", 720_000, [], [])
+        user = msgs[1]["content"]
+        assert "OUTCOME NOTE" not in user
+
+
 class TestHeroesContext:
     def test_heroes_rendered_in_context(self) -> None:
         msgs = build_messages(

@@ -41,6 +41,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from typing import Any
 
 from app.benchmarks.db import (
@@ -307,6 +308,20 @@ def _parse_tips_from_llm(
 # ---------------------------------------------------------------------------
 
 
+# Trailing internal severity jargon on a ScoredProblem.summary, e.g.
+# "... 136s late (expected 4:30) — critical". This reads as alarmist jargon in a
+# user-facing tip (and contradicts win-framing), so we strip it when a summary is
+# used as a grounded fallback detail. The severity still drives priority order.
+_SEVERITY_TAIL_RE = re.compile(
+    r"\s*[—-]\s*(?:critical|major|minor|info)\b.*$", re.IGNORECASE
+)
+
+
+def _clean_fallback_detail(summary: str) -> str:
+    """Strip the trailing '— <severity> ...' jargon from a fallback detail."""
+    return _SEVERITY_TAIL_RE.sub("", summary).rstrip()
+
+
 def _ground_tips(
     tips: list[CoachTip],
     problems: list[ScoredProblem],
@@ -373,7 +388,7 @@ def _ground_tips(
                         if not title_offenders
                         else prob.metric.replace("_", " ").title()
                     ),
-                    detail=prob.summary,
+                    detail=_clean_fallback_detail(prob.summary),
                     tMs=tip.t_ms,
                     relatedBenchmarks=tip.related_benchmarks,
                 )

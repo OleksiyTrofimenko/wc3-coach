@@ -90,6 +90,27 @@ Each tip must be specific, timed where the data supports it, and grounded in \
 the provided material — no invented numbers or generic advice."""
 
 
+# Result-aware tone. The benchmark FACTS are objective (a deviation is a real
+# deviation), but the COACHING FRAME must fit the outcome: you do not tell a
+# player who WON that their biggest mistake was 'critical'. Orc especially wins
+# many games on a 1-base aggressive style where macro 'deviations' are expected.
+_TONE_BY_RESULT: dict[str, str] = {
+    "win": (
+        "OUTCOME NOTE: the player WON this game. Open by briefly acknowledging "
+        "the win, then frame every tip as a refinement to tighten up — what to "
+        "improve to win more consistently. Do NOT use alarmist words like "
+        "'critical', 'severe', or 'cost you the game'; these were not losing "
+        "mistakes. A late macro timing on a winning aggressive game is a "
+        "polish point, not a failure."
+    ),
+    "loss": (
+        "OUTCOME NOTE: the player LOST this game. Be direct and specific about "
+        "which deviations most plausibly contributed to the loss, and what to "
+        "do differently — but stay grounded in the FACTS, never speculate."
+    ),
+}
+
+
 # Maps the analysed-race-first matchup code to the opponent's full race name.
 # The LLM does not reliably know that "OvNE" means the opponent is Night Elf,
 # so we spell it out in CONTEXT to stop it guessing the wrong opponent race.
@@ -195,6 +216,8 @@ def build_messages(
     heroes_str = (
         ", ".join(heroes) if heroes else "(not detected — name no specific hero)"
     )
+    tone = _TONE_BY_RESULT.get(result, "")
+    _tone_line = f"{tone}\n\n" if tone else ""
 
     user_content = f"""\
 CONTEXT:
@@ -210,7 +233,7 @@ FACTS (computed deterministically from the replay — treat these as ground trut
 REFERENCE MATERIAL (from WC3 strategy corpus — context and explanation):
 {_fmt_chunks(chunks)}
 
-{_TASK_SECTION}"""
+{_tone_line}{_TASK_SECTION}"""
 
     return [
         {"role": "system", "content": _SYSTEM_PROMPT},
