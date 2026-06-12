@@ -54,6 +54,7 @@ from app.benchmarks.models import PlayerInfo
 from app.benchmarks.references import infer_matchup_code
 from app.benchmarks.scoring import ScoredProblem, prioritize
 from app.coach.db import load_replay_meta, upsert_report
+from app.coach.grounding import find_ungrounded_numbers
 from app.coach.models import CoachReport, CoachTip
 from app.coach.prompt import build_messages
 from app.rag.models import RetrievedChunk
@@ -277,6 +278,94 @@ def _parse_tips_from_llm(
 
 
 # ---------------------------------------------------------------------------
+# Grounding post-processor (T5.4)
+# ---------------------------------------------------------------------------
+
+
+def _ground_tips(
+    tips: list[CoachTip],
+    problems: list[ScoredProblem],
+    allowed_text: str,
+) -> list[CoachTip]:
+    """
+    Replace any tip whose title or detail contains fabricated numbers with a
+    fully grounded fallback derived from the corresponding ScoredProblem.
+
+    Rules
+    -----
+    - For each tip at 1-based rank i, the corresponding problem is
+      problems[i-1] (same mapping as _parse_tips_from_llm).
+    - Both tip.title and tip.detail are checked independently.
+    - If either is ungrounded:
+        - detail  → replaced with prob.summary
+        - title   → replaced with metric name formatted as Title Case
+                    (e.g. "expansion_timing" → "Expansion Timing")
+    - tMs, priority, and relatedBenchmarks are NEVER touched — they are set
+      deterministically by _parse_tips_from_llm, not by the LLM.
+    - If there is no corresponding problem (tip beyond the scored problems
+      list) the tip is left as-is; we cannot ground it but at least we don't
+      crash.
+
+    Logging
+    -------
+    A WARNING is emitted for each replaced tip, identifying the metric and the
+    offending numeric expressions.  A summary line logs the aggregate counts.
+    """
+    replaced = 0
+    grounded: list[CoachTip] = []
+
+    for tip in tips:
+        rank = tip.priority  # 1-based
+        prob_idx = rank - 1
+
+        if prob_idx >= len(problems):
+            # No matching problem — cannot ground; pass through unchanged
+            grounded.append(tip)
+            continue
+
+        prob = problems[prob_idx]
+
+        # Check detail first (longer text; most fabrications live here)
+        detail_offenders = find_ungrounded_numbers(tip.detail, allowed_text)
+        # Check title (shorter; catches things like "Expand by 7:15")
+        title_offenders = find_ungrounded_numbers(tip.title, allowed_text)
+
+        if detail_offenders or title_offenders:
+            all_offenders = detail_offenders + title_offenders
+            logger.warning(
+                "Coach grounding: replacing tip rank=%d metric=%r — "
+                "fabricated numbers detected: %s",
+                rank,
+                prob.metric,
+                all_offenders,
+            )
+            replaced += 1
+            grounded.append(
+                CoachTip(
+                    priority=tip.priority,
+                    title=(
+                        tip.title
+                        if not title_offenders
+                        else prob.metric.replace("_", " ").title()
+                    ),
+                    detail=prob.summary,
+                    tMs=tip.t_ms,
+                    relatedBenchmarks=tip.related_benchmarks,
+                )
+            )
+        else:
+            grounded.append(tip)
+
+    logger.info(
+        "Coach grounding: %d/%d tips checked, %d replaced",
+        len(tips),
+        len(tips),
+        replaced,
+    )
+    return grounded
+
+
+# ---------------------------------------------------------------------------
 # Main entry point
 # ---------------------------------------------------------------------------
 
@@ -412,6 +501,18 @@ async def generate_coach_report(
         len(all_chunks), len(deduped_chunks), replay_id,
     )
 
+    # Build the allowed_text for grounding validation (T5.4).
+    # This is the union of every number the model is *permitted* to use:
+    # - Every scored-problem summary (template-generated, not LLM; contains all
+    #   the M:SS times, deltas, and counts the model should echo).
+    # - Every retrieved knowledge chunk (corpus text that may contain times and
+    #   stats the model is allowed to reference).
+    # Kept as plain concatenation so find_ungrounded_numbers can do a fast
+    # substring search without re-parsing structure.
+    allowed_text = "\n".join(p.summary for p in problems) + "\n" + "\n".join(
+        c.chunk_text for c in deduped_chunks
+    )
+
     # -------------------------------------------------------------------------
     # Step 6: Build prompt → LLM chat
     # -------------------------------------------------------------------------
@@ -432,6 +533,10 @@ async def generate_coach_report(
     # Step 7: Post-process tips
     # -------------------------------------------------------------------------
     tips = _parse_tips_from_llm(raw_response, problems)
+
+    # T5.4: Grounding validation — strip any LLM-fabricated numbers by
+    # replacing offending tips with their deterministic fallback summaries.
+    tips = _ground_tips(tips, problems, allowed_text)
 
     # Safety: ensure 3 tips minimum (pad with a generic-but-grounded tip if
     # the model underdelivered — this is a defence-in-depth fallback only)

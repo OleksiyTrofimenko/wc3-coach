@@ -64,6 +64,10 @@ never name a different opponent race than the one in CONTEXT.
 7. Express every game time as M:SS (for example 5:30), exactly as written in \
 the FACTS. NEVER write times in milliseconds or raw seconds, and never restate \
 a timing value differently from how it appears in the FACTS.
+8. If a FACT states that something did NOT happen (e.g. "No expansion taken", \
+"never started", "never reached level 3", "no hero produced"), do NOT invent a \
+time or value for it — refer to it as not having happened. Never state a \
+timestamp for an event the FACTS say is absent.
 
 Your task is to output 3-5 prioritised, specific, actionable coaching tips, \
 most important first.
