@@ -83,3 +83,51 @@ class CoachReport(BaseModel):
     result: Literal["win", "loss", "unknown"] = Field(alias="result")
     duration_ms: int = Field(alias="durationMs")
     tips: list[CoachTip] = Field(alias="tips")
+
+
+Verdict = Literal["wrong", "good", "partly"]
+FeedbackCategory = Literal["timing", "advice", "hero", "priority", "tone", "other"]
+
+
+class TipFeedbackIn(BaseModel):
+    """Request body for submitting feedback on a coach tip (or whole report)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    tip_priority: int | None = Field(
+        default=None,
+        alias="tipPriority",
+        description="1-based CoachTip.priority this targets; null = whole report.",
+    )
+    verdict: Verdict = Field(alias="verdict", description="wrong | good | partly")
+    category: FeedbackCategory | None = Field(
+        default=None,
+        alias="category",
+        description="Optional dimension: timing|advice|hero|priority|tone|other.",
+    )
+    note: str | None = Field(
+        default=None, alias="note", description="Free-text explanation."
+    )
+
+
+class TipFeedback(TipFeedbackIn):
+    """A stored feedback row (request fields + id, replayId, createdAt)."""
+
+    id: str = Field(alias="id")
+    replay_id: str = Field(alias="replayId")
+    created_at: str = Field(alias="createdAt")
+
+
+class ReportSummary(BaseModel):
+    """One row in the analyzed-replay history list."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    replay_id: str = Field(alias="replayId")
+    matchup: str = Field(alias="matchup")
+    map_name: str = Field(alias="mapName")
+    result: Literal["win", "loss", "unknown"] = Field(alias="result")
+    duration_ms: int = Field(alias="durationMs")
+    created_at: str = Field(alias="createdAt")
+    tip_count: int = Field(alias="tipCount")
+    feedback_count: int = Field(alias="feedbackCount")

@@ -78,6 +78,18 @@ _COACH_REPORTS = sa.table(
     sa.column("duration_ms", sa.Integer),
     sa.column("tips", sa.JSON),
     sa.column("model", sa.Text),
+    sa.column("created_at", sa.DateTime(timezone=True)),
+)
+
+_TIP_FEEDBACK = sa.table(
+    "tip_feedback",
+    sa.column("id", UUID(as_uuid=False)),
+    sa.column("replay_id", UUID(as_uuid=False)),
+    sa.column("tip_priority", sa.Integer),
+    sa.column("verdict", sa.Text),
+    sa.column("category", sa.Text),
+    sa.column("note", sa.Text),
+    sa.column("created_at", sa.DateTime(timezone=True)),
 )
 
 # ---------------------------------------------------------------------------
@@ -278,3 +290,135 @@ async def fetch_report(
         durationMs=row.duration_ms,
         tips=_tips_from_jsonb(row.tips),
     )
+
+
+# ---------------------------------------------------------------------------
+# Review / feedback layer (replay history + tip feedback)
+# ---------------------------------------------------------------------------
+
+
+async def list_reports(conn: AsyncConnection) -> list[dict[str, Any]]:
+    """
+    Return all coach reports as summary rows for the analyzed-replay history,
+    newest first. Each row carries tip_count and feedback_count so the UI can
+    show "3 tips · 2 flags" without a second query.
+    """
+    fb_count = (
+        sa.select(
+            _TIP_FEEDBACK.c.replay_id,
+            sa.func.count().label("feedback_count"),
+        )
+        .group_by(_TIP_FEEDBACK.c.replay_id)
+        .subquery()
+    )
+    rows = (
+        await conn.execute(
+            sa.select(
+                _COACH_REPORTS.c.replay_id,
+                _COACH_REPORTS.c.matchup,
+                _COACH_REPORTS.c.map_name,
+                _COACH_REPORTS.c.result,
+                _COACH_REPORTS.c.duration_ms,
+                _COACH_REPORTS.c.created_at,
+                _COACH_REPORTS.c.tips,
+                sa.func.coalesce(fb_count.c.feedback_count, 0).label(
+                    "feedback_count"
+                ),
+            )
+            .select_from(
+                _COACH_REPORTS.outerjoin(
+                    fb_count, _COACH_REPORTS.c.replay_id == fb_count.c.replay_id
+                )
+            )
+            .order_by(_COACH_REPORTS.c.created_at.desc())
+        )
+    ).fetchall()
+
+    result: list[dict[str, Any]] = []
+    for row in rows:
+        tips = row.tips if isinstance(row.tips, list) else json.loads(row.tips or "[]")
+        result.append(
+            {
+                "replayId": str(row.replay_id),
+                "matchup": row.matchup,
+                "mapName": row.map_name,
+                "result": row.result,
+                "durationMs": row.duration_ms,
+                "createdAt": row.created_at.isoformat() if row.created_at else "",
+                "tipCount": len(tips),
+                "feedbackCount": int(row.feedback_count),
+            }
+        )
+    return result
+
+
+async def insert_feedback(
+    conn: AsyncConnection,
+    replay_id: str,
+    tip_priority: int | None,
+    verdict: str,
+    category: str | None,
+    note: str | None,
+) -> dict[str, Any]:
+    """Insert one feedback row and return it (camelCase dict)."""
+    row = (
+        await conn.execute(
+            sa.insert(_TIP_FEEDBACK)
+            .values(
+                replay_id=replay_id,
+                tip_priority=tip_priority,
+                verdict=verdict,
+                category=category,
+                note=note,
+            )
+            .returning(
+                _TIP_FEEDBACK.c.id,
+                _TIP_FEEDBACK.c.created_at,
+            )
+        )
+    ).fetchone()
+
+    assert row is not None  # INSERT ... RETURNING always yields a row
+    return {
+        "id": str(row.id),
+        "replayId": replay_id,
+        "tipPriority": tip_priority,
+        "verdict": verdict,
+        "category": category,
+        "note": note,
+        "createdAt": row.created_at.isoformat() if row.created_at else "",
+    }
+
+
+async def list_feedback(
+    conn: AsyncConnection,
+    replay_id: str,
+) -> list[dict[str, Any]]:
+    """Return all feedback rows for a replay, newest first (camelCase dicts)."""
+    rows = (
+        await conn.execute(
+            sa.select(
+                _TIP_FEEDBACK.c.id,
+                _TIP_FEEDBACK.c.tip_priority,
+                _TIP_FEEDBACK.c.verdict,
+                _TIP_FEEDBACK.c.category,
+                _TIP_FEEDBACK.c.note,
+                _TIP_FEEDBACK.c.created_at,
+            )
+            .where(_TIP_FEEDBACK.c.replay_id == replay_id)
+            .order_by(_TIP_FEEDBACK.c.created_at.desc())
+        )
+    ).fetchall()
+
+    return [
+        {
+            "id": str(row.id),
+            "replayId": replay_id,
+            "tipPriority": row.tip_priority,
+            "verdict": row.verdict,
+            "category": row.category,
+            "note": row.note,
+            "createdAt": row.created_at.isoformat() if row.created_at else "",
+        }
+        for row in rows
+    ]

@@ -893,6 +893,55 @@ export const coachReports = pgTable(
 export type CoachReportRow = typeof coachReports.$inferSelect;
 export type NewCoachReportRow = typeof coachReports.$inferInsert;
 
+// ---------------------------------------------------------------------------
+// tip_feedback
+// ---------------------------------------------------------------------------
+
+/**
+ * User feedback on coach output — the human-in-the-loop review signal.
+ *
+ * The user reviews a replay's CoachReport and flags what is wrong (or right),
+ * so calibration fixes are driven by real examples rather than guesswork (this
+ * is exactly how the Orc expansion mis-calibration was found). One replay can
+ * accumulate many feedback rows (one per flagged tip, plus whole-report notes),
+ * so this is NOT unique on replay_id.
+ *
+ * - tip_priority: which tip the feedback targets (1-based, matches
+ *   CoachTip.priority). NULL = feedback about the whole report.
+ * - verdict: 'wrong' | 'good' | 'partly' — the headline judgement.
+ * - category: optional dimension of the problem, e.g. 'timing', 'advice',
+ *   'hero', 'priority', 'tone', 'other'. Lets fixes map to a subsystem.
+ * - note: free-text explanation ("Orc never expands at 5:30").
+ *
+ * ON DELETE CASCADE: feedback is meaningless without its replay.
+ */
+export const tipFeedback = pgTable(
+  "tip_feedback",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    replayId: uuid("replay_id")
+      .notNull()
+      .references(() => replays.id, { onDelete: "cascade" }),
+    /** 1-based CoachTip.priority this targets; NULL = whole-report feedback. */
+    tipPriority: integer("tip_priority"),
+    /** Headline judgement: 'wrong' | 'good' | 'partly'. */
+    verdict: text("verdict").notNull(),
+    /** Optional problem dimension: timing | advice | hero | priority | tone | other. */
+    category: text("category"),
+    /** Free-text explanation from the user. */
+    note: text("note"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (table) => [index("tip_feedback_replay_idx").on(table.replayId)],
+);
+
+export type TipFeedbackRow = typeof tipFeedback.$inferSelect;
+export type NewTipFeedbackRow = typeof tipFeedback.$inferInsert;
+
 // ===========================================================================
 // KNOWLEDGE BASE (RAG) — design doc §5.4
 //

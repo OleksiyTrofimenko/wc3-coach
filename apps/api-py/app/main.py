@@ -43,8 +43,18 @@ from app.benchmarks.db import (
 from app.benchmarks.engine import run_benchmarks
 from app.benchmarks.models import BenchmarkResult
 from app.benchmarks.scoring import ScoredProblem, prioritize
-from app.coach.db import fetch_report
-from app.coach.models import CoachReport
+from app.coach.db import (
+    fetch_report,
+    insert_feedback,
+    list_feedback,
+    list_reports,
+)
+from app.coach.models import (
+    CoachReport,
+    ReportSummary,
+    TipFeedback,
+    TipFeedbackIn,
+)
 from app.coach.service import generate_coach_report
 from app.rag.ingest import ingest_corpus
 from app.rag.models import RetrievedChunk
@@ -330,3 +340,71 @@ async def get_coach_report(replay_id: str) -> CoachReport:
             ),
         )
     return report
+
+
+# ---------------------------------------------------------------------------
+# Review / feedback endpoints (human-in-the-loop calibration)
+# ---------------------------------------------------------------------------
+
+
+@app.get(
+    "/coach",
+    response_model=list[ReportSummary],
+    summary="List all analyzed replays (coach-report history)",
+    description=(
+        "Returns one summary row per stored coach report, newest first, with "
+        "tip and feedback counts — the data for the analyzed-replay history list."
+    ),
+)
+async def list_coach_reports() -> list[ReportSummary]:
+    """List all coach reports as history summaries."""
+    engine = get_engine()
+    async with engine.connect() as conn:
+        rows = await list_reports(conn)
+    return [ReportSummary.model_validate(r) for r in rows]
+
+
+@app.post(
+    "/coach/{replay_id}/feedback",
+    response_model=TipFeedback,
+    status_code=201,
+    summary="Submit feedback on a coach tip (or the whole report)",
+    description=(
+        "Records the user's verdict on a tip so calibration fixes are driven by "
+        "real review. tipPriority is the 1-based CoachTip.priority, or null for "
+        "whole-report feedback. Returns 404 if the replay does not exist."
+    ),
+)
+async def submit_feedback(replay_id: str, body: TipFeedbackIn) -> TipFeedback:
+    """Record one piece of feedback on a coach report."""
+    engine = get_engine()
+    async with engine.begin() as conn:
+        try:
+            await load_replay_timeline(conn, replay_id)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=404, detail="replay not found"
+            ) from exc
+        row = await insert_feedback(
+            conn,
+            replay_id=replay_id,
+            tip_priority=body.tip_priority,
+            verdict=body.verdict,
+            category=body.category,
+            note=body.note,
+        )
+    return TipFeedback.model_validate(row)
+
+
+@app.get(
+    "/coach/{replay_id}/feedback",
+    response_model=list[TipFeedback],
+    summary="List feedback recorded for a replay",
+    description="Returns all feedback rows for the replay, newest first.",
+)
+async def get_feedback(replay_id: str) -> list[TipFeedback]:
+    """List all feedback for a replay."""
+    engine = get_engine()
+    async with engine.connect() as conn:
+        rows = await list_feedback(conn, replay_id)
+    return [TipFeedback.model_validate(r) for r in rows]
