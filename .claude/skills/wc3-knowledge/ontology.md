@@ -208,15 +208,197 @@ are referenced directly by FourCC (e.g., `hero:Nfir`).
 
 ---
 
-### Human (`human`) — TODO
+### Human (`human`) — fully seeded (opponent data for OvH)
 
-Stub only. Human FourCCs are not required for the NvO fixture tests.
-Seed when a Human-race fixture is available.
+**Provenance:** `community/liquipedia seed`, `verified: false`, patch 2.0. FourCCs
+are `null` (no Human fixture run through the resolver yet — fill after CASC or a
+Human replay). Mirrors `packages/db/src/seed/ontology.human.json` exactly. Note
+the barracks key is `human_barracks` (renamed to avoid a global-key collision
+with Orc's `barracks`).
 
-### Undead (`undead`) — TODO
+**Units (12):**
 
-Stub only. Undead FourCCs not required for NvO fixture tests.
-Seed when an Undead-race fixture is available.
+| Key              | FourCC | HP   | Armor | ArmorType | AttackType | DPS | Gold | Lbr | Food | BuildTime |
+|------------------|--------|------|-------|-----------|------------|-----|------|-----|------|-----------|
+| peasant          | null   | 250  | 0     | unarmored | normal     | 11  | 75   | 0   | 1    | 15        |
+| footman          | null   | 420  | 2     | heavy     | normal     | 16  | 135  | 0   | 2    | 20        |
+| rifleman         | null   | 505  | 0     | medium    | pierce     | 21  | 205  | 30  | 3    | 28        |
+| knight           | null   | 825  | 5     | heavy     | normal     | 37  | 245  | 60  | 4    | 36        |
+| priest           | null   | 305  | 0     | unarmored | magic      | 13  | 135  | 10  | 2    | 22        |
+| sorceress        | null   | 275  | 0     | unarmored | magic      | 12  | 155  | 20  | 2    | 22        |
+| spell_breaker    | null   | 625  | 3     | heavy     | normal     | 25  | 215  | 30  | 3    | 30        |
+| mortar_team      | null   | 360  | 0     | unarmored | siege      | 28  | 180  | 70  | 3    | 30        |
+| flying_machine   | null   | 280  | 2     | medium    | pierce     | 17  | 135  | 20  | 2    | 22        |
+| gryphon_rider    | null   | 800  | 3     | heavy     | normal     | 44  | 280  | 70  | 5    | 40        |
+| dragonhawk_rider | null   | 575  | 1     | medium    | pierce     | 26  | 255  | 45  | 4    | 35        |
+| siege_engine     | null   | 525  | 5     | heavy     | siege      | 32  | 195  | 60  | 4    | 35        |
+
+**Buildings (16):**
+
+| Key             | FourCC | HP   | Gold | Lbr | BuildTime |
+|-----------------|--------|------|------|-----|-----------|
+| town_hall       | null   | 1800 | 385  | 185 | 100       |
+| keep            | null   | 2400 | 215  | 135 | 60        |
+| castle          | null   | 3000 | 215  | 200 | 75        |
+| altar_of_kings  | null   | 900  | 180  | 50  | 60        |
+| farm            | null   | 500  | 80   | 20  | 30        |
+| human_barracks  | null   | 1100 | 160  | 0   | 60        |
+| lumber_mill     | null   | 800  | 120  | 0   | 40        |
+| blacksmith      | null   | 1100 | 140  | 0   | 60        |
+| workshop        | null   | 1100 | 200  | 80  | 60        |
+| arcane_sanctum  | null   | 1100 | 150  | 100 | 60        |
+| gryphon_aviary  | null   | 1100 | 150  | 100 | 60        |
+| arcane_vault    | null   | 800  | 150  | 30  | 40        |
+| scout_tower     | null   | 200  | 30   | 20  | 15        |
+| guard_tower     | null   | 500  | 60   | 20  | 20        |
+| cannon_tower    | null   | 500  | 90   | 60  | 25        |
+| arcane_tower    | null   | 500  | 60   | 20  | 20        |
+
+Town Hall → Keep → Castle are the T1/T2/T3 tiers (the upgrade costs equal the
+Keep/Castle gold/lumber/time rows above). Scout Tower upgrades in place into
+Guard/Cannon/Arcane Tower.
+
+**Heroes (4):**
+
+| Key           | FourCC | Primary Attr | Str | Agi | Int | StrLvl | AgiLvl | IntLvl |
+|---------------|--------|--------------|-----|-----|-----|--------|--------|--------|
+| paladin       | null   | str          | 22  | 12  | 18  | 3.0    | 1.25   | 1.75   |
+| archmage      | null   | int          | 14  | 14  | 27  | 1.5    | 1.5    | 3.0    |
+| mountain_king | null   | str          | 25  | 14  | 16  | 3.0    | 1.5    | 1.5    |
+| blood_mage    | null   | int          | 16  | 13  | 21  | 1.5    | 1.5    | 3.0    |
+
+**Hero abilities (key effects, level 1 unless ultimate):**
+
+| Hero          | Ability Key            | Name                  | Key effect (L1)                                        |
+|---------------|------------------------|-----------------------|--------------------------------------------------------|
+| paladin       | holy_light             | Holy Light            | Heal 200 HP / 100 dmg to undead                        |
+| paladin       | divine_shield          | Divine Shield         | Invulnerable 5s                                        |
+| paladin       | devotion_aura          | Devotion Aura         | Passive +1 armor to nearby ground units               |
+| paladin       | resurrection (ult)     | Resurrection          | Revive up to 6 dead friendly units                    |
+| archmage      | blizzard               | Blizzard              | AoE 60 DPS + slow                                      |
+| archmage      | summon_water_elemental | Summon Water Elemental| Summons 500 HP elemental, 60s                          |
+| archmage      | brilliance_aura        | Brilliance Aura       | Passive +0.75 mana regen/s nearby                     |
+| archmage      | mass_teleport (ult)    | Mass Teleport         | Teleport up to 5 units to an ally                     |
+| mountain_king | storm_bolt             | Storm Bolt            | 175 dmg + 3s stun                                      |
+| mountain_king | thunder_clap           | Thunder Clap          | 60 dmg AoE + 50% slow                                 |
+| mountain_king | bash                   | Bash                  | Passive 15% chance: +25 dmg + 1s stun                 |
+| mountain_king | avatar (ult)           | Avatar                | +500 HP, +10 dmg, +3 armor, spell immune 20s          |
+| blood_mage    | flame_strike           | Flame Strike          | 90 DPS AoE ground, 3s                                 |
+| blood_mage    | banish                 | Banish                | Ethereal 7s: +66% magic dmg taken, can't attack       |
+| blood_mage    | siphon_mana            | Siphon Mana           | Drains 50 mana/s for 8s                               |
+| blood_mage    | phoenix (ult)          | Phoenix               | Summons Phoenix, 75 DPS splash                        |
+
+**Upgrades (10):**
+
+| Key                       | FourCC | Levels | Notes (L1 effect)                                        |
+|---------------------------|--------|--------|----------------------------------------------------------|
+| iron_forged_swords        | null   | 3      | +melee attack damage (Footmen, Knights)                  |
+| studded_leather_armor     | null   | 3      | +armor for ground melee units                            |
+| black_gunpowder           | null   | 3      | +ranged attack damage (Riflemen)                         |
+| defend                    | null   | 1      | Footman Defend: −50% pierce damage taken                 |
+| masonry                   | null   | 3      | +HP and +armor for Human buildings                       |
+| improved_masonry          | null   | 1      | Allows Farms → Improved Farms                            |
+| priest_adept_training     | null   | 2      | Adept/Master Priest (Dispel Magic / Inner Fire)          |
+| sorceress_adept_training  | null   | 2      | Adept/Master Sorceress (Slow / Invisibility)             |
+| magic_sentry              | null   | 1      | Priests reveal nearby invisible units                    |
+| animal_war_training       | null   | 1      | +100 Gryphon HP + chain-lightning attack                 |
+
+---
+
+### Undead (`undead`) — fully seeded (opponent data for OvUD)
+
+**Provenance:** `community/liquipedia seed`, `verified: false`, patch 2.0. FourCCs
+`null` pending CASC/fixture. Mirrors `packages/db/src/seed/ontology.undead.json`
+exactly. DPS are approximate averages (rounded). Skeleton Warrior, Destroyer
+(morph of Obsidian Statue), and Shade have gold/food/buildTime 0 because they are
+summoned/morphed (no distinct training cost). Shade DPS 0 (detector, no attack).
+
+**Units (13):**
+
+| Key             | FourCC | HP   | Armor | ArmorType | AttackType | DPS | Gold | Lbr | Food | BuildTime |
+|-----------------|--------|------|-------|-----------|------------|-----|------|-----|------|-----------|
+| acolyte         | null   | 250  | 0     | unarmored | normal     | 11  | 75   | 0   | 1    | 15        |
+| ghoul           | null   | 340  | 1     | medium    | normal     | 19  | 120  | 0   | 2    | 20        |
+| crypt_fiend     | null   | 500  | 1     | medium    | pierce     | 23  | 215  | 40  | 3    | 28        |
+| gargoyle        | null   | 400  | 1     | medium    | pierce     | 20  | 165  | 30  | 3    | 27        |
+| necromancer     | null   | 290  | 0     | unarmored | magic      | 13  | 145  | 20  | 2    | 22        |
+| banshee         | null   | 240  | 0     | unarmored | magic      | 11  | 155  | 25  | 2    | 22        |
+| meat_wagon      | null   | 345  | 5     | heavy     | siege      | 28  | 230  | 65  | 4    | 35        |
+| abomination     | null   | 1200 | 3     | heavy     | normal     | 38  | 250  | 60  | 5    | 38        |
+| obsidian_statue | null   | 700  | 5     | heavy     | magic      | 22  | 230  | 50  | 3    | 30        |
+| frost_wyrm      | null   | 1500 | 3     | heavy     | siege      | 61  | 385  | 185 | 7    | 65        |
+| destroyer       | null   | 900  | 5     | heavy     | magic      | 52  | 0    | 0   | 0    | 0         |
+| shade           | null   | 300  | 0     | unarmored | normal     | 0   | 150  | 0   | 2    | 20        |
+| skeleton_warrior| null   | 225  | 1     | light     | normal     | 15  | 0    | 0   | 0    | 0         |
+
+**Buildings (14):**
+
+| Key                  | FourCC | HP   | Gold | Lbr | BuildTime |
+|----------------------|--------|------|------|-----|-----------|
+| necropolis           | null   | 1500 | 385  | 185 | 100       |
+| halls_of_the_dead    | null   | 1800 | 215  | 135 | 60        |
+| black_citadel        | null   | 2500 | 215  | 200 | 75        |
+| altar_of_darkness    | null   | 900  | 180  | 50  | 60        |
+| crypt                | null   | 1100 | 150  | 0   | 60        |
+| graveyard            | null   | 800  | 145  | 0   | 40        |
+| tomb_of_relics       | null   | 750  | 145  | 0   | 40        |
+| slaughterhouse       | null   | 1100 | 150  | 100 | 60        |
+| temple_of_the_damned | null   | 1100 | 150  | 100 | 60        |
+| boneyard             | null   | 1100 | 150  | 125 | 60        |
+| sacrificial_pit      | null   | 750  | 100  | 50  | 40        |
+| ziggurat             | null   | 550  | 160  | 40  | 35        |
+| spirit_tower         | null   | 550  | 60   | 20  | 20        |
+| nerubian_tower       | null   | 550  | 40   | 80  | 20        |
+
+Necropolis → Halls of the Dead → Black Citadel are the T1/T2/T3 tiers. Spirit
+Tower and Nerubian Tower are in-place morphs of the Ziggurat.
+
+**Heroes (4):**
+
+| Key         | FourCC | Primary Attr | Str | Agi | Int | StrLvl | AgiLvl | IntLvl |
+|-------------|--------|--------------|-----|-----|-----|--------|--------|--------|
+| death_knight| null   | str          | 21  | 15  | 16  | 3.0    | 1.5    | 1.75   |
+| lich        | null   | int          | 14  | 13  | 21  | 1.75   | 1.5    | 3.0    |
+| dreadlord   | null   | str          | 19  | 15  | 18  | 2.75   | 1.5    | 2.0    |
+| crypt_lord  | null   | str          | 22  | 13  | 15  | 3.0    | 1.25   | 1.75   |
+
+**Hero abilities (key effects, level 1 unless ultimate):**
+
+| Hero        | Ability Key          | Name             | Key effect (L1)                                          |
+|-------------|----------------------|------------------|----------------------------------------------------------|
+| death_knight| death_coil           | Death Coil       | 100 dmg to enemy / heal 200 friendly undead              |
+| death_knight| death_pact           | Death Pact       | Sacrifice friendly undead → 50% of its HP to DK          |
+| death_knight| unholy_aura          | Unholy Aura      | Passive move speed + HP regen to nearby units            |
+| death_knight| animate_dead (ult)   | Animate Dead     | Raise 6 corpses as invulnerable skeletons, 40s           |
+| lich        | frost_nova           | Frost Nova       | 100 dmg target + 75 AoE + slow                           |
+| lich        | frost_armor          | Frost Armor      | +3 armor + slows melee attackers                         |
+| lich        | dark_ritual          | Dark Ritual      | Sacrifice undead → 33% of its HP to Lich mana            |
+| lich        | death_and_decay (ult)| Death and Decay  | AoE 4% max HP/s for 35s                                  |
+| dreadlord   | carrion_swarm        | Carrion Swarm    | 75 dmg to all enemies in a line                          |
+| dreadlord   | sleep                | Sleep            | Puts a target enemy unit to sleep                        |
+| dreadlord   | vampiric_aura        | Vampiric Aura    | Passive 15% lifesteal for nearby friendly melee          |
+| dreadlord   | inferno (ult)        | Inferno          | Summon Infernal: 100 AoE dmg + 3s stun on landing        |
+| crypt_lord  | impale               | Impale           | 75 dmg + stun, throws units up in a line                 |
+| crypt_lord  | spiked_carapace      | Spiked Carapace  | Passive +3 armor + 10% melee damage return               |
+| crypt_lord  | carrion_beetles      | Carrion Beetles  | Summons Scarab Beetle from a corpse (up to 2)            |
+| crypt_lord  | locust_swarm (ult)   | Locust Swarm     | Swarm: 290 total dmg + lifesteal to Crypt Lord           |
+
+**Upgrades (12):**
+
+| Key                        | FourCC | Levels | Notes (L1 effect)                                    |
+|----------------------------|--------|--------|------------------------------------------------------|
+| unholy_strength            | null   | 3      | +melee attack damage (Ghouls, Abominations)          |
+| creature_carapace          | null   | 3      | +armor for all Undead units                          |
+| creature_attack            | null   | 3      | +ranged attack damage (Crypt Fiends, Gargoyles)      |
+| web                        | null   | 1      | Crypt Fiend Web: bind & ground air units             |
+| burrow                     | null   | 1      | Ghouls/Acolytes burrow underground (invisible)       |
+| cannibalize                | null   | 1      | Ghouls consume a corpse to restore HP                |
+| ghoul_frenzy               | null   | 1      | +20% Ghoul attack speed + HP regen                   |
+| necromancer_adept_training | null   | 2      | Adept/Master Necromancer (unlocks Cripple)           |
+| banshee_adept_training     | null   | 2      | Adept/Master Banshee (unlocks Curse)                 |
+| skeletal_mastery           | null   | 1      | Necromancers raise up to 3 skeletons per cast        |
+| stone_form                 | null   | 1      | Gargoyle Stone Form (invulnerable statue)            |
+| freezing_breath            | null   | 1      | Frost Wyrms permanently slow buildings they attack   |
 
 ---
 
