@@ -188,6 +188,30 @@ A personal, locally-run platform for deliberate Warcraft III improvement:
 >   keystone.** Known non-number gap (separate, lower-priority): the LLM can still
 >   mis-name a hero ability qualitatively (e.g. "Feral Spirit" in a Blademaster
 >   game) — entity/ability grounding is a possible future enhancement, not T5.4.
+> - **First REAL-replay testing + coach-quality fixes (2026-06-12 PM, HEAD
+>   `5efd33e`):** ran 5 user W3Champions replays (`game-data/replays/12.06/`, all
+>   `patch:2.00+6117` — confirms Reforged 2.0, not RoC) through the FULL live
+>   pipeline. Found + fixed real bad coaching: **(1) Orc expansion mis-calibration**
+>   (`a020efe`) — a WON 1-base game got "Missing Expansion = critical"; user (Orc
+>   main) confirmed "Orc never expands at 5:30"; recalibrated references (anchors
+>   330k→480k+, informational only), `severity_for_absent_expansion` → info/minor
+>   never critical, weight 10→3, + corpus. **(2) Hero-name hallucination** (`971c2e4`)
+>   — coach said "Berserker/Frost Shaman" for a Far Seer + Tauren Chieftain game;
+>   `_extract_heroes` feeds real heroes into the prompt + rule 9 bans inventing.
+>   **(3) Result/style-aware tone** (`fb34ee1`) — won games framed as refinements
+>   not "critical"; severity-jargon stripped from fallbacks. **(4) Review/feedback
+>   workflow** (`5afd7b0` API + `d949b6e` web) — `tip_feedback` table (migration
+>   0005), `GET /coach` history + `POST/GET /coach/{id}/feedback`, and `/history`
+>   dashboard with per-tip flag controls → human-in-the-loop calibration. **(5)
+>   Econ-sim Path A — supply-block detection** (`5efd33e`) — `app/benchmarks/
+>   econ.py` reconstructs the Orc supply curve from commands + deep-research-
+>   verified food constants (Great Hall 11, Burrow 10, hero 5, cap 100) → flags
+>   food-capped-below-100 blocks; live found a 59.7s critical block in the OvNE
+>   game (won OvH ~2s clean). 274 pytest. **NEXT DIRECTION (agreed): admin panel +
+>   DB-backed references + pro-replay timing aggregation + image/icon assets** —
+>   make the reference DATA curatable/pro-sourced (root-cause fix for bad coaching)
+>   then resume deferred econ-sim metrics (floating gold, army value). See
+>   memory `where-we-left-2026-06-12`.
 > Next up: **T4.2** (per-race hotkey drills — verify the flagged keys in-game first),
 > then T4.3 micro / T4.4 build-order drills, T4.5 juice (Director), T4.6 progress.
 > Ontology follow-ups: ~~expand the prose `ontology.md` with Human/Undead~~ ✅ DONE
