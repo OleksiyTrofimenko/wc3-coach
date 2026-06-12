@@ -89,8 +89,9 @@ _REFERENCE_TABLE: dict[tuple[str, str, str], ReferenceEntry] = {
     ),
     ("OvNE", "orc", "expansion_timing"): ReferenceEntry(
         expected=480_000, window_ms=120_000,
-        notes="Informational anchor — 1-base Orc is standard meta; FE variant ~5:00-6:00; "
-              "absent expansion scores info, never a penalty (2026-06-12 calibration)",
+        notes="Informational anchor only; 1-base Orc is standard meta. FE "
+              "variant ~5:00-6:00; absent expansion scores info, never a "
+              "penalty (2026-06-12 calibration)",
     ),
     ("OvNE", "orc", "hero_level3_timing"): ReferenceEntry(
         expected=240_000, window_ms=30_000,
@@ -146,8 +147,9 @@ _REFERENCE_TABLE: dict[tuple[str, str, str], ReferenceEntry] = {
     ),
     ("OvH", "orc", "expansion_timing"): ReferenceEntry(
         expected=540_000, window_ms=120_000,
-        notes="Informational anchor — OvH is 1-base BM harass -> T2 spike close-out; "
-              "expansion only if Human survives past ~9 min; absent expansion not a mistake",
+        notes="Informational anchor; OvH is 1-base BM harass -> T2 spike "
+              "close-out. Expansion only if Human survives past ~9 min; "
+              "absent expansion is not a mistake",
     ),
     ("OvH", "orc", "hero_level3_timing"): ReferenceEntry(
         expected=270_000, window_ms=30_000,
@@ -233,7 +235,7 @@ _REFERENCE_TABLE: dict[tuple[str, str, str], ReferenceEntry] = {
     # -----------------------------------------------------------------------
     ("OvO", "orc", "first_hero_timing"): ReferenceEntry(
         expected=62_000, window_ms=15_000,
-        notes="Standard Altar 60 s; BM or FS opener; same reference for both mirror slots",
+        notes="Standard Altar 60 s; BM or FS opener; same ref for both mirror slots",
     ),
     ("OvO", "orc", "tier2_timing"): ReferenceEntry(
         expected=130_000, window_ms=20_000,
@@ -245,8 +247,9 @@ _REFERENCE_TABLE: dict[tuple[str, str, str], ReferenceEntry] = {
     ),
     ("OvO", "orc", "expansion_timing"): ReferenceEntry(
         expected=480_000, window_ms=120_000,
-        notes="Informational anchor — BM opener: expo after T2 spike if game continues; "
-              "FS opener fast expo ~4:30-5:00; absent expansion not a mistake",
+        notes="Informational anchor; BM opener expos after the T2 spike if the "
+              "game continues; FS opener fast expo ~4:30-5:00; absent "
+              "expansion is not a mistake",
     ),
     ("OvO", "orc", "hero_level3_timing"): ReferenceEntry(
         expected=240_000, window_ms=30_000,

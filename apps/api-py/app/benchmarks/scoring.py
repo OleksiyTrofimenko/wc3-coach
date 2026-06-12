@@ -267,28 +267,34 @@ def _make_summary(result: BenchmarkResult) -> str:
     if metric == "tier3_timing":
         delta_s = int(delta / 1000)
         sign = "late" if delta > 0 else "early"
+        exp_str = (
+            f"expected {_fmt_ms(expected_ms)}" if expected_ms else "no reference"
+        )
         return (
             f"T3 (Fortress) at {_fmt_ms(value_ms)}, {abs(delta_s)}s {sign} "
-            f"({f'expected {_fmt_ms(expected_ms)}' if expected_ms else 'no reference'}) "
-            f"— {sev}"
+            f"({exp_str}) — {sev}"
         )
 
     if metric == "first_hero_timing":
         delta_s = int(delta / 1000)
         sign = "late" if delta > 0 else "early"
+        exp_str = (
+            f"expected {_fmt_ms(expected_ms)}" if expected_ms else "no reference"
+        )
         return (
             f"First hero at {_fmt_ms(value_ms)}, {abs(delta_s)}s {sign} "
-            f"({f'expected {_fmt_ms(expected_ms)}' if expected_ms else 'no reference'}) "
-            f"— {sev}"
+            f"({exp_str}) — {sev}"
         )
 
     if metric == "hero_level3_timing":
         delta_s = int(delta / 1000)
         sign = "late" if delta > 0 else "early"
+        exp_str = (
+            f"expected {_fmt_ms(expected_ms)}" if expected_ms else "no reference"
+        )
         return (
             f"Hero reached level 3 at {_fmt_ms(value_ms)}, {abs(delta_s)}s {sign} "
-            f"({f'expected {_fmt_ms(expected_ms)}' if expected_ms else 'no reference'}) "
-            f"— {sev}"
+            f"({exp_str}) — {sev}"
         )
 
     if metric == "worker_production_gap_approx":
