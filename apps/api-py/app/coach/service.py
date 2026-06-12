@@ -120,6 +120,31 @@ def _find_orc_player(players: list[PlayerInfo]) -> PlayerInfo | None:
     return None
 
 
+def _extract_heroes(events: list[Any], orc_slot: int) -> list[str]:
+    """
+    Return the display names of the Orc player's actual heroes, in first-seen
+    order, derived from resolved ``hero:<key>`` entity refs in the timeline.
+
+    This is fed into the coach prompt so the LLM names the REAL heroes (e.g.
+    "Far Seer", "Tauren Chieftain") instead of inventing ones ("Berserker").
+    A ``hero:<key>`` ref is already the canonical ontology key (the worker's
+    resolver rewrites it), so the display name is just key.title(). Unresolved
+    refs (raw FourCC) fall back to the FourCC — still better than a hallucination.
+    """
+    seen: list[str] = []
+    for ev in events:
+        if ev.slot != orc_slot:
+            continue
+        ref = ev.entity_ref
+        if not ref.startswith("hero:"):
+            continue
+        key = ref.split(":", 1)[1]
+        name = key.replace("_", " ").title()
+        if name and name not in seen:
+            seen.append(name)
+    return seen
+
+
 def _derive_matchup(
     orc_player: PlayerInfo,
     players: list[PlayerInfo],
@@ -516,6 +541,8 @@ async def generate_coach_report(
     # -------------------------------------------------------------------------
     # Step 6: Build prompt → LLM chat
     # -------------------------------------------------------------------------
+    heroes = _extract_heroes(events, orc_player.slot)
+    logger.info("Coach: Orc heroes detected for %s: %s", replay_id, heroes)
     messages = build_messages(
         matchup=matchup,
         map_name=map_name,
@@ -523,6 +550,7 @@ async def generate_coach_report(
         duration_ms=game_duration_ms,
         problems=problems,
         chunks=deduped_chunks,
+        heroes=heroes,
     )
 
     logger.info("Coach: calling Ollama chat for %s ...", replay_id)

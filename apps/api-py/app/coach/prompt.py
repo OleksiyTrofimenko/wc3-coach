@@ -68,6 +68,10 @@ a timing value differently from how it appears in the FACTS.
 "never started", "never reached level 3", "no hero produced"), do NOT invent a \
 time or value for it — refer to it as not having happened. Never state a \
 timestamp for an event the FACTS say is absent.
+9. The player's actual heroes are listed in CONTEXT ("Heroes"). When you mention \
+a hero, use ONLY those exact names. NEVER name a hero the player did not use, \
+and NEVER invent a hero name or abbreviation (e.g. do not write "Berserker" or \
+"Frost Shaman"). If no heroes are listed, do not name any specific hero.
 
 Your task is to output 3-5 prioritised, specific, actionable coaching tips, \
 most important first.
@@ -157,6 +161,7 @@ def build_messages(
     duration_ms: int,
     problems: list[ScoredProblem],
     chunks: list[RetrievedChunk],
+    heroes: list[str] | None = None,
 ) -> list[dict[str, str]]:
     """
     Build the system + user messages for the LLM coach.
@@ -187,6 +192,9 @@ def build_messages(
         Ready to pass as the "messages" field in an Ollama /api/chat request.
     """
     duration_str = _fmt_duration(duration_ms)
+    heroes_str = (
+        ", ".join(heroes) if heroes else "(not detected — name no specific hero)"
+    )
 
     user_content = f"""\
 CONTEXT:
@@ -194,6 +202,7 @@ CONTEXT:
   Map     : {map_name}
   Result  : {result}
   Duration: {duration_str}
+  Heroes  : {heroes_str}
 
 FACTS (computed deterministically from the replay — treat these as ground truth):
 {_fmt_facts(problems)}

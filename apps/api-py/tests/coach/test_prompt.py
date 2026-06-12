@@ -308,6 +308,29 @@ class TestReferenceMaterialSection:
 # ---------------------------------------------------------------------------
 
 
+class TestHeroesContext:
+    def test_heroes_rendered_in_context(self) -> None:
+        msgs = build_messages(
+            "OvH", "Echo Isles", "win", 720_000, [], [],
+            heroes=["Far Seer", "Tauren Chieftain"],
+        )
+        user = msgs[1]["content"]
+        assert "Far Seer" in user
+        assert "Tauren Chieftain" in user
+
+    def test_no_heroes_renders_safe_placeholder(self) -> None:
+        msgs = build_messages("OvH", "Echo Isles", "win", 720_000, [], [])
+        user = msgs[1]["content"]
+        assert "not detected" in user.lower()
+
+    def test_system_rule_bans_inventing_heroes(self) -> None:
+        msgs = build_messages("OvH", "Echo Isles", "win", 720_000, [], [])
+        sys_content = msgs[0]["content"].lower()
+        assert "hero" in sys_content
+        # Rule 9 explicitly forbids inventing hero names.
+        assert "invent a hero" in sys_content or "never name a hero" in sys_content
+
+
 class TestTaskSection:
     def test_task_section_present(self) -> None:
         msgs = build_messages("OvNE", "Test Map", "loss", 600_000, [], [])
