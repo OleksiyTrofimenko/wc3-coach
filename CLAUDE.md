@@ -142,6 +142,33 @@ A personal, locally-run platform for deliberate Warcraft III improvement:
 >   `verified:false` (community/Liquipedia, patch 2.0); CASC cross-check pending.
 >   212 pytest + `turbo build` green. **Env:** DB on **:5433**, DBeaver-connectable
 >   (host localhost, db/user/pass all `wc3coach`).
+> - **Knowledge-base depth — core mechanics corpus (2026-06-12, HEAD `c3abdff`):**
+>   goal = teach the coach to explain *why* a deviation matters, not just *what*.
+>   Method = **hybrid** (user-chosen): two `/deep-research` passes (5-angle fan-out
+>   + 3-vote adversarial verification) → **strategist** distilled into 3 NEW
+>   canonical, web-cited, confidence-flagged docs: `wc3-knowledge/mechanics.md`
+>   (upkeep 100/70/40% gold-only tax @ 0-50/51-80/81-100 food; food per race;
+>   gold-mine 5-worker rule + 12500 default; lumber per race; bounty),
+>   `creeping.md` (camp tiers by summed levels; creep-XP L1=25..L6=150 +summoned
+>   50%; **hero level-5 creep-XP cutoff** 80/70/60/50/0%; item-drop scaling),
+>   `hero-progression.md` (XP curve table + verified formula `50*(L²+L−2)`;
+>   derived stats +25HP/Str +15mana/Int +0.30armor/Agi +1dmg/primary; per-level
+>   growth w/ TC example; Altar revive cost/time). Sources Liquipedia + Blizzard
+>   classic.battle.net, patch 2.0; unverified items explicitly flagged (player-unit
+>   bounty, **per-race tier-upgrade costs**, creep XP proximity split, non-TC hero
+>   growth). Wired into RAG (`ingest.py` manifest + SKILL.md) → re-seeded **12 docs
+>   / 151 chunks**; retrieval verified (new chunks rank #1 for mechanics queries,
+>   reach the coach prompt at rank 2-3 for real problem summaries). Research caught
+>   its own error: batch-1 false-refuted the XP formula; batch-2 (with the real
+>   table) confirmed it — a 0-3 "refute" means *unsupported by what was fetched*,
+>   not *false*. **Coach-prompt experiment REVERTED:** instructing the model to
+>   quote the mechanics figures made qwen2.5:14b *inconsistently fabricate* derived
+>   numbers ("~6 min late" when 1:45; "~6 peon-cycles/min" not in any source) —
+>   a Principle-#4 violation, caught only by live A/B testing. Proper fix is
+>   DETERMINISTIC: compute deviation deltas in code + inject as FACTS, and add a
+>   post-generation validator that strips any tip number absent from FACTS/material.
+>   Tracked as **T5.4 (coach grounding)**. 212 pytest still green; corpus is the
+>   durable, safe value shipped today.
 > Next up: **T4.2** (per-race hotkey drills — verify the flagged keys in-game first),
 > then T4.3 micro / T4.4 build-order drills, T4.5 juice (Director), T4.6 progress.
 > Ontology follow-ups: expand the prose `wc3-knowledge/ontology.md` (still Orc/NE
@@ -151,6 +178,14 @@ A personal, locally-run platform for deliberate Warcraft III improvement:
 > Deaths/positions (T1.4, Observer API) remain a tracked follow-up, as does
 > promoting `ScoredProblem` into shared-types + the JSON-Schema→pydantic
 > generator (TODO T0.4).
+> Knowledge-depth follow-ups (parallel to EPIC 4): **T5.4** coach grounding
+> (deterministic delta-as-FACT + tip-number validator — prerequisite before the
+> coach can safely cite the new mechanics figures); remaining depth backlog from
+> the 2026-06-12 plan — Human/Undead **prose** ontology (combat stats into RAG),
+> a combat-math deep-dive doc (worked unit trades from the existing armor matrix),
+> per-matchup threat/counter depth, and the **per-race tier-upgrade costs** the
+> research couldn't web-confirm (CASC/in-game). Re-seed RAG (`python -m
+> app.rag.seed`, DB :5433 + Ollama) after any corpus edit.
 > See `docs/WC3_Coach_Design_Doc.md` and `docs/WC3_Coach_Project_Plan.md`
 > for full architecture and backlog.
 
