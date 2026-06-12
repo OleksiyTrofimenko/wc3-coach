@@ -80,6 +80,9 @@ import re
 _SPACE_PERCENT_RE = re.compile(r"(\d)\s+%")
 # Strip thousands separators inside numbers "1,800" → "1800"
 _THOUSANDS_SEP_RE = re.compile(r"(\d),(\d{3})")
+# A number joined to a word by a hyphen: "30-second" → "30 second". Only when a
+# LETTER follows the hyphen, so numeric ranges ("4:30-5:00", "10-20") are kept.
+_NUM_HYPHEN_WORD_RE = re.compile(r"(\d)\s*-\s*(?=[a-z])")
 
 
 def normalize_for_match(text: str) -> str:
@@ -90,6 +93,9 @@ def normalize_for_match(text: str) -> str:
     - lowercase
     - strip thousands separators: "1,800" → "1800"
     - collapse space-before-percent: "70 %" → "70%"
+    - normalize a hyphen between a number and a word to a space:
+      "30-second" → "30 second" so the duration regex sees the digits (the LLM
+      writes "30-second block"; without this it bypassed grounding entirely).
 
     The result is used only for substring containment tests in
     find_ungrounded_numbers; it is NOT fed back to the LLM.
@@ -101,6 +107,9 @@ def normalize_for_match(text: str) -> str:
         prev = t
         t = _THOUSANDS_SEP_RE.sub(r"\1\2", t)
     t = _SPACE_PERCENT_RE.sub(r"\1%", t)
+    # "30-second"/"60-food" → "30 second"/"60 food" (hyphen only before a letter,
+    # so number ranges like "4:30-5:00" and "10-20" are untouched).
+    t = _NUM_HYPHEN_WORD_RE.sub(r"\1 ", t)
     return t
 
 

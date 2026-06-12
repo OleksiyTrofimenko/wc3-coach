@@ -186,6 +186,19 @@ class TestDurationPhrases:
         # "6" does not appear as a standalone digit in allowed_text
         assert any("6" in o and "minute" in o.lower() for o in offenders)
 
+    def test_hyphenated_duration_is_checked(self) -> None:
+        # The supply-block bug: model wrote "30-second block" but the real value
+        # was 59s. The hyphen previously bypassed the duration regex entirely.
+        tip = "You had a 30-second supply block."
+        allowed = "Supply-blocked (food-capped) for 59s — production stalled — critical"
+        offenders = find_ungrounded_numbers(tip, allowed)
+        assert any("30" in o for o in offenders)
+
+    def test_hyphenated_grounded_duration_passes(self) -> None:
+        tip = "You had a 59-second supply block."
+        allowed = "Supply-blocked (food-capped) for 59s — critical"
+        assert is_grounded(tip, allowed)
+
     def test_grounded_seconds_number_passes(self) -> None:
         tip = "Your hero came 30s late."
         allowed = "Hero at 2:00, 30s late — minor"

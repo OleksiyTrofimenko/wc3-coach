@@ -21,6 +21,7 @@ the engine will pass patch_id into the reference lookup.
 
 from __future__ import annotations
 
+from app.benchmarks.econ import supply_block_approx
 from app.benchmarks.metrics import (
     expansion_timing,
     first_hero_timing,
@@ -149,6 +150,11 @@ def run_benchmarks(
         # --- worker_production_continuity ---
         results.append(
             worker_production_continuity(events, player, replay_id)
+        )
+
+        # --- supply_block_approx (Orc supply reconstruction, Path A) ---
+        results.append(
+            supply_block_approx(events, player, replay_id, game_duration_ms)
         )
 
     # Sort for deterministic output

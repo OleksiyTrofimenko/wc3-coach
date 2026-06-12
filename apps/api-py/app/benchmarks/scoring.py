@@ -43,6 +43,9 @@ IMPACT_WEIGHTS: dict[str, float] = {
     # Orc is the 1-base aggression race, so expansion is situational, not a
     # game-deciding timing. It must never be the auto-top problem. See scoring.md.
     "expansion_timing":              3.0,
+    # supply_block_approx (Path A econ-sim): being food-capped for lack of
+    # burrows stalls ALL production — a top-tier macro mistake at the T2 spike.
+    "supply_block_approx":           8.0,
     "worker_production_gap_approx":  8.0,
     "tier2_timing":                  7.0,
     "worker_count_approx_10min":     6.0,
@@ -302,6 +305,13 @@ def _make_summary(result: BenchmarkResult) -> str:
         return (
             f"Longest worker-production idle gap: {gap_s}s "
             f"(ideal ≈ 0s) — {sev}"
+        )
+
+    if metric == "supply_block_approx":
+        block_s = int(result.value / 1000)
+        return (
+            f"Supply-blocked (food-capped, too few burrows) for {block_s}s "
+            f"— production stalled — {sev}"
         )
 
     if metric.startswith("worker_count_approx"):
