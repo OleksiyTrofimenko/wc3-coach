@@ -28,8 +28,14 @@ to surface only meaningful mistakes.
 | critical | ≥ 120 000 ms (≥ 2 min) | ≥ 3 levels |
 
 For "missing" events (e.g. no expansion taken):
-- expansion absent in a game > 8 min → critical
-- expansion absent in a game ≤ 8 min → major (could be a fast-win aggressive build)
+- Orc-specific rule: expansion absent in ANY Orc game → **info** (no score contribution)
+  unless game duration > 18 min → minor.
+  Rationale: 1-base aggressive Orc is the dominant meta across all four Orc matchups.
+  No expansion is frequently the CORRECT decision (BM harass → T2 spike → win/lose
+  before 12–14 min). Penalising absent expansion for Orc produces false coach tips
+  (user-confirmed W3Champions correction, 2026-06-12).
+- For non-Orc races (Human, NE, UD): retain original rule
+  (expansion absent in game > 8 min → critical; ≤ 8 min → major).
 
 ---
 
@@ -52,7 +58,7 @@ Added by Strategist in T3.1.
 2:00   Stronghold upgrade begins (requires Barracks)
 2:30   2nd hero timing depends on game state
 3:30   Stronghold completes → access to Raiders, Shaman, T2 upgrades
-4:00–5:30  Expansion window (map-dependent; Fast Expo builds go earlier ~3:00)
+7:00–10:00 Expansion window (only if 1-base push did not close the game; Fast Expo variant ~5:00–6:00 on safe maps)
 ```
 
 Stronghold (T2) timing depends on whether the build is:
@@ -67,7 +73,7 @@ Stronghold (T2) timing depends on whether the build is:
 | first_hero_timing | 62 000 ms (1:02) | ±15 000 ms | Altar 60 s build + few seconds queue |
 | tier2_timing (stronghold) | 130 000 ms (2:10) | ±20 000 ms | Standard opener benchmark |
 | tier3_timing (fortress) | 420 000 ms (7:00) | ±60 000 ms | Game-state dependent; late-game only |
-| expansion_timing | 330 000 ms (5:30) | ±60 000 ms | Standard mid-ladder; FE builds earlier |
+| expansion_timing | 480 000 ms (8:00) | ±120 000 ms | Informational anchor only — 1-base Orc is standard meta; FE variant goes ~5:00–6:00; absent expansion → info, not a penalty (2026-06-12 calibration) |
 | hero_level3_timing | 240 000 ms (4:00) | ±30 000 ms | Creeping 2–3 camps by 4 min |
 | hero_level5_timing | 480 000 ms (8:00) | ±60 000 ms | Full T2 fight hero |
 | worker_count_10min | 14 workers | ±2 | Typical mid-game saturation |
@@ -104,7 +110,7 @@ Updated by Strategist in T3.2 (was bare table from T3.1; full build order added)
 2:00–2:15  Stronghold upgrade begins
 3:15   Stronghold complete → Shaman / Raider / T2 upgrades
 3:30–4:00  2nd hero (Far Seer or Shadow Hunter)
-6:00   Expansion (HU pressure typically delays to ~6:00)
+9:00+  Expansion (only if 1-base BM harass + T2 spike did not close the game; OvH is 1-base meta — absent expansion is NOT a mistake)
 ```
 
 ### Standard Human build order (HvO) — Archmage FE opener
@@ -128,7 +134,7 @@ Updated by Strategist in T3.2 (was bare table from T3.1; full build order added)
 | first_hero_timing | 62 000 ms (1:02) | ±15 000 ms | Altar 60 s; BM standard opener |
 | tier2_timing (stronghold) | 135 000 ms (2:15) | ±20 000 ms | Slightly later vs Human; BM first hits then T2 |
 | tier3_timing (fortress) | 450 000 ms (7:30) | ±60 000 ms | Fortress in drawn-out OvH games only |
-| expansion_timing | 360 000 ms (6:00) | ±60 000 ms | HU keep pressure often delays Orc expo |
+| expansion_timing | 540 000 ms (9:00) | ±120 000 ms | Informational anchor — OvH is 1-base BM harass → T2 spike close-out; expansion only if Human survives past ~9 min; absent expansion is NOT a mistake (2026-06-12 calibration) |
 | hero_level3_timing | 270 000 ms (4:30) | ±30 000 ms | BM creep constrained by HU harassment |
 | hero_level5_timing | 480 000 ms (8:00) | ±60 000 ms | Mid-T2 fight hero level |
 | worker_count_10min | 14 workers | ±2 | Standard mid-game peon saturation |
@@ -165,7 +171,7 @@ Updated by Strategist in T3.2 (was bare table from T3.1; full build order added)
 2:00–2:15  Stronghold upgrade begins
 3:15   Stronghold complete → Shaman / Raider / Kodo production
 3:30–4:00  2nd hero (Far Seer wolves or Shadow Hunter)
-5:00–5:30  Expansion (safer vs UD than vs HU; DK route is predictable)
+7:00–10:00 Expansion (only if 1-base push did not close the game; fast variant ~5:00–6:00 when DK route is confirmed distant)
 ```
 
 ### Standard Undead build order (UDvO) — Death Knight opener
@@ -190,7 +196,7 @@ Updated by Strategist in T3.2 (was bare table from T3.1; full build order added)
 | first_hero_timing | 62 000 ms (1:02) | ±15 000 ms | Standard Altar 60 s; BM or FS opener |
 | tier2_timing (stronghold) | 135 000 ms (2:15) | ±20 000 ms | Stronghold ~2:15; FE variant delays to ~3:00 |
 | tier3_timing (fortress) | 420 000 ms (7:00) | ±60 000 ms | Fortress at ~7:00 if game is even; earlier if snowballing |
-| expansion_timing | 330 000 ms (5:30) | ±60 000 ms | Orc can expo safely ~5:30 if BM contested DK camps |
+| expansion_timing | 480 000 ms (8:00) | ±120 000 ms | Informational anchor — standard OvUD is 1-base BM/FS → T2 spike; safe FE variant ~5:00–6:00 only when DK camps are contested; absent expansion is NOT a mistake (2026-06-12 calibration) |
 | hero_level3_timing | 240 000 ms (4:00) | ±30 000 ms | BM reaches 3 while contesting UD creep route |
 | hero_level5_timing | 480 000 ms (8:00) | ±60 000 ms | Level 5 in sustained T2 fights |
 | worker_count_10min | 14 workers | ±2 | Standard mid-game peon saturation |
@@ -232,7 +238,7 @@ only one code needed, unlike asymmetric matchups).
 2:30   2nd Orc Burrow
 3:15   Stronghold complete → Raider / Shaman available; queue Raiders immediately
 3:30   2nd hero (Far Seer or Shadow Hunter)
-5:00–5:30  Expansion (after T2 spike; FS-first variant can go ~4:30)
+7:00–10:00 Expansion (only if game continues past T2 spike; FS-first variant can fast expo ~4:30–5:00 on safe maps)
 ```
 
 ### Key reference timings — Orc (OvO, patch 2.0)
@@ -244,7 +250,7 @@ Both players use the same row; the mirror has symmetric benchmarks.
 | first_hero_timing | 62 000 ms (1:02) | ±15 000 ms | Standard Altar 60 s; BM or FS opener |
 | tier2_timing (stronghold) | 130 000 ms (2:10) | ±20 000 ms | Same as OvNE standard opener |
 | tier3_timing (fortress) | 420 000 ms (7:00) | ±60 000 ms | Late-game only; `verified: community, low-confidence` |
-| expansion_timing | 330 000 ms (5:30) | ±60 000 ms | BM-first expo; FS-first can go ~4:30 |
+| expansion_timing | 480 000 ms (8:00) | ±120 000 ms | Informational anchor — BM opener: expo after T2 spike if game continues; FS opener fast expo ~4:30–5:00; absent expansion is NOT a mistake (2026-06-12 calibration) |
 | hero_level3_timing | 240 000 ms (4:00) | ±30 000 ms | BM or FS reaches level 3 by 4:00 with 2–3 camps |
 | hero_level5_timing | 480 000 ms (8:00) | ±60 000 ms | Level 5 in T2 engagement; `verified: community, low-confidence` |
 | worker_count_10min | 14 workers | ±2 | Standard mid-game peon saturation; same for both sides |

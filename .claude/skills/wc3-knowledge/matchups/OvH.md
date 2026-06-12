@@ -21,7 +21,7 @@ Added by Strategist in T3.2.
 3:15   Stronghold complete → Shaman / Raider / T2 upgrades
 3:30–4:00  2nd hero (Far Seer or Shadow Hunter)
 4:00–4:30  Voodoo Lounge for item access
-6:00   Expansion (map-dependent; FE Orc goes earlier ~4:00 if BM pressure worked)
+9:00+  Expansion (only if 1-base BM harass + T2 spike did not close the game; OvH standard plan is 1-base close-out; absent expansion is NOT a mistake)
 ```
 
 Orc vs Human typically follows a **BM-harass-into-T2** pattern. The BM aims to
@@ -70,7 +70,7 @@ because AM FE is the dominant strategy.
 | first_hero_timing | 62 000 ms (1:02) | ±15 000 ms | Altar 60 s build; BM standard opener |
 | tier2_timing (stronghold) | 135 000 ms (2:15) | ±20 000 ms | Slightly later vs Human; BM first hits then T2 |
 | tier3_timing (fortress) | 450 000 ms (7:30) | ±60 000 ms | Fortress; only in drawn-out games |
-| expansion_timing | 360 000 ms (6:00) | ±60 000 ms | HU keep pressure often delays Orc expo |
+| expansion_timing | 540 000 ms (9:00) | ±120 000 ms | Informational anchor — OvH is 1-base BM harass → T2 spike close-out; expansion only if Human survives past ~9 min; absent expansion is NOT a mistake (2026-06-12 calibration) |
 | hero_level3_timing | 270 000 ms (4:30) | ±30 000 ms | BM creep route constrained by HU harassment |
 | hero_level5_timing | 480 000 ms (8:00) | ±60 000 ms | Mid-T2 fight hero level |
 | worker_count_10min | 14 workers | ±2 | Standard mid-game saturation |

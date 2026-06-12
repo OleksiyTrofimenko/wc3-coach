@@ -32,7 +32,7 @@ deciding factor on its own."
 
 | Metric | Weight | Strategic rationale |
 |--------|--------|---------------------|
-| `expansion_timing` | 10 | Missing or very late expansion is the single highest-leverage economic mistake. A 90-second late expo means ~6–9 fewer peon-mining-cycles per minute across the mid-game — this compounds into a unit deficit that never closes. In OvH and OvUD, the opponent's economy runs ahead while the Orc fights with a smaller army. The absent-expansion case is near game-deciding in any game over 8 minutes. |
+| `expansion_timing` | 3 | **2026-06-12 calibration (user-confirmed W3Champions correction):** Orc is the aggression-first race; 1-base play across all four Orc matchups is the dominant meta. Absent expansion is NOT a mistake — it is frequently the correct decision (BM harass → T2 spike → win/lose by 12–14 min). Weight reduced from 10 to 3. At weight 3, a genuinely late expansion (player chose to expand but did so slowly) still surfaces if other problems are minor; but absent expansion in a normal-length game scores 0 (info) and never dominates the tip list. The absent-expansion severity rule is also updated: info for any Orc game ≤ 18 min; minor only if game > 18 min. |
 | `worker_production_gap_approx` | 8 | Idle Great Hall is the silent macro killer. Every 15-second idle window is one peon lost from the economy permanently. A critical gap (>60s idle proxy) typically indicates the player stopped producing workers entirely for a phase of the game — often during a fight or creep. This stacks with expansion timing: late expo + idle hall = compounding deficit. |
 | `tier2_timing` | 7 | Stronghold is the Orc power-spike gate. Late T2 means delayed access to Raiders (the primary map-control unit in OvNE), Shaman (the dispel + bloodlust combo in OvH), and key upgrades (Pillage, Berserker Upgrade). A 60–120 second late Stronghold means the opponent's T2 units are online and trading against Orc T1, which is a direct army-quality disadvantage. |
 | `worker_count_approx_10min` | 6 | Low worker count at 10 minutes is the cumulative proof of earlier production decisions. A count 4+ below reference (critical) means the player lost or never built a significant fraction of their economic base. This is a lagging indicator but high-signal: if a player reached 10 minutes with 9 workers instead of 14, they were economically crippled. |
@@ -94,8 +94,10 @@ score = impact_weight × severity_multiplier × magnitude_factor
 ```
 
 - `score = 0.0` when `severity == "info"` (never surfaced).
-- Maximum theoretical score: 10 × 2.0 × 3.0 = 60.0 (critical expansion miss with
-  large delta). In practice, expansion absent in a long game scores 10 × 2.0 × 1.5 = 30.0.
+- Maximum theoretical score: 8 × 2.0 × 3.0 = 48.0 (critical worker-production gap;
+  worker_production_gap_approx weight = 8 is now the highest).
+  Expansion absent in a game ≤ 18 min scores 0.0 (info). Expansion absent in a game
+  > 18 min scores 3 × 0.5 × 1.5 = 2.25 (minor, never dominates).
 
 ---
 

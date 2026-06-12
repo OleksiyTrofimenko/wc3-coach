@@ -7,7 +7,7 @@ Fixture: Orc (slot 1) vs Night Elf (slot 2), patch 2.0, ~10 min game.
 Models a realistic OvNE game with:
   - Blademaster first hero at ~65 000 ms (slightly late)
   - Stronghold (T2) command at ~160 000 ms (30 s late vs 130 000 ms reference)
-  - No expansion taken (game ends at 620 000 ms → critical)
+  - No expansion taken (game ends at 620 000 ms → info; Orc 1-base is standard)
   - Orc hero level 3 at ~280 000 ms (40 s late)
   - Worker trains: 5 starting + 9 trained = 14 total at 10 min
   - NE (slot 2): standard timings for reference checks
@@ -304,14 +304,24 @@ class TestTier2Timing:
 # ---------------------------------------------------------------------------
 
 class TestExpansionTiming:
-    def test_orc_no_expansion_critical_in_long_game(self) -> None:
+    def test_orc_no_expansion_info_in_normal_game(self) -> None:
+        # 2026-06-12 recalibration: Orc 1-base is standard meta. No expansion in
+        # a sub-18-min game is NOT a mistake → info (was wrongly 'critical').
         result = expansion_timing(
             ORC_EVENTS, ORC_PLAYER, "OvNE", REPLAY_ID, GAME_DURATION_MS
         )
         assert result.metric == "expansion_timing"
         assert result.value == -1
-        # game > 8 min → critical
-        assert result.severity == "critical"
+        # game ≤ 18 min, no expo → info (1-base is fine for Orc)
+        assert result.severity == "info"
+
+    def test_orc_no_expansion_minor_in_very_long_game(self) -> None:
+        # Only genuinely anomalous (18+ min) no-expo games get a soft 'minor'.
+        result = expansion_timing(
+            ORC_EVENTS, ORC_PLAYER, "OvNE", REPLAY_ID,
+            game_duration_ms=1_200_000,  # 20 min
+        )
+        assert result.severity == "minor"
 
     def test_ne_expansion_360s_on_reference(self) -> None:
         result = expansion_timing(
@@ -333,25 +343,27 @@ class TestExpansionTiming:
             events, ORC_PLAYER, "OvNE", REPLAY_ID, GAME_DURATION_MS
         )
         assert result.value == 300_000.0
-        # delta = 300_000 - 330_000 = -30_000 → info (early is fine)
+        # delta = 300_000 - 480_000 = -180_000 → info (early/normal is fine)
         assert result.severity == "info"
 
-    def test_late_expansion_major(self) -> None:
+    def test_very_late_expansion_flagged(self) -> None:
+        # An Orc expansion much later than the 8:00 informational anchor still
+        # flags (greedy/slow), but at low weight (scoring.py = 3.0).
         events = [
-            _ev(1, 500_000, "expand", "building:great_hall"),
+            _ev(1, 740_000, "expand", "building:great_hall"),
         ]
         result = expansion_timing(
             events, ORC_PLAYER, "OvNE", REPLAY_ID, GAME_DURATION_MS
         )
-        # delta = 500_000 - 330_000 = 170_000 → critical
+        # delta = 740_000 - 480_000 = 260_000 → critical
         assert result.severity == "critical"
 
-    def test_no_expansion_short_game_major(self) -> None:
+    def test_no_expansion_short_game_info(self) -> None:
         result = expansion_timing(
             ORC_EVENTS, ORC_PLAYER, "OvNE", REPLAY_ID,
-            game_duration_ms=300_000,  # 5 min game → major, not critical
+            game_duration_ms=300_000,  # 5 min game, no expo → info (1-base)
         )
-        assert result.severity == "major"
+        assert result.severity == "info"
 
 
 # ---------------------------------------------------------------------------
@@ -487,13 +499,14 @@ class TestEngine:
         assert 1 in slots
         assert 2 in slots
 
-    def test_orc_expansion_critical(self) -> None:
+    def test_orc_expansion_info_when_1base(self) -> None:
+        # Orc 1-base (no expo) in a sub-18-min game → info, not a flagged problem.
         results = run_benchmarks(ALL_EVENTS, PLAYERS, GAME_DURATION_MS, REPLAY_ID)
         orc_expo = next(
             r for r in results
             if r.slot == 1 and r.metric == "expansion_timing"
         )
-        assert orc_expo.severity == "critical"
+        assert orc_expo.severity == "info"
 
     def test_orc_t2_minor(self) -> None:
         results = run_benchmarks(ALL_EVENTS, PLAYERS, GAME_DURATION_MS, REPLAY_ID)
@@ -512,8 +525,8 @@ class TestEngine:
         # With a single player, matchup code cannot be inferred → expected=None for
         # all time-based metrics that DO have an actual value (non-absent events).
         # Note: absent-expansion severity is computed independently of the reference
-        # (it uses game duration), so expansion_timing can still be critical with
-        # no reference. We verify only the metrics that have a real measured value.
+        # (it uses game duration); for Orc a sub-18-min no-expo game is info.
+        # We verify only the metrics that have a real measured value.
         none_expected_with_value = [
             r for r in results
             if r.expected is None and r.value > 0

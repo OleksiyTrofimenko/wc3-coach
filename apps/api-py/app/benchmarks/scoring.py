@@ -39,7 +39,10 @@ from app.benchmarks.models import BenchmarkResult, BenchmarkSeverity
 # Metrics not in this dict default to weight 1.0 (present but low-impact).
 IMPACT_WEIGHTS: dict[str, float] = {
     # Economy
-    "expansion_timing":             10.0,
+    # expansion_timing was 10.0 (highest) — recalibrated to 3.0 on 2026-06-12:
+    # Orc is the 1-base aggression race, so expansion is situational, not a
+    # game-deciding timing. It must never be the auto-top problem. See scoring.md.
+    "expansion_timing":              3.0,
     "worker_production_gap_approx":  8.0,
     "tier2_timing":                  7.0,
     "worker_count_approx_10min":     6.0,
@@ -209,11 +212,13 @@ def _make_summary(result: BenchmarkResult) -> str:
     # --- Absent event (value == -1) ---
     if value_ms == -1:
         if metric == "expansion_timing":
-            exp_str = (
-                f" (expected by {_fmt_ms(expected_ms)})"
-                if expected_ms is not None else ""
+            # Orc 1-base play is standard — absent expansion is NOT a deficit.
+            # This only surfaces at severity 'minor' for 18+ min games; the
+            # wording stays neutral so the coach never frames it as a mistake.
+            return (
+                "No expansion taken — 1-base play (standard for Orc; only "
+                "worth noting in very long games)"
             )
-            return f"No expansion taken{exp_str} — {sev} economic deficit"
         if metric == "tier2_timing":
             exp_str = (
                 f" (expected by {_fmt_ms(expected_ms)})"

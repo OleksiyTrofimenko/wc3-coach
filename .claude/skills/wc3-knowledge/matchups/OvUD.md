@@ -20,7 +20,7 @@ Added by Strategist in T3.2.
 2:30   2nd Orc Burrow
 3:15   Stronghold complete → Shaman / Raider / Kodo production
 3:30–4:00  2nd hero (Far Seer wolves or Shadow Hunter healing)
-5:00–5:30  Expansion (safer vs UD than vs HU; DK creep route is predictable)
+7:00–10:00 Expansion (only if 1-base push did not close the game; fast FE variant ~5:00–6:00 only when DK camp route is confirmed distant; absent expansion is NOT a mistake)
 ```
 
 Orc vs Undead is a matchup where **map control and creep racing** determine the
@@ -76,7 +76,7 @@ so this is a niche strategy.
 | first_hero_timing | 62 000 ms (1:02) | ±15 000 ms | Standard Altar 60 s; BM or FS opener |
 | tier2_timing (stronghold) | 135 000 ms (2:15) | ±20 000 ms | Stronghold ~2:15 vs UD; FE variant delays to ~3:00 |
 | tier3_timing (fortress) | 420 000 ms (7:00) | ±60 000 ms | Fortress at ~7:00 if game is even; earlier if snowballing |
-| expansion_timing | 330 000 ms (5:30) | ±60 000 ms | Orc can expo safely ~5:30 if BM contested DK camps |
+| expansion_timing | 480 000 ms (8:00) | ±120 000 ms | Informational anchor — standard OvUD is 1-base BM/FS → T2 spike; FE variant ~5:00–6:00 only when DK route is confirmed contested; absent expansion is NOT a mistake (2026-06-12 calibration) |
 | hero_level3_timing | 240 000 ms (4:00) | ±30 000 ms | BM reaches 3 while contesting UD creep route |
 | hero_level5_timing | 480 000 ms (8:00) | ±60 000 ms | Level 5 in sustained T2 fights |
 | worker_count_10min | 14 workers | ±2 | Standard mid-game peon saturation |
@@ -107,8 +107,10 @@ so this is a niche strategy.
   mitigation ability) from units, making the UD army take full damage.
 - **Far Seer wolves control space:** Wolves block UD Ghouls from efficiently
   chasing and deny map vision; useful on maps with narrow choke points.
-- **Early expo pressure:** If Orc secures expansion at 5:30 while UD is still on
-  one base, the Orc economic lead compounds — UD cannot match 2-base Orc at 8:00.
+- **Late expo pressure (if game goes long):** If Orc secured the map via T2 spike and
+  UD is still on one base at 8:00+, taking an expansion compounds the lead — UD
+  cannot match 2-base Orc at 10:00+. But expansion is the reward for winning the
+  mid-game, not the plan that drives it.
 
 ## Win conditions — Undead
 

@@ -43,7 +43,7 @@ the entire mid-game.
 3:15   Stronghold complete → Shaman / Raider available
 3:30   2nd hero (Far Seer wolves or Shadow Hunter Hex/Wards)
 4:00   Voodoo Lounge for item access (optional but common)
-5:00–5:30  Expansion (map-dependent; safe if BM harass forced opponent's BM back)
+7:00–10:00 Expansion (only if game continues past T2 spike without a decisive fight; FS opener can fast expo ~4:30–5:00 if opponent is not punishing)
 ```
 
 **Strategic intent:** BM into the enemy base at 1:30 aims to deny the opponent's
@@ -88,7 +88,7 @@ access) but can be devastating if undetected.
 | first_hero_timing | 62 000 ms (1:02) | ±15 000 ms | Standard Altar 60 s; BM or FS opener |
 | tier2_timing (stronghold) | 130 000 ms (2:10) | ±20 000 ms | Stronghold starts ~2:10 in standard BM opener; FS opener same |
 | tier3_timing (fortress) | 420 000 ms (7:00) | ±60 000 ms | Fortress only in drawn-out games; `verified: community, low-confidence` |
-| expansion_timing | 330 000 ms (5:30) | ±60 000 ms | BM opener: expo at ~5:30 after T2 spike; FS opener: ~4:30 |
+| expansion_timing | 480 000 ms (8:00) | ±120 000 ms | Informational anchor — BM opener: expo after T2 spike only if game continues; FS opener fast expo ~4:30–5:00; absent expansion is NOT a mistake (2026-06-12 calibration) |
 | hero_level3_timing | 240 000 ms (4:00) | ±30 000 ms | BM or FS reaches level 3 by 4:00 with 2–3 camps |
 | hero_level5_timing | 480 000 ms (8:00) | ±60 000 ms | Level 5 in sustained T2 engagement; `verified: community, low-confidence` |
 | worker_count_10min | 14 workers | ±2 | Standard mid-game peon saturation; same for both sides |

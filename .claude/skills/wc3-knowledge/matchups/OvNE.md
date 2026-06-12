@@ -14,7 +14,7 @@
 7. ~2:00 — Stronghold (T2) upgrade begins (requires Barracks + Great Hall)
 8. ~2:10 — optional 2nd Burrow for food headroom
 9. ~3:30 — Stronghold complete → Raiders/Shaman/T2 upgrades available
-10. ~5:30 — Expansion (map-dependent)
+10. ~7:00–10:00 — Expansion (only if game continues past BM harass + T2 spike phase; 1-base close-out is the standard plan)
 
 ## Key timings — Orc (patch 2.0)
 
@@ -23,7 +23,7 @@
 | first_hero_timing | 62 000 ms (1:02) | ±15 000 ms | Altar 60 s build + queue |
 | tier2_timing (stronghold) | 130 000 ms (2:10) | ±20 000 ms | Standard opener |
 | tier3_timing (fortress) | 420 000 ms (7:00) | ±60 000 ms | Late game only |
-| expansion_timing | 330 000 ms (5:30) | ±60 000 ms | Mid-ladder standard; FE builds earlier |
+| expansion_timing | 480 000 ms (8:00) | ±120 000 ms | Informational anchor — 1-base Orc is standard; FE variant ~5:00–6:00 on safe maps; absent expansion → info, never a penalty (2026-06-12 calibration) |
 | hero_level3_timing | 240 000 ms (4:00) | ±30 000 ms | 2–3 creep camps |
 | hero_level5_timing | 480 000 ms (8:00) | ±60 000 ms | Full T2 engagement |
 | worker_count_10min | 14 workers | ±2 | Typical mid-game peon saturation |

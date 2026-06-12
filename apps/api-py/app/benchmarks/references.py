@@ -88,8 +88,9 @@ _REFERENCE_TABLE: dict[tuple[str, str, str], ReferenceEntry] = {
         notes="Fortress at ~7:00; only in long games",
     ),
     ("OvNE", "orc", "expansion_timing"): ReferenceEntry(
-        expected=330_000, window_ms=60_000,
-        notes="Standard mid-ladder OvNE expo at 5:30; FE builds go earlier",
+        expected=480_000, window_ms=120_000,
+        notes="Informational anchor — 1-base Orc is standard meta; FE variant ~5:00-6:00; "
+              "absent expansion scores info, never a penalty (2026-06-12 calibration)",
     ),
     ("OvNE", "orc", "hero_level3_timing"): ReferenceEntry(
         expected=240_000, window_ms=30_000,
@@ -144,8 +145,9 @@ _REFERENCE_TABLE: dict[tuple[str, str, str], ReferenceEntry] = {
         notes="Fortress at ~7:30 in drawn-out OvH games only",
     ),
     ("OvH", "orc", "expansion_timing"): ReferenceEntry(
-        expected=360_000, window_ms=60_000,
-        notes="HU Keep pressure often delays Orc expo to ~6:00",
+        expected=540_000, window_ms=120_000,
+        notes="Informational anchor — OvH is 1-base BM harass -> T2 spike close-out; "
+              "expansion only if Human survives past ~9 min; absent expansion not a mistake",
     ),
     ("OvH", "orc", "hero_level3_timing"): ReferenceEntry(
         expected=270_000, window_ms=30_000,
@@ -208,8 +210,9 @@ _REFERENCE_TABLE: dict[tuple[str, str, str], ReferenceEntry] = {
         notes="Fortress at ~7:00 if game is even; earlier if Orc is snowballing",
     ),
     ("OvUD", "orc", "expansion_timing"): ReferenceEntry(
-        expected=330_000, window_ms=60_000,
-        notes="Orc can expo safely ~5:30 if BM contested DK creep camps",
+        expected=480_000, window_ms=120_000,
+        notes="Informational anchor — standard OvUD is 1-base; FE variant ~5:00-6:00 "
+              "only when DK route contested; absent expansion not a mistake",
     ),
     ("OvUD", "orc", "hero_level3_timing"): ReferenceEntry(
         expected=240_000, window_ms=30_000,
@@ -241,8 +244,9 @@ _REFERENCE_TABLE: dict[tuple[str, str, str], ReferenceEntry] = {
         notes="Fortress at ~7:00 in drawn-out OvO games; low-confidence timing",
     ),
     ("OvO", "orc", "expansion_timing"): ReferenceEntry(
-        expected=330_000, window_ms=60_000,
-        notes="BM-first expo ~5:30; FS-first variant can expo ~4:30 — 5:30 is the conservative benchmark",
+        expected=480_000, window_ms=120_000,
+        notes="Informational anchor — BM opener: expo after T2 spike if game continues; "
+              "FS opener fast expo ~4:30-5:00; absent expansion not a mistake",
     ),
     ("OvO", "orc", "hero_level3_timing"): ReferenceEntry(
         expected=240_000, window_ms=30_000,
@@ -388,11 +392,20 @@ def severity_for_level_delta(delta: float) -> BenchmarkSeverity:
 
 def severity_for_absent_expansion(game_duration_ms: int) -> BenchmarkSeverity:
     """
-    Severity when no expansion was taken at all.
+    Severity when no expansion was taken at all — ORC ONLY (Orc sanctuary).
 
-    > 8 min game with no expo → critical (should have expanded)
-    ≤ 8 min game with no expo → major   (could be fast-win build, but still notable)
+    Orc is the aggression-first race. 1-base play across all four Orc matchups
+    is the dominant meta through patch 2.0 — BM harass -> T2 spike -> the game
+    resolves by ~12-14 min. No expansion is frequently the CORRECT decision, so
+    it must NOT be scored as a mistake by itself (this previously flagged winning
+    1-base games as a 'critical economic deficit' — wrong advice).
+
+    > 18 min game with no expo → minor (genuinely anomalous; even 1-base Orc
+      resolves before ~14 min at high ladder on standard maps)
+    ≤ 18 min game with no expo → info (score contribution 0; never surfaces)
+
+    W3Champions / user (Orc main) correction confirmed 2026-06-12.
     """
-    if game_duration_ms > 480_000:
-        return "critical"
-    return "major"
+    if game_duration_ms > 1_080_000:  # 18 min
+        return "minor"
+    return "info"

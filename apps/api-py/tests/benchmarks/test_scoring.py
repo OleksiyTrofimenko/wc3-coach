@@ -70,8 +70,11 @@ def _ev(slot: int, t_ms: int, event_type: str, entity_ref: str, payload: dict | 
 # ---------------------------------------------------------------------------
 
 class TestImpactWeights:
-    def test_expansion_has_highest_weight(self) -> None:
-        assert IMPACT_WEIGHTS["expansion_timing"] == 10.0
+    def test_expansion_recalibrated_low(self) -> None:
+        # 2026-06-12: dropped 10.0 → 3.0 (Orc is 1-base; expansion is situational,
+        # never the auto-top problem). worker_production_gap is now the highest.
+        assert IMPACT_WEIGHTS["expansion_timing"] == 3.0
+        assert IMPACT_WEIGHTS["worker_production_gap_approx"] > IMPACT_WEIGHTS["expansion_timing"]
 
     def test_worker_gap_beats_t2(self) -> None:
         assert IMPACT_WEIGHTS["worker_production_gap_approx"] > IMPACT_WEIGHTS["tier2_timing"]
@@ -132,18 +135,20 @@ class TestScoreDeviation:
 
     def test_absent_event_uses_absent_magnitude(self) -> None:
         # value == -1, delta is None → absent magnitude factor = 1.5
-        r = _br("expansion_timing", -1, 330_000, None, "critical")
-        expected_score = 10.0 * 2.0 * 1.5  # = 30.0
+        # (formula test; uses the recalibrated expansion weight 3.0)
+        r = _br("expansion_timing", -1, 480_000, None, "critical")
+        expected_score = 3.0 * 2.0 * 1.5  # = 9.0
         assert score_deviation(r) == pytest.approx(expected_score)
 
-    def test_missing_expansion_critical_score_30(self) -> None:
-        r = _br("expansion_timing", -1, 330_000, None, "critical")
-        assert score_deviation(r) == pytest.approx(30.0)
+    def test_expansion_critical_formula_score(self) -> None:
+        # Formula check at the new weight (3.0). NOTE: absent expansion no longer
+        # PRODUCES 'critical' for Orc (it's info/minor) — this only exercises the math.
+        r = _br("expansion_timing", -1, 480_000, None, "critical")
+        assert score_deviation(r) == pytest.approx(9.0)
 
-    def test_missing_expansion_major_score_15(self) -> None:
-        # short game → major severity for absent expansion
-        r = _br("expansion_timing", -1, 330_000, None, "major")
-        expected_score = 10.0 * 1.0 * 1.5  # = 15.0
+    def test_expansion_major_formula_score(self) -> None:
+        r = _br("expansion_timing", -1, 480_000, None, "major")
+        expected_score = 3.0 * 1.0 * 1.5  # = 4.5
         assert score_deviation(r) == pytest.approx(expected_score)
 
     def test_minor_expansion_score_less_than_major(self) -> None:
@@ -314,10 +319,13 @@ class TestPrioritize:
 
 class TestMakeSummary:
     def test_absent_expansion(self) -> None:
-        r = _br("expansion_timing", -1, 330_000, None, "critical")
+        # Recalibrated: absent expansion is neutral framing for Orc (1-base), with
+        # NO "expected by" time and NO "deficit" wording (would be wrong advice).
+        r = _br("expansion_timing", -1, 480_000, None, "minor")
         s = _make_summary(r)
         assert "No expansion" in s
-        assert "5:30" in s  # 330 000 ms = 5:30
+        assert "1-base" in s
+        assert "deficit" not in s.lower()
 
     def test_absent_hero(self) -> None:
         r = _br("first_hero_timing", -1, 62_000, None, "critical")
@@ -408,7 +416,10 @@ class TestIntegration:
         assert len(problems) <= 5
         assert len(problems) > 0
 
-    def test_expansion_is_top_priority(self) -> None:
+    def test_expansion_not_surfaced_and_worker_gap_leads(self) -> None:
+        # 2026-06-12 recalibration: Orc 1-base (no expo) in a 620k (<18 min) game
+        # is INFO, so expansion must NOT appear among the prioritised problems —
+        # and the real top problem is the 154k worker-production gap (critical).
         results = run_benchmarks(
             events=self.ORC_EVENTS + self.NE_EVENTS,
             players=[self.ORC_PLAYER, self.NE_PLAYER],
@@ -416,7 +427,14 @@ class TestIntegration:
             replay_id="integration-test",
         )
         problems = prioritize(results, orc_slot=1)
-        assert problems[0].metric == "expansion_timing"
+        # The fix: expansion is INFO for 1-base Orc → never surfaced, never #1.
+        assert "expansion_timing" not in {p.metric for p in problems}
+        assert problems[0].metric != "expansion_timing"
+        # The genuine top problem is a real economy failure (worker count/gap), critical.
+        assert problems[0].metric in {
+            "worker_count_approx_10min", "worker_production_gap_approx", "tier2_timing"
+        }
+        assert problems[0].severity == "critical"
 
     def test_no_ne_problems_surfaced_when_slot_filtered(self) -> None:
         results = run_benchmarks(
