@@ -169,6 +169,25 @@ A personal, locally-run platform for deliberate Warcraft III improvement:
 >   post-generation validator that strips any tip number absent from FACTS/material.
 >   Tracked as **T5.4 (coach grounding)**. 212 pytest still green; corpus is the
 >   durable, safe value shipped today.
+> - **T5.4 — coach tip grounding DONE (2026-06-12, HEAD `3e7226c`):** the
+>   deterministic guardrail that makes coach output trustworthy. New pure
+>   `apps/api-py/app/coach/grounding.py` (`find_ungrounded_numbers`/`is_grounded`)
+>   checks four high-signal numeric categories in each tip against the allowed
+>   source text (scored-problem summaries + retrieved chunks): **clock times M:SS
+>   (full-token match = the strong guarantee)**, duration phrases, percentages,
+>   resource figures; bare ints (level 3, tier 2) deliberately unchecked to keep
+>   false-positives ~0. `service.py::_ground_tips` runs post-parse: any tip with a
+>   fabricated number has its `detail` replaced by the deterministic
+>   `ScoredProblem.summary` (title → metric-derived), logging the offenders;
+>   tMs/priority/relatedBenchmarks untouched. `prompt.py` rule 8 bans inventing a
+>   timestamp for an absent event. **Live-verified across 3 OvNE runs:** the
+>   validator caught + replaced every fabricated figure (`4:17`, `6:15`,
+>   `2400 gold`) with the true summary; clean qualitative tips passed unchanged —
+>   no fabricated number can reach the user regardless of LLM nondeterminism.
+>   248 pytest (+36), ruff + mypy-strict clean. **This is the v1 trustworthiness
+>   keystone.** Known non-number gap (separate, lower-priority): the LLM can still
+>   mis-name a hero ability qualitatively (e.g. "Feral Spirit" in a Blademaster
+>   game) — entity/ability grounding is a possible future enhancement, not T5.4.
 > Next up: **T4.2** (per-race hotkey drills — verify the flagged keys in-game first),
 > then T4.3 micro / T4.4 build-order drills, T4.5 juice (Director), T4.6 progress.
 > Ontology follow-ups: expand the prose `wc3-knowledge/ontology.md` (still Orc/NE
@@ -178,9 +197,8 @@ A personal, locally-run platform for deliberate Warcraft III improvement:
 > Deaths/positions (T1.4, Observer API) remain a tracked follow-up, as does
 > promoting `ScoredProblem` into shared-types + the JSON-Schema→pydantic
 > generator (TODO T0.4).
-> Knowledge-depth follow-ups (parallel to EPIC 4): **T5.4** coach grounding
-> (deterministic delta-as-FACT + tip-number validator — prerequisite before the
-> coach can safely cite the new mechanics figures); remaining depth backlog from
+> Knowledge-depth follow-ups (parallel to EPIC 4): ~~T5.4 coach grounding~~ ✅ DONE;
+> remaining depth backlog from
 > the 2026-06-12 plan — Human/Undead **prose** ontology (combat stats into RAG),
 > a combat-math deep-dive doc (worked unit trades from the existing armor matrix),
 > per-matchup threat/counter depth, and the **per-race tier-upgrade costs** the
