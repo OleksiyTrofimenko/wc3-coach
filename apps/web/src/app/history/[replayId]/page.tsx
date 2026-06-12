@@ -12,7 +12,7 @@
  * updated optimistically on each submission.
  */
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import type { CoachReport, CoachTip } from "@wc3-coach/shared-types";
 import type { TipFeedback } from "@/types/analyzer";
@@ -117,6 +117,9 @@ export default function ReplayReportPage() {
   const replayId = typeof params.replayId === "string" ? params.replayId : "";
 
   const [loadState, setLoadState] = useState<LoadState>({ kind: "loading" });
+  // Tracks the replay currently being viewed so a slow earlier fetch (after the
+  // user navigates to a different replay) can't overwrite the newer one.
+  const activeReplayIdRef = useRef(replayId);
 
   const load = useCallback(async () => {
     if (!replayId) return;
@@ -126,12 +129,14 @@ export default function ReplayReportPage() {
         getCoachReportById(replayId),
         getReplayFeedback(replayId),
       ]);
+      if (activeReplayIdRef.current !== replayId) return; // stale response — ignore
       if (report === null) {
         setLoadState({ kind: "not-found" });
       } else {
         setLoadState({ kind: "loaded", report, feedback });
       }
     } catch (err) {
+      if (activeReplayIdRef.current !== replayId) return; // stale response — ignore
       setLoadState({
         kind: "error",
         message: err instanceof Error ? err.message : "Failed to load report",
@@ -140,8 +145,9 @@ export default function ReplayReportPage() {
   }, [replayId]);
 
   useEffect(() => {
+    activeReplayIdRef.current = replayId;
     void load();
-  }, [load]);
+  }, [load, replayId]);
 
   /** Optimistically add a newly submitted feedback row to state. */
   const handleFeedbackSubmitted = useCallback((row: TipFeedback) => {

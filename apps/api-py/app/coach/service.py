@@ -266,14 +266,19 @@ def _parse_tips_from_llm(
     # Clamp to 3-5
     raw_tips = raw_tips[:5]
 
-    # Build CoachTip objects with deterministic priority/tMs/relatedBenchmarks
+    # Build CoachTip objects with deterministic priority/tMs/relatedBenchmarks.
+    # `rank` counts only the SURVIVING tips so priority == 1-based list position,
+    # which _ground_tips and the problem mapping below rely on (a skipped
+    # empty tip must NOT leave a gap that desyncs tip↔problem alignment).
     tips: list[CoachTip] = []
-    for rank, raw in enumerate(raw_tips, 1):
+    rank = 0
+    for raw in raw_tips:
         title = str(raw.get("title", "")).strip()
         detail = str(raw.get("detail", "")).strip()
         if not title or not detail:
             continue
 
+        rank += 1
         # Find the corresponding problem (rank 1 → problems[0], etc.)
         problem_idx = rank - 1
         t_ms: int | None = None

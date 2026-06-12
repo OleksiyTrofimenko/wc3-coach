@@ -108,6 +108,21 @@ class TestParseTipsFromLlm:
         assert tips[1].priority == 2
         assert tips[2].priority == 3
 
+    def test_skipped_empty_tip_keeps_priorities_contiguous(self) -> None:
+        # An empty middle tip must NOT leave a priority gap — surviving tips get
+        # contiguous 1-based priorities so the tip↔problem mapping stays aligned.
+        raw = _make_llm_json([
+            {"title": "Tip 1", "detail": "D1"},
+            {"title": "", "detail": ""},  # dropped
+            {"title": "Tip 3", "detail": "D3"},
+        ])
+        prob_a = _problem(metric="worker_production_gap_approx")
+        prob_b = _problem(metric="tier2_timing")
+        tips = _parse_tips_from_llm(raw, [prob_a, prob_b])
+        assert [t.priority for t in tips] == [1, 2]
+        # The 2nd surviving tip maps to problems[1] (tier2), not problems[2].
+        assert tips[1].related_benchmarks == ["tier2_timing"]
+
     def test_title_and_detail_preserved(self) -> None:
         raw = _make_llm_json([
             {"title": "Expand at 5:30", "detail": "You must expand."}

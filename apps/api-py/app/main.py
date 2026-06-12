@@ -385,6 +385,28 @@ async def submit_feedback(replay_id: str, body: TipFeedbackIn) -> TipFeedback:
             raise HTTPException(
                 status_code=404, detail="replay not found"
             ) from exc
+
+        # Feedback only makes sense against an existing report — and a tip-level
+        # flag must target a real tip. Otherwise the row would be an orphan the
+        # history UI can never render (it filters by tipPriority == tip.priority).
+        report = await fetch_report(conn, replay_id)
+        if report is None:
+            raise HTTPException(
+                status_code=404,
+                detail="no coach report yet — generate one before leaving feedback",
+            )
+        if body.tip_priority is not None and not (
+            1 <= body.tip_priority <= len(report.tips)
+        ):
+            raise HTTPException(
+                status_code=422,
+                detail=(
+                    f"tipPriority {body.tip_priority} out of range "
+                    f"(report has {len(report.tips)} tips; use null for "
+                    "whole-report feedback)"
+                ),
+            )
+
         row = await insert_feedback(
             conn,
             replay_id=replay_id,
