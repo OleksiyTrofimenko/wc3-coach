@@ -14,8 +14,16 @@ add it HERE rather than hard-coding a magic number in application code.
 ## Files
 - `ontology.md` — races, units, buildings, heroes, creeps; short cross-reference to the DB.
 - `timings.md` — reference timings per matchup and patch (expand, T2/T3, hero levels).
+- `mechanics.md` — core economy mechanics: upkeep, food/supply, gold mining, lumber,
+  bounty (the "why a deviation matters" layer; web-cited, patch-tagged).
+- `creeping.md` — neutral camp difficulty tiers, creep XP table, hero level-5 XP
+  cutoff, item drops (universal rules; per-camp data is map-specific, unseeded).
+- `hero-progression.md` — hero XP curve (cumulative table + formula), derived-stat
+  model (HP/Str, mana/Int, armor/Agi, +1 dmg/primary), per-level growth, Altar
+  revive cost/time. Single source of truth for the XP-to-level table.
 - `matchups/` — one file per matchup (OvH, OvNE, OvUD, …): build orders, win-conditions,
   common mistakes.
+- `hotkeys.md` — control-group / unit / building hotkeys (APM-trainer source of truth).
 - `glossary.md` — WC3 terms so the coach speaks the language of the game.
 
 ## Rules

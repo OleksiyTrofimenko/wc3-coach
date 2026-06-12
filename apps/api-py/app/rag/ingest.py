@@ -102,6 +102,24 @@ _CORPUS_FILES: list[dict[str, str | None]] = [
         "matchup": None,
         "source": "manual",
     },
+    {
+        "rel_path": "mechanics.md",
+        "title": "WC3 Game Mechanics Reference (Economy)",
+        "matchup": None,
+        "source": "manual",
+    },
+    {
+        "rel_path": "creeping.md",
+        "title": "WC3 Creeping Reference",
+        "matchup": None,
+        "source": "manual",
+    },
+    {
+        "rel_path": "hero-progression.md",
+        "title": "WC3 Hero Progression Reference",
+        "matchup": None,
+        "source": "manual",
+    },
 ]
 
 
