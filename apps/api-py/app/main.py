@@ -35,6 +35,7 @@ from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.admin.routes import router as admin_router
+from app.curation.routes import router as curation_router
 from app.replays.routes import router as replays_router
 from app.benchmarks.db import (
     fetch_benchmarks,
@@ -76,6 +77,8 @@ app = FastAPI(
 app.include_router(admin_router)
 # Replays browser (personal + reference replays)
 app.include_router(replays_router)
+# Curation pipeline (training-example capture + export)
+app.include_router(curation_router)
 
 
 # ---------------------------------------------------------------------------

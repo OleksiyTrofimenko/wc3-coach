@@ -12,6 +12,7 @@ import { useParams, useRouter } from "next/navigation";
 import type { ReplayResponse } from "@/types/analyzer";
 import { getReplay } from "@/lib/api";
 import { BuildTimeline } from "@/components/BuildTimeline";
+import { CurationPanel } from "@/components/CurationPanel";
 import { EntityIcon } from "@/components/EntityIcon";
 import { formatMs, raceName } from "@/lib/utils";
 import { entityDisplayName, heroRefsForSlot, parseEntityRef } from "@/lib/entities";
@@ -147,6 +148,11 @@ export default function ReplayDetailPage() {
                 />
               </section>
             )}
+
+            {/* Curation — capture the ideal coaching for the training set */}
+            <section className="section">
+              <CurationPanel replayId={replayId} />
+            </section>
           </>
         )}
       </div>

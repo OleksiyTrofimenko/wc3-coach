@@ -57,6 +57,13 @@
       "when": 1781346660001,
       "tag": "0007_productive_madame_hydra",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1781377471601,
+      "tag": "0008_foamy_molecule_man",
+      "breakpoints": true
     }
   ]
 }

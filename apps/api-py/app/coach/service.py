@@ -42,6 +42,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+from dataclasses import dataclass
 from typing import Any
 
 from app.benchmarks.db import (
@@ -418,6 +419,148 @@ def _ground_tips(
 
 
 # ---------------------------------------------------------------------------
+# Prompt assembly (shared by the coach run AND the curation pipeline)
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class CoachAssembly:
+    """
+    Everything needed to run (or curate) the coach for one replay.
+
+    `messages` is the exact prompt the LLM sees in production — capturing it for
+    a training example guarantees no train/serve skew. `problems` are the scored
+    deviations (the deterministic seed for curated gold tips). When `problems` is
+    empty the game is "clean" (no significant deviations).
+    """
+
+    replay_id: str
+    matchup: str
+    rag_matchup: str | None
+    map_name: str
+    result: str
+    duration_ms: int
+    orc_slot: int
+    problems: list[ScoredProblem]
+    chunks: list[RetrievedChunk]
+    messages: list[dict[str, str]]
+    heroes: list[str]
+    allowed_text: str
+
+
+async def assemble_coach(
+    replay_id: str,
+    top_n: int = 5,
+    chunks_per_problem: int = 3,
+    max_chunks: int = 10,
+) -> CoachAssembly:
+    """
+    Build the coach prompt context for a replay WITHOUT calling the LLM.
+
+    Runs steps 1–6 of the pipeline (load timeline → benchmarks → prioritize →
+    RAG → build_messages) and returns the assembled context. Used by both
+    generate_coach_report (which then calls the LLM) and the curation pipeline
+    (which captures `messages` as the training input and seeds gold tips from
+    `problems`). RAG needs Ollama embeddings, so the stack must be up.
+
+    Raises ValueError on unknown replay / non-Orc game (same as the coach run).
+    """
+    engine = get_engine()
+
+    # Step 1: Load timeline + meta (validates replay existence)
+    async with engine.connect() as conn:
+        events, players, game_duration_ms, patch_id = await load_replay_timeline(
+            conn, replay_id
+        )
+        meta = await load_replay_meta(conn, replay_id)
+    map_name: str = meta["map_name"]
+
+    # Step 2: Derive Orc context
+    orc_player = _find_orc_player(players)
+    if orc_player is None:
+        raise ValueError(
+            "orc_sanctuary: no Orc player found in this replay. "
+            "The coach only analyses games where Orc is one of the players."
+        )
+    matchup, rag_matchup = _derive_matchup(orc_player, players)
+    result_str: str = orc_player.result
+
+    # Step 3: Benchmarks (fetch existing or compute + persist)
+    async with engine.connect() as conn:
+        results = await fetch_benchmarks(conn, replay_id)
+    if not results:
+        async with engine.connect() as conn:
+            references = await load_reference_table(conn, patch_id)
+        results = run_benchmarks(
+            events=events,
+            players=players,
+            game_duration_ms=game_duration_ms,
+            replay_id=replay_id,
+            patch_id=patch_id,
+            references=references,
+        )
+        async with engine.begin() as conn:
+            await persist_benchmarks(conn, replay_id, results)
+
+    # Step 4: Prioritize
+    problems = prioritize(results, top_n=top_n, orc_slot=orc_player.slot)
+
+    # Step 5: RAG augmentation (loop is empty for a clean game → no waste)
+    all_chunks: list[RetrievedChunk] = []
+    for prob in problems:
+        try:
+            all_chunks.extend(
+                await retrieve(
+                    query=prob.summary,
+                    top_k=chunks_per_problem,
+                    matchup=rag_matchup,
+                )
+            )
+        except RuntimeError:
+            logger.warning(
+                "Coach: RAG retrieve failed for problem %r — skipping", prob.metric
+            )
+    deduped_chunks = _dedupe_chunks(all_chunks, max_chunks)
+
+    # allowed_text for grounding validation (T5.4)
+    context_facts = f"{matchup} {map_name} {_fmt_duration(game_duration_ms)}"
+    allowed_text = (
+        context_facts
+        + "\n"
+        + "\n".join(p.summary for p in problems)
+        + "\n"
+        + "\n".join(c.chunk_text for c in deduped_chunks)
+    )
+
+    # Step 6: Build the prompt messages (the training INPUT)
+    heroes = _extract_heroes(events, orc_player.slot)
+    messages = build_messages(
+        matchup=matchup,
+        map_name=map_name,
+        result=result_str,
+        duration_ms=game_duration_ms,
+        problems=problems,
+        chunks=deduped_chunks,
+        heroes=heroes,
+    )
+
+    return CoachAssembly(
+        replay_id=replay_id,
+        matchup=matchup,
+        rag_matchup=rag_matchup,
+        map_name=map_name,
+        result=result_str,
+        duration_ms=game_duration_ms,
+        orc_slot=orc_player.slot,
+        problems=problems,
+        chunks=deduped_chunks,
+        messages=messages,
+        heroes=heroes,
+        allowed_text=allowed_text,
+    )
+
+
+# ---------------------------------------------------------------------------
 # Main entry point
 # ---------------------------------------------------------------------------
 
@@ -461,150 +604,43 @@ async def generate_coach_report(
     """
     engine = get_engine()
 
-    # -------------------------------------------------------------------------
-    # Step 1: Load timeline (validates replay existence)
-    # -------------------------------------------------------------------------
-    async with engine.connect() as conn:
-        events, players, game_duration_ms, patch_id = await load_replay_timeline(
-            conn, replay_id
-        )
-        meta = await load_replay_meta(conn, replay_id)
-
-    map_name: str = meta["map_name"]
-
-    # -------------------------------------------------------------------------
-    # Step 2: Derive Orc context
-    # -------------------------------------------------------------------------
-    orc_player = _find_orc_player(players)
-    if orc_player is None:
-        raise ValueError(
-            "orc_sanctuary: no Orc player found in this replay. "
-            "The coach only analyses games where Orc is one of the players."
-        )
-
-    matchup, rag_matchup = _derive_matchup(orc_player, players)
-    result_str: str = orc_player.result  # "win" | "loss" | "unknown"
-
-    logger.info(
-        "Coach: replay=%s matchup=%s map=%r orc_slot=%d result=%s duration=%.1fs",
-        replay_id, matchup, map_name, orc_player.slot, result_str,
-        game_duration_ms / 1000,
+    # Steps 1–6: assemble the prompt context (shared with the curation pipeline).
+    a = await assemble_coach(
+        replay_id,
+        top_n=top_n,
+        chunks_per_problem=chunks_per_problem,
+        max_chunks=max_chunks,
     )
 
-    # -------------------------------------------------------------------------
-    # Step 3: Benchmarks (fetch existing or compute + persist)
-    # -------------------------------------------------------------------------
-    async with engine.connect() as conn:
-        results = await fetch_benchmarks(conn, replay_id)
-
-    if not results:
-        logger.info("Coach: no benchmarks found for %s — running engine", replay_id)
-        async with engine.connect() as conn:
-            references = await load_reference_table(conn, patch_id)
-        results = run_benchmarks(
-            events=events,
-            players=players,
-            game_duration_ms=game_duration_ms,
-            replay_id=replay_id,
-            patch_id=patch_id,
-            references=references,
-        )
-        async with engine.begin() as conn:
-            await persist_benchmarks(conn, replay_id, results)
-
-    # -------------------------------------------------------------------------
-    # Step 4: Prioritize
-    # -------------------------------------------------------------------------
-    problems: list[ScoredProblem] = prioritize(
-        results, top_n=top_n, orc_slot=orc_player.slot
-    )
-
-    if not problems:
+    # Clean game (no scorable deviations) → deterministic templated report, no LLM.
+    if not a.problems:
         logger.info("Coach: no scorable problems for %s — clean game", replay_id)
         report = _clean_game_report(
             replay_id=replay_id,
-            matchup=matchup,
-            map_name=map_name,
-            result=result_str,
-            duration_ms=game_duration_ms,
+            matchup=a.matchup,
+            map_name=a.map_name,
+            result=a.result,
+            duration_ms=a.duration_ms,
         )
         async with engine.begin() as conn:
             await upsert_report(conn, report, model=CHAT_MODEL)
         return report
 
-    # -------------------------------------------------------------------------
-    # Step 5: RAG augmentation
-    # -------------------------------------------------------------------------
-    all_chunks: list[RetrievedChunk] = []
-    for prob in problems:
-        try:
-            chunks = await retrieve(
-                query=prob.summary,
-                top_k=chunks_per_problem,
-                matchup=rag_matchup,
-            )
-            all_chunks.extend(chunks)
-        except RuntimeError:
-            # RAG failure is non-fatal — we proceed with fewer chunks
-            logger.warning(
-                "Coach: RAG retrieve failed for problem %r — skipping", prob.metric
-            )
-
-    deduped_chunks = _dedupe_chunks(all_chunks, max_chunks)
-    logger.info(
-        "Coach: %d raw chunks → %d deduped for %s",
-        len(all_chunks), len(deduped_chunks), replay_id,
-    )
-
-    # Build the allowed_text for grounding validation (T5.4).
-    # This is the union of every number the model is *permitted* to use:
-    # - The CONTEXT facts the prompt also shows (matchup, map, and the game
-    #   Duration as M:SS — a legit tip may cite the game-end time, so it must be
-    #   grounded, not flagged as fabricated).
-    # - Every scored-problem summary (template-generated; contains all the M:SS
-    #   times, deltas, and counts the model should echo).
-    # - Every retrieved knowledge chunk (corpus text the model may reference).
-    context_facts = f"{matchup} {map_name} {_fmt_duration(game_duration_ms)}"
-    allowed_text = (
-        context_facts
-        + "\n"
-        + "\n".join(p.summary for p in problems)
-        + "\n"
-        + "\n".join(c.chunk_text for c in deduped_chunks)
-    )
-
-    # -------------------------------------------------------------------------
-    # Step 6: Build prompt → LLM chat
-    # -------------------------------------------------------------------------
-    heroes = _extract_heroes(events, orc_player.slot)
-    logger.info("Coach: Orc heroes detected for %s: %s", replay_id, heroes)
-    messages = build_messages(
-        matchup=matchup,
-        map_name=map_name,
-        result=result_str,
-        duration_ms=game_duration_ms,
-        problems=problems,
-        chunks=deduped_chunks,
-        heroes=heroes,
-    )
-
+    # Step 7: LLM chat + post-process tips
     logger.info("Coach: calling Ollama chat for %s ...", replay_id)
-    raw_response = await chat(messages, format_schema=_TIP_SCHEMA)
+    raw_response = await chat(a.messages, format_schema=_TIP_SCHEMA)
     logger.info("Coach: LLM response received (%d chars)", len(raw_response))
 
-    # -------------------------------------------------------------------------
-    # Step 7: Post-process tips
-    # -------------------------------------------------------------------------
-    tips = _parse_tips_from_llm(raw_response, problems)
+    tips = _parse_tips_from_llm(raw_response, a.problems)
 
     # T5.4: Grounding validation — strip any LLM-fabricated numbers by
     # replacing offending tips with their deterministic fallback summaries.
-    tips = _ground_tips(tips, problems, allowed_text)
+    tips = _ground_tips(tips, a.problems, a.allowed_text)
 
     # Safety: ensure 3 tips minimum (pad with a generic-but-grounded tip if
     # the model underdelivered — this is a defence-in-depth fallback only)
-    while len(tips) < 3 and problems:
-        prob = problems[len(tips)] if len(tips) < len(problems) else problems[-1]
+    while len(tips) < 3 and a.problems:
+        prob = a.problems[len(tips)] if len(tips) < len(a.problems) else a.problems[-1]
         tips.append(
             CoachTip(
                 priority=len(tips) + 1,
@@ -617,15 +653,13 @@ async def generate_coach_report(
     # Clamp to 5 (already done in _parse_tips_from_llm but be explicit)
     tips = tips[:5]
 
-    # -------------------------------------------------------------------------
     # Step 8: Assemble and persist
-    # -------------------------------------------------------------------------
     report = CoachReport(
         replayId=replay_id,
-        matchup=matchup,
-        mapName=map_name,
-        result=result_str,  # type: ignore[arg-type]
-        durationMs=game_duration_ms,
+        matchup=a.matchup,
+        mapName=a.map_name,
+        result=a.result,  # type: ignore[arg-type]
+        durationMs=a.duration_ms,
         tips=tips,
     )
 

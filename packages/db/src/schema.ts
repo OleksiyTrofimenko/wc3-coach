@@ -924,6 +924,61 @@ export type NewReferenceObservationRow =
   typeof referenceObservations.$inferInsert;
 
 // ---------------------------------------------------------------------------
+// training_examples
+// ---------------------------------------------------------------------------
+
+/**
+ * Curated coaching examples for fine-tuning the local LLM.
+ *
+ * One example = (captured prompt messages) → (human-curated ideal tips), the
+ * exact (input → output) pair a QLoRA run consumes. The input is the system+user
+ * messages the coach builds for a replay (CONTEXT + FACTS + REFERENCE MATERIAL);
+ * the output is the gold tips a human approved. Per Principle #4 we teach
+ * style/grounding discipline, NOT facts — so the gold is seeded from the
+ * deterministic fact-summaries and edited by a human, never from the LLM's own
+ * (flawed) output.
+ *
+ * One row per replay (unique replay_id); upsert as curation progresses.
+ */
+export const trainingExamples = pgTable(
+  "training_examples",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    replayId: uuid("replay_id")
+      .notNull()
+      .references(() => replays.id, { onDelete: "cascade" }),
+    /** Denormalized context for browsing/filtering the dataset. */
+    matchup: text("matchup"),
+    mapName: text("map_name"),
+    result: text("result"),
+    /** The captured prompt messages (the training INPUT): [{role, content}, ...]. */
+    inputMessages: jsonb("input_messages").notNull(),
+    /** The curated gold tips (the training OUTPUT): CoachTip[]-shaped. */
+    outputTips: jsonb("output_tips").notNull(),
+    /** Curation lifecycle: 'draft' (seeded/in-progress) | 'approved' (export-ready). */
+    status: text("status")
+      .notNull()
+      .default("draft")
+      .$type<"draft" | "approved">(),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (table) => [
+    uniqueIndex("training_examples_replay_uq").on(table.replayId),
+  ],
+);
+
+export type TrainingExampleRow = typeof trainingExamples.$inferSelect;
+export type NewTrainingExampleRow = typeof trainingExamples.$inferInsert;
+
+// ---------------------------------------------------------------------------
 // apm_sessions
 // ---------------------------------------------------------------------------
 

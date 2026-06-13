@@ -19,6 +19,11 @@ import type {
   ReferenceUpdate,
 } from "@/types/admin";
 import type { ReplaySummary } from "@/types/replays";
+import type {
+  ExampleSummary,
+  ExampleUpdate,
+  TrainingExample,
+} from "@/types/curation";
 
 /** Upload a .w3g file. Returns replayId + initial status. */
 export async function uploadReplay(file: File): Promise<UploadResponse> {
@@ -234,4 +239,62 @@ export async function listReplays(
     throw new Error(`Replays fetch failed (${res.status}): ${text}`);
   }
   return res.json() as Promise<ReplaySummary[]>;
+}
+
+// ---------------------------------------------------------------------------
+// Curation (training-example capture)
+// ---------------------------------------------------------------------------
+
+/** Fetch the training example for a replay, or null if none yet. */
+export async function getExample(
+  replayId: string
+): Promise<TrainingExample | null> {
+  const res = await fetch(`/api/py/curation/${replayId}`);
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Example fetch failed (${res.status}): ${text}`);
+  }
+  return res.json() as Promise<TrainingExample>;
+}
+
+/** Draft a training example from a replay's facts (assembles the prompt). */
+export async function draftExample(
+  replayId: string
+): Promise<TrainingExample> {
+  const res = await fetch(`/api/py/curation/${replayId}/draft`, {
+    method: "POST",
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Draft failed (${res.status}): ${text}`);
+  }
+  return res.json() as Promise<TrainingExample>;
+}
+
+/** Save edited gold tips + status for a replay's example. */
+export async function saveExample(
+  replayId: string,
+  body: ExampleUpdate
+): Promise<TrainingExample> {
+  const res = await fetch(`/api/py/curation/${replayId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Save failed (${res.status}): ${text}`);
+  }
+  return res.json() as Promise<TrainingExample>;
+}
+
+/** List all training examples (dataset overview). */
+export async function listExamples(): Promise<ExampleSummary[]> {
+  const res = await fetch("/api/py/curation");
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Examples fetch failed (${res.status}): ${text}`);
+  }
+  return res.json() as Promise<ExampleSummary[]>;
 }

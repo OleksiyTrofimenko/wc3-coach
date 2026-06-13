@@ -12,7 +12,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ReplaySummary } from "@/types/replays";
-import { listReplays } from "@/lib/api";
+import type { ExampleSummary } from "@/types/curation";
+import { listExamples, listReplays } from "@/lib/api";
 import { formatMs } from "@/lib/utils";
 
 type Filter = "all" | "reference" | "personal";
@@ -65,6 +66,7 @@ export default function ReplaysBrowserPage() {
   const router = useRouter();
   const [loadState, setLoadState] = useState<LoadState>({ kind: "loading" });
   const [filter, setFilter] = useState<Filter>("all");
+  const [examples, setExamples] = useState<ExampleSummary[]>([]);
 
   const load = useCallback(async () => {
     setLoadState({ kind: "loading" });
@@ -76,6 +78,11 @@ export default function ReplaysBrowserPage() {
         kind: "error",
         message: err instanceof Error ? err.message : "Failed to load replays",
       });
+    }
+    try {
+      setExamples(await listExamples());
+    } catch {
+      setExamples([]);
     }
   }, []);
 
@@ -122,6 +129,35 @@ export default function ReplaysBrowserPage() {
             feed the benchmark references. Open one to study its build order and
             curate the ideal coaching for the training set.
           </p>
+        </section>
+
+        {/* Training-set / dataset bar */}
+        <section className="section">
+          <div className="rb-dataset wc3-panel">
+            <div className="rb-dataset__stat">
+              <span className="rb-dataset__big">
+                {examples.filter((e) => e.status === "approved").length}
+              </span>
+              <span className="rb-dataset__label">approved examples</span>
+            </div>
+            <div className="rb-dataset__stat">
+              <span className="rb-dataset__big">
+                {examples.filter((e) => e.status === "draft").length}
+              </span>
+              <span className="rb-dataset__label">drafts</span>
+            </div>
+            <p className="rb-dataset__hint">
+              Open a replay → curate the ideal coaching → Approve. Approved
+              examples export as the LLM training set.
+            </p>
+            <a
+              className="btn-action"
+              href="/api/py/curation/export.jsonl"
+              download
+            >
+              Download training set (JSONL)
+            </a>
+          </div>
         </section>
 
         <section className="section">
@@ -222,6 +258,14 @@ export default function ReplaysBrowserPage() {
         .rb-flag--report { color: #6f9bdb; border-color: rgba(58,106,191,0.4); }
         .rb-count { font-size: 0.72rem; color: var(--text-muted); padding-left: 0.2rem; }
         .btn-ghost { padding: 0.3rem 0.6rem; background: transparent; border: 1px solid var(--border-dim); border-radius: 3px; color: var(--text-secondary); font-size: 0.72rem; cursor: pointer; }
+
+        .rb-dataset { display: flex; align-items: center; gap: 1.25rem; padding: 0.8rem 1rem; flex-wrap: wrap; }
+        .rb-dataset__stat { display: flex; flex-direction: column; align-items: center; }
+        .rb-dataset__big { font-size: 1.4rem; font-weight: 700; color: var(--gold); font-family: monospace; }
+        .rb-dataset__label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+        .rb-dataset__hint { flex: 1; min-width: 200px; font-size: 0.75rem; color: var(--text-muted); line-height: 1.45; }
+        .btn-action { display: inline-block; padding: 0.45rem 1.1rem; background: transparent; border: 1px solid var(--border-gold-bright); border-radius: 3px; color: var(--gold); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em; cursor: pointer; text-decoration: none; white-space: nowrap; }
+        .btn-action:hover { background: rgba(200,151,42,0.1); }
       `}</style>
     </main>
   );
