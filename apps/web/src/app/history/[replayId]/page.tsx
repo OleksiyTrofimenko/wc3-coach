@@ -15,10 +15,13 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import type { CoachReport, CoachTip } from "@wc3-coach/shared-types";
-import type { TipFeedback } from "@/types/analyzer";
-import { getCoachReportById, getReplayFeedback } from "@/lib/api";
+import type { ReplayResponse, TipFeedback } from "@/types/analyzer";
+import { getCoachReportById, getReplay, getReplayFeedback } from "@/lib/api";
 import { TipFeedbackControl } from "@/components/TipFeedbackControl";
+import { BuildTimeline } from "@/components/BuildTimeline";
+import { EntityIcon } from "@/components/EntityIcon";
 import { formatMs, humanizeRef } from "@/lib/utils";
+import { entityDisplayName, heroRefsForSlot, parseEntityRef } from "@/lib/entities";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -117,6 +120,9 @@ export default function ReplayReportPage() {
   const replayId = typeof params.replayId === "string" ? params.replayId : "";
 
   const [loadState, setLoadState] = useState<LoadState>({ kind: "loading" });
+  // The parsed replay (events + players) for the build-order timeline + hero
+  // icons. Optional — the report still renders if this fetch fails.
+  const [replay, setReplay] = useState<ReplayResponse | null>(null);
   // Tracks the replay currently being viewed so a slow earlier fetch (after the
   // user navigates to a different replay) can't overwrite the newer one.
   const activeReplayIdRef = useRef(replayId);
@@ -124,6 +130,15 @@ export default function ReplayReportPage() {
   const load = useCallback(async () => {
     if (!replayId) return;
     setLoadState({ kind: "loading" });
+    setReplay(null);
+    // Best-effort: timeline data is a nice-to-have, never blocks the report.
+    void getReplay(replayId)
+      .then((r) => {
+        if (activeReplayIdRef.current === replayId) setReplay(r);
+      })
+      .catch(() => {
+        /* timeline simply won't render */
+      });
     try {
       const [report, feedback] = await Promise.all([
         getCoachReportById(replayId),
@@ -159,6 +174,12 @@ export default function ReplayReportPage() {
       };
     });
   }, []);
+
+  // Build-order / hero data from the (optional) parsed replay.
+  const orcPlayer =
+    replay?.players.find((p) => p.raceId === "race:orc") ?? null;
+  const heroRefs =
+    orcPlayer && replay ? heroRefsForSlot(replay.events, orcPlayer.slot) : [];
 
   return (
     <main className="page">
@@ -253,6 +274,18 @@ export default function ReplayReportPage() {
                       {formatMs(loadState.report.durationMs)}
                     </span>
                   </div>
+                  {heroRefs.length > 0 && (
+                    <div className="rr-heroes">
+                      {heroRefs.map((ref) => (
+                        <span className="rr-hero" key={ref}>
+                          <EntityIcon entityRef={ref} size={22} />
+                          <span className="rr-hero__name">
+                            {entityDisplayName(parseEntityRef(ref).key)}
+                          </span>
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="rr-header-panel__right">
                   <span className="rr-replay-id" title="Replay ID">
@@ -261,6 +294,17 @@ export default function ReplayReportPage() {
                 </div>
               </div>
             </section>
+
+            {/* Build-order timeline (if the parsed replay is available) */}
+            {orcPlayer && replay && (
+              <section className="section">
+                <BuildTimeline
+                  events={replay.events}
+                  slot={orcPlayer.slot}
+                  playerName={orcPlayer.playerName}
+                />
+              </section>
+            )}
 
             {/* Tips with feedback controls */}
             <section className="section">
@@ -556,6 +600,21 @@ export default function ReplayReportPage() {
           font-family: monospace;
           font-size: 0.82rem;
           color: var(--gold-dim);
+        }
+        .rr-heroes {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.6rem;
+          margin-top: 0.5rem;
+        }
+        .rr-hero {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.35rem;
+        }
+        .rr-hero__name {
+          font-size: 0.75rem;
+          color: var(--text-secondary);
         }
         .rr-header-panel__right {
           flex-shrink: 0;

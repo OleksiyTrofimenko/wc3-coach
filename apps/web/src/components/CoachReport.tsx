@@ -2,6 +2,8 @@
 
 import type { CoachReport, CoachTip } from "@wc3-coach/shared-types";
 import { formatMs, humanizeRef } from "@/lib/utils";
+import { EntityIcon } from "@/components/EntityIcon";
+import { entityDisplayName, parseEntityRef } from "@/lib/entities";
 
 // -----------------------------------------------------------------------
 // Sub-component: a single tip card
@@ -51,9 +53,11 @@ function TipCard({ tip, index }: TipCardProps) {
 
 interface CoachReportProps {
   report: CoachReport;
+  /** Optional Orc-player hero refs ("hero:far_seer") to show as icons. */
+  heroes?: string[];
 }
 
-export function CoachReport({ report }: CoachReportProps) {
+export function CoachReport({ report, heroes }: CoachReportProps) {
   return (
     <div className="coach-report wc3-panel-elevated">
       {/* Panel header */}
@@ -63,6 +67,18 @@ export function CoachReport({ report }: CoachReportProps) {
           <span className="cr-sub">
             Written coaching — {report.matchup} on {report.mapName}
           </span>
+          {heroes && heroes.length > 0 && (
+            <div className="cr-heroes" aria-label="Heroes played">
+              {heroes.map((ref) => (
+                <span className="cr-hero" key={ref}>
+                  <EntityIcon entityRef={ref} size={22} />
+                  <span className="cr-hero__name">
+                    {entityDisplayName(parseEntityRef(ref).key)}
+                  </span>
+                </span>
+              ))}
+            </div>
+          )}
         </div>
         <div className="cr-header__right">
           <span className={`cr-result cr-result--${report.result}`}>
@@ -124,6 +140,21 @@ export function CoachReport({ report }: CoachReportProps) {
           font-size: 0.75rem;
           color: var(--text-muted);
           letter-spacing: 0.03em;
+        }
+        .cr-heroes {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.6rem;
+          margin-top: 0.4rem;
+        }
+        .cr-hero {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.35rem;
+        }
+        .cr-hero__name {
+          font-size: 0.75rem;
+          color: var(--text-secondary);
         }
 
         .cr-header__right {

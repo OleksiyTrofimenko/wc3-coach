@@ -10,6 +10,8 @@ import { GameSummary } from "@/components/GameSummary";
 import { ProblemCards } from "@/components/ProblemCards";
 import { BenchmarkTable } from "@/components/BenchmarkTable";
 import { CoachReport as CoachReportView } from "@/components/CoachReport";
+import { BuildTimeline } from "@/components/BuildTimeline";
+import { heroRefsForSlot } from "@/lib/entities";
 
 type Phase =
   | { kind: "idle" }
@@ -265,7 +267,10 @@ export default function AnalyzerPage() {
 
             {coachState.kind === "loaded" && (
               <section className="section">
-                <CoachReportView report={coachState.report} />
+                <CoachReportView
+                  report={coachState.report}
+                  heroes={heroRefsForSlot(phase.replay.events, orcPlayer.slot)}
+                />
               </section>
             )}
 
@@ -282,6 +287,14 @@ export default function AnalyzerPage() {
             <section className="section">
               <ProblemCards
                 problems={phase.problems}
+                playerName={orcPlayer.playerName}
+              />
+            </section>
+
+            <section className="section">
+              <BuildTimeline
+                events={phase.replay.events}
+                slot={orcPlayer.slot}
                 playerName={orcPlayer.playerName}
               />
             </section>
