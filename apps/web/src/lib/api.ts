@@ -18,6 +18,7 @@ import type {
   ReferenceCreate,
   ReferenceUpdate,
 } from "@/types/admin";
+import type { ReplaySummary } from "@/types/replays";
 
 /** Upload a .w3g file. Returns replayId + initial status. */
 export async function uploadReplay(file: File): Promise<UploadResponse> {
@@ -216,4 +217,21 @@ export async function deleteReference(id: string): Promise<void> {
     const text = await res.text();
     throw new Error(`Reference delete failed (${res.status}): ${text}`);
   }
+}
+
+// ---------------------------------------------------------------------------
+// Replays browser
+// ---------------------------------------------------------------------------
+
+/** List all replays (personal + reference). Optional reference filter. */
+export async function listReplays(
+  reference?: boolean
+): Promise<ReplaySummary[]> {
+  const qs = reference === undefined ? "" : `?reference=${reference}`;
+  const res = await fetch(`/api/py/replays${qs}`);
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Replays fetch failed (${res.status}): ${text}`);
+  }
+  return res.json() as Promise<ReplaySummary[]>;
 }

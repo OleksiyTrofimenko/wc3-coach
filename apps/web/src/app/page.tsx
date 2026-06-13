@@ -168,6 +168,8 @@ export default function AnalyzerPage() {
             <span className="nav-sep">|</span>
             <a href="/history" className="nav-link">History</a>
             <span className="nav-sep">|</span>
+            <a href="/replays" className="nav-link">Replays</a>
+            <span className="nav-sep">|</span>
             <a href="/trainer" className="nav-link">APM Trainer</a>
             <span className="nav-sep">|</span>
             <a href="/admin/references" className="nav-link">Admin</a>

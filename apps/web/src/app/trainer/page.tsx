@@ -200,6 +200,10 @@ export default function TrainerPage() {
               History
             </a>
             <span className="nav-sep">|</span>
+            <a href="/replays" className="nav-link">
+              Replays
+            </a>
+            <span className="nav-sep">|</span>
             <a href="/trainer" className="nav-link nav-link--active">
               APM Trainer
             </a>
