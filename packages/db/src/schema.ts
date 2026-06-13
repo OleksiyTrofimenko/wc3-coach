@@ -38,6 +38,7 @@ import {
   integer,
   bigint,
   real,
+  boolean,
   timestamp,
   jsonb,
   uniqueIndex,
@@ -135,6 +136,13 @@ export const replays = pgTable("replays", {
   error: text("error"),
   /** Raw parsed metadata blob (w3gjs top-level fields). */
   rawMeta: jsonb("raw_meta"),
+  /**
+   * True when this replay is reference/pro data used to build benchmark
+   * references (pro-replay aggregation), NOT a personal game. Reference replays
+   * drive aggregation and are hidden from the personal coach history. Set by the
+   * refdata ingest CLI after upload; the ingest worker never touches it.
+   */
+  isReference: boolean("is_reference").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .default(sql`now()`),
@@ -822,6 +830,17 @@ export const benchmarkReferences = pgTable(
       .$type<"community" | "pro" | "user">(),
     /** Optional confidence flag for low-certainty values. Nullable. */
     confidence: text("confidence").$type<"low" | "medium" | "high" | null>(),
+    /**
+     * Number of pro observations this value was aggregated from. NULL for
+     * hand-authored (community/user) rows; set for provenance='pro' rows so the
+     * UI can show confidence (n=3 weak vs n=120 strong).
+     */
+    sampleSize: integer("sample_size"),
+    /**
+     * Aggregate spread for pro-derived rows: { p25, p75 } in the metric's units.
+     * NULL for hand-authored rows. Stored for future percentile-based severity.
+     */
+    dist: jsonb("dist"),
     /** FK into patch_versions. NULL = patch-agnostic baseline. */
     patchId: uuid("patch_id").references(() => patchVersions.id),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -847,6 +866,62 @@ export const benchmarkReferences = pgTable(
 
 export type BenchmarkReferenceRow = typeof benchmarkReferences.$inferSelect;
 export type NewBenchmarkReferenceRow = typeof benchmarkReferences.$inferInsert;
+
+// ---------------------------------------------------------------------------
+// reference_observations
+// ---------------------------------------------------------------------------
+
+/**
+ * Immutable per-replay metric observations — the raw facts that pro-derived
+ * benchmark_references rows are aggregated from (median/p25/p75/n).
+ *
+ * "Store observations, derive aggregates": keeping every raw value means a
+ * reference is recomputable (add replays, change the aggregation method) and
+ * auditable ("this number came from these N games") without re-parsing. Mirrors
+ * the game_events → benchmarks relationship.
+ *
+ * One row per (source replay × player-slot perspective × metric). value uses the
+ * metric's natural units (ms for timings, count for worker metrics).
+ */
+export const referenceObservations = pgTable(
+  "reference_observations",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    /** Matchup code from the observed player's perspective, e.g. "OvNE". */
+    matchup: text("matchup").notNull(),
+    /** Observed player's race id, e.g. "orc". */
+    raceId: text("race_id").notNull(),
+    /** Metric name (matches BenchmarkResult.metric / benchmark_references.metric). */
+    metric: text("metric").notNull(),
+    /** Measured value in the metric's natural units. */
+    value: real("value").notNull(),
+    /** Replay this observation was extracted from. */
+    sourceReplayId: uuid("source_replay_id")
+      .notNull()
+      .references(() => replays.id, { onDelete: "cascade" }),
+    /** Observed player's name (provenance/audit). */
+    playerName: text("player_name"),
+    /** FK into patch_versions (the source replay's patch). NULL if unresolved. */
+    patchId: uuid("patch_id").references(() => patchVersions.id),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (table) => [
+    index("reference_observations_key_idx").on(
+      table.matchup,
+      table.raceId,
+      table.metric,
+    ),
+    index("reference_observations_replay_idx").on(table.sourceReplayId),
+  ],
+);
+
+export type ReferenceObservationRow = typeof referenceObservations.$inferSelect;
+export type NewReferenceObservationRow =
+  typeof referenceObservations.$inferInsert;
 
 // ---------------------------------------------------------------------------
 // apm_sessions

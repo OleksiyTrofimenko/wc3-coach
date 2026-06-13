@@ -94,6 +94,10 @@ function ReferenceRow({
   }, [editing, row]);
 
   const hint = expectedHint(row.metric, row.expected);
+  const spread =
+    row.dist != null
+      ? `${Math.round(row.dist.p25)}–${Math.round(row.dist.p75)}`
+      : null;
 
   if (!editing) {
     return (
@@ -104,12 +108,22 @@ function ReferenceRow({
         </div>
         <div className="ref-cell ref-metric">{row.metric}</div>
         <div className="ref-cell ref-num">
-          {row.expected}
+          {Math.round(row.expected)}
           {hint && <span className="ref-hint">{hint}</span>}
+          {spread && (
+            <span className="ref-hint" title="p25–p75 spread">
+              {spread}
+            </span>
+          )}
         </div>
         <div className="ref-cell ref-num ref-dim">{row.windowMs}</div>
         <div className="ref-cell">
           <ProvenanceTag value={row.provenance} />
+          {row.provenance === "pro" && row.sampleSize != null && (
+            <span className="ref-conf" title="pro replays aggregated">
+              n={row.sampleSize}
+            </span>
+          )}
           {row.confidence && (
             <span className="ref-conf">{row.confidence}</span>
           )}

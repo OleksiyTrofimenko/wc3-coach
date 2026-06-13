@@ -50,6 +50,13 @@
       "when": 1781339572414,
       "tag": "0006_short_frog_thor",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1781346660001,
+      "tag": "0007_productive_madame_hydra",
+      "breakpoints": true
     }
   ]
 }

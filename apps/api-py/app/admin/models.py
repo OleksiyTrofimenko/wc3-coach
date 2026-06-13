@@ -28,6 +28,16 @@ class BenchmarkReference(BaseModel):
     notes: str | None = Field(default=None, alias="notes")
     provenance: Provenance = Field(alias="provenance")
     confidence: Confidence | None = Field(default=None, alias="confidence")
+    sample_size: int | None = Field(
+        default=None,
+        alias="sampleSize",
+        description="Number of pro observations aggregated (provenance='pro').",
+    )
+    dist: dict[str, float] | None = Field(
+        default=None,
+        alias="dist",
+        description="Aggregate spread {p25, p75} for pro-derived rows.",
+    )
     patch_id: str | None = Field(default=None, alias="patchId")
     created_at: str = Field(alias="createdAt")
     updated_at: str = Field(alias="updatedAt")

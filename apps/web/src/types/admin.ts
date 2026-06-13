@@ -17,6 +17,10 @@ export type BenchmarkReference = {
   notes: string | null;
   provenance: Provenance;
   confidence: Confidence | null;
+  /** Number of pro observations aggregated (provenance='pro'); null otherwise. */
+  sampleSize: number | null;
+  /** Aggregate spread for pro-derived rows; null for hand-authored rows. */
+  dist: { p25: number; p75: number } | null;
   patchId: string | null;
   createdAt: string; // ISO 8601
   updatedAt: string; // ISO 8601

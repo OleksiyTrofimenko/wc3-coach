@@ -59,6 +59,7 @@ _REPLAYS = sa.table(
     "replays",
     sa.column("id", UUID(as_uuid=False)),
     sa.column("map_id", sa.Text),
+    sa.column("is_reference", sa.Boolean),
 )
 
 _MAPS = sa.table(
@@ -328,8 +329,10 @@ async def list_reports(conn: AsyncConnection) -> list[dict[str, Any]]:
             .select_from(
                 _COACH_REPORTS.outerjoin(
                     fb_count, _COACH_REPORTS.c.replay_id == fb_count.c.replay_id
-                )
+                ).join(_REPLAYS, _COACH_REPORTS.c.replay_id == _REPLAYS.c.id)
             )
+            # Reference/pro replays are aggregation fodder, not personal games.
+            .where(_REPLAYS.c.is_reference.is_(False))
             .order_by(_COACH_REPORTS.c.created_at.desc())
         )
     ).fetchall()

@@ -70,6 +70,8 @@ _BENCHMARK_REFERENCES = sa.table(
     sa.column("notes", sa.Text),
     sa.column("provenance", sa.Text),
     sa.column("confidence", sa.Text),
+    sa.column("sample_size", sa.Integer),
+    sa.column("dist", sa.JSON),
     sa.column("patch_id", UUID(as_uuid=False)),
     sa.column("created_at", sa.DateTime(timezone=True)),
     sa.column("updated_at", sa.DateTime(timezone=True)),
@@ -181,6 +183,20 @@ async def resolve_current_patch_id(conn: AsyncConnection) -> str | None:
 # ---------------------------------------------------------------------------
 
 
+def _coerce_dist(raw: Any) -> dict[str, float] | None:
+    """asyncpg returns JSONB as dict already; tolerate a JSON string too."""
+    if raw is None:
+        return None
+    if isinstance(raw, str):
+        import json
+
+        parsed: dict[str, float] = json.loads(raw)
+        return parsed
+    if isinstance(raw, dict):
+        return raw
+    return None
+
+
 def _row_to_dict(row: Any) -> dict[str, Any]:
     """Map a benchmark_references row to a camelCase API dict."""
     return {
@@ -193,6 +209,8 @@ def _row_to_dict(row: Any) -> dict[str, Any]:
         "notes": row.notes,
         "provenance": row.provenance,
         "confidence": row.confidence,
+        "sampleSize": row.sample_size,
+        "dist": _coerce_dist(row.dist),
         "patchId": str(row.patch_id) if row.patch_id else None,
         "createdAt": row.created_at.isoformat() if row.created_at else "",
         "updatedAt": row.updated_at.isoformat() if row.updated_at else "",
@@ -209,6 +227,8 @@ _ALL_COLUMNS = (
     _BENCHMARK_REFERENCES.c.notes,
     _BENCHMARK_REFERENCES.c.provenance,
     _BENCHMARK_REFERENCES.c.confidence,
+    _BENCHMARK_REFERENCES.c.sample_size,
+    _BENCHMARK_REFERENCES.c.dist,
     _BENCHMARK_REFERENCES.c.patch_id,
     _BENCHMARK_REFERENCES.c.created_at,
     _BENCHMARK_REFERENCES.c.updated_at,
