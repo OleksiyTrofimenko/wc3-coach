@@ -33,7 +33,7 @@ from app.benchmarks.metrics import (
     worker_production_continuity,
 )
 from app.benchmarks.models import BenchmarkResult, PlayerInfo, TimelineEvent
-from app.benchmarks.references import infer_matchup_code
+from app.benchmarks.references import ReferenceTable, infer_matchup_code
 
 # Checkpoints for hero-level-by-time metric (ms → metric name)
 # Chosen at tactically significant moments:
@@ -57,6 +57,7 @@ def run_benchmarks(
     game_duration_ms: int,
     replay_id: str,
     patch_id: str = "patch:2.0",  # noqa: ARG001 — reserved for T3.2
+    references: ReferenceTable | None = None,
 ) -> list[BenchmarkResult]:
     """
     Run all benchmark metrics for every player in the replay.
@@ -68,6 +69,10 @@ def run_benchmarks(
     game_duration_ms: Total game duration in milliseconds.
     replay_id       : Replay identifier (written into each BenchmarkResult).
     patch_id        : Patch reference (reserved for T3.2 per-patch corpus).
+    references      : Optional reference table loaded from the DB (DB-backed
+                      references). When None, the in-code seed table is used, so
+                      the engine stays pure and unit tests need no DB. The route
+                      handler loads the table once and injects it here.
 
     Returns
     -------
@@ -95,29 +100,31 @@ def run_benchmarks(
 
         # --- first_hero_timing ---
         results.append(
-            first_hero_timing(events, player, matchup, replay_id)
+            first_hero_timing(events, player, matchup, replay_id, references)
         )
 
         # --- tier2_timing ---
         results.append(
-            tier2_timing(events, player, matchup, replay_id)
+            tier2_timing(events, player, matchup, replay_id, references)
         )
 
         # --- tier3_timing (skipped for short games) ---
         t3 = tier3_timing(
-            events, player, matchup, replay_id, game_duration_ms
+            events, player, matchup, replay_id, game_duration_ms, references
         )
         if t3 is not None:
             results.append(t3)
 
         # --- expansion_timing ---
         results.append(
-            expansion_timing(events, player, matchup, replay_id, game_duration_ms)
+            expansion_timing(
+                events, player, matchup, replay_id, game_duration_ms, references
+            )
         )
 
         # --- hero_level3_timing ---
         results.append(
-            hero_level3_timing(events, player, matchup, replay_id)
+            hero_level3_timing(events, player, matchup, replay_id, references)
         )
 
         # --- hero_level_at_checkpoint (for each checkpoint ≤ game duration) ---
@@ -132,6 +139,7 @@ def run_benchmarks(
                         checkpoint_ms=checkpoint_ms,
                         expected_level=3.0,  # fallback if no ref
                         metric_name=metric_name,
+                        references=references,
                     )
                 )
 

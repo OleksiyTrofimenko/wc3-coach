@@ -53,6 +53,7 @@ from app.benchmarks.db import (
 from app.benchmarks.engine import run_benchmarks
 from app.benchmarks.models import PlayerInfo
 from app.benchmarks.references import infer_matchup_code
+from app.benchmarks.references_db import load_reference_table
 from app.benchmarks.scoring import ScoredProblem, prioritize
 from app.coach.db import load_replay_meta, upsert_report
 from app.coach.grounding import find_ungrounded_numbers
@@ -498,12 +499,15 @@ async def generate_coach_report(
 
     if not results:
         logger.info("Coach: no benchmarks found for %s — running engine", replay_id)
+        async with engine.connect() as conn:
+            references = await load_reference_table(conn, patch_id)
         results = run_benchmarks(
             events=events,
             players=players,
             game_duration_ms=game_duration_ms,
             replay_id=replay_id,
             patch_id=patch_id,
+            references=references,
         )
         async with engine.begin() as conn:
             await persist_benchmarks(conn, replay_id, results)

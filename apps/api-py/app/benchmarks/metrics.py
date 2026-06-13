@@ -25,6 +25,7 @@ from app.benchmarks.models import (
     TimelineEvent,
 )
 from app.benchmarks.references import (
+    ReferenceTable,
     get_reference,
     severity_for_absent_expansion,
     severity_for_level_delta,
@@ -135,6 +136,7 @@ def first_hero_timing(
     player: PlayerInfo,
     matchup: str | None,
     replay_id: str,
+    references: ReferenceTable | None = None,
 ) -> BenchmarkResult:
     """
     Time of the first hero appearing (hero_level event, level 1).
@@ -162,7 +164,7 @@ def first_hero_timing(
                 hero_time = ev.t_ms
                 break
 
-    ref = get_reference(matchup, race, "first_hero_timing")
+    ref = get_reference(matchup, race, "first_hero_timing", references)
 
     if hero_time is None:
         # No hero produced at all — this is critical in almost any game
@@ -213,6 +215,7 @@ def tier2_timing(
     player: PlayerInfo,
     matchup: str | None,
     replay_id: str,
+    references: ReferenceTable | None = None,
 ) -> BenchmarkResult:
     """
     Time of the T2 building command (e.g. Stronghold, Tree of Ages).
@@ -229,7 +232,7 @@ def tier2_timing(
             t2_time = ev.t_ms
             break
 
-    ref = get_reference(matchup, race, "tier2_timing")
+    ref = get_reference(matchup, race, "tier2_timing", references)
 
     if t2_time is None:
         # No T2 in the timeline; if the game was long enough this is major
@@ -280,6 +283,7 @@ def tier3_timing(
     matchup: str | None,
     replay_id: str,
     game_duration_ms: int,
+    references: ReferenceTable | None = None,
 ) -> BenchmarkResult | None:
     """
     Time of the T3 building command (e.g. Fortress, Tree of Eternity).
@@ -301,7 +305,7 @@ def tier3_timing(
             t3_time = ev.t_ms
             break
 
-    ref = get_reference(matchup, race, "tier3_timing")
+    ref = get_reference(matchup, race, "tier3_timing", references)
 
     if t3_time is None:
         # No T3 in a long game — only flag if game > 10 min
@@ -355,6 +359,7 @@ def expansion_timing(
     matchup: str | None,
     replay_id: str,
     game_duration_ms: int,
+    references: ReferenceTable | None = None,
 ) -> BenchmarkResult:
     """
     Time of the expansion (second town-hall build command).
@@ -389,7 +394,7 @@ def expansion_timing(
     elif len(hall_builds) >= 2:
         expansion_t = hall_builds[1]
 
-    ref = get_reference(matchup, race, "expansion_timing")
+    ref = get_reference(matchup, race, "expansion_timing", references)
 
     if expansion_t is None:
         # No expansion taken at all
@@ -458,6 +463,7 @@ def hero_level_at_checkpoint(
     checkpoint_ms: int,
     expected_level: float,
     metric_name: str,
+    references: ReferenceTable | None = None,
 ) -> BenchmarkResult:
     """
     Hero level of the primary hero at a specific game-time checkpoint.
@@ -470,7 +476,7 @@ def hero_level_at_checkpoint(
 
     actual_level = _hero_max_level_at(slot_events, checkpoint_ms)
 
-    ref = get_reference(matchup, race, metric_name)
+    ref = get_reference(matchup, race, metric_name, references)
     exp: float = ref.expected if ref else expected_level
 
     delta = float(actual_level) - exp
@@ -492,6 +498,7 @@ def hero_level3_timing(
     player: PlayerInfo,
     matchup: str | None,
     replay_id: str,
+    references: ReferenceTable | None = None,
 ) -> BenchmarkResult:
     """
     Game time when the primary hero first reached level 3.
@@ -511,7 +518,7 @@ def hero_level3_timing(
                 level3_t = ev.t_ms
                 break
 
-    ref = get_reference(matchup, race, "hero_level3_timing")
+    ref = get_reference(matchup, race, "hero_level3_timing", references)
 
     if level3_t is None:
         # Hero never reached level 3 — only penalise if game was long enough

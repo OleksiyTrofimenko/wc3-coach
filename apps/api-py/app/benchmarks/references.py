@@ -69,8 +69,17 @@ class ReferenceEntry:
     notes: str
 
 
-# Primary lookup: (matchup_code, race_id, metric) → ReferenceEntry
-_REFERENCE_TABLE: dict[tuple[str, str, str], ReferenceEntry] = {
+# A reference table maps (matchup_code, race_id, metric) → ReferenceEntry.
+# The benchmark engine stays PURE: instead of reaching into a module global at
+# call time, callers may inject a table loaded from the DB (T-step #1, DB-backed
+# references). When no table is injected, the in-code seed below is used — this
+# is also the seed source for the DB and the default for unit tests.
+ReferenceTable = dict[tuple[str, str, str], ReferenceEntry]
+
+
+# Seed reference table — the source of truth for the DB seed, the fallback when
+# the DB has no reference rows, and the default lookup table for unit tests.
+_SEED_REFERENCE_TABLE: ReferenceTable = {
 
     # -----------------------------------------------------------------------
     # OvNE — Orc (analysed player is Orc)
@@ -335,16 +344,27 @@ def get_reference(
     matchup: str | None,
     race_id: str,
     metric: str,
+    table: ReferenceTable | None = None,
 ) -> ReferenceEntry | None:
     """
     Look up a reference entry.
+
+    Parameters
+    ----------
+    table:
+        Optional injected reference table (e.g. loaded from the DB). When None,
+        the in-code seed table is used. This keeps the benchmark engine pure:
+        the DB I/O happens once in the route handler, and the resulting table is
+        threaded down to the metric functions.
 
     Returns None when no reference exists for the given triple.
     Callers must treat None as "no reference available" and emit severity='info'.
     """
     if matchup is None:
         return None
-    return _REFERENCE_TABLE.get((matchup, race_id, metric))
+    if table is None:
+        table = _SEED_REFERENCE_TABLE
+    return table.get((matchup, race_id, metric))
 
 
 # ---------------------------------------------------------------------------

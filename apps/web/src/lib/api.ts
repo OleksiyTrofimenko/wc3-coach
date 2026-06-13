@@ -13,6 +13,11 @@ import type {
   FeedbackRequest,
   TipFeedback,
 } from "@/types/analyzer";
+import type {
+  BenchmarkReference,
+  ReferenceCreate,
+  ReferenceUpdate,
+} from "@/types/admin";
 
 /** Upload a .w3g file. Returns replayId + initial status. */
 export async function uploadReplay(file: File): Promise<UploadResponse> {
@@ -153,4 +158,62 @@ export async function getReplayFeedback(
     throw new Error(`Feedback fetch failed (${res.status}): ${text}`);
   }
   return res.json() as Promise<TipFeedback[]>;
+}
+
+// ---------------------------------------------------------------------------
+// Admin — benchmark reference CRUD (DB-backed references)
+// ---------------------------------------------------------------------------
+
+/** List all benchmark reference rows (admin panel). */
+export async function listReferences(): Promise<BenchmarkReference[]> {
+  const res = await fetch("/api/py/admin/references");
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`References fetch failed (${res.status}): ${text}`);
+  }
+  return res.json() as Promise<BenchmarkReference[]>;
+}
+
+/** Create a new benchmark reference row. Throws on 409 (duplicate key). */
+export async function createReference(
+  body: ReferenceCreate
+): Promise<BenchmarkReference> {
+  const res = await fetch("/api/py/admin/references", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Reference create failed (${res.status}): ${text}`);
+  }
+  return res.json() as Promise<BenchmarkReference>;
+}
+
+/** Update the editable fields of a benchmark reference row. */
+export async function updateReference(
+  id: string,
+  body: ReferenceUpdate
+): Promise<BenchmarkReference> {
+  const res = await fetch(`/api/py/admin/references/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Reference update failed (${res.status}): ${text}`);
+  }
+  return res.json() as Promise<BenchmarkReference>;
+}
+
+/** Delete a benchmark reference row. */
+export async function deleteReference(id: string): Promise<void> {
+  const res = await fetch(`/api/py/admin/references/${id}`, {
+    method: "DELETE",
+  });
+  if (!res.ok && res.status !== 204) {
+    const text = await res.text();
+    throw new Error(`Reference delete failed (${res.status}): ${text}`);
+  }
 }

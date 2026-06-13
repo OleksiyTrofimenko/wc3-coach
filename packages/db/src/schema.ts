@@ -771,6 +771,84 @@ export type BenchmarkRow = typeof benchmarks.$inferSelect;
 export type NewBenchmarkRow = typeof benchmarks.$inferInsert;
 
 // ---------------------------------------------------------------------------
+// benchmark_references
+// ---------------------------------------------------------------------------
+
+/**
+ * Curatable reference values for benchmark comparisons.
+ *
+ * This is the DB-backed home for what used to live as Python literals in
+ * apps/api-py/app/benchmarks/references.py. Each row is the expected value for
+ * one (matchup, race, metric) at a given patch, plus a provenance tier recording
+ * where the number came from. Moving these out of code lets us:
+ *   - edit timings live via the admin panel (no redeploy), and
+ *   - record provenance so pro-replay aggregation can write trustworthy rows
+ *     (provenance='pro') that outrank wiki guesses (provenance='community').
+ *
+ * Severity *thresholds* remain global policy in code (references.py); only the
+ * per-(matchup, race, metric) *values* are data.
+ *
+ * Patch-versioning mirrors the ontology stat tables: NULL patch_id = baseline
+ * (valid across patches); a non-null patch_id pins the value to that patch.
+ * The loader prefers a patch-specific row, falling back to the NULL baseline.
+ */
+export const benchmarkReferences = pgTable(
+  "benchmark_references",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    /** Canonical matchup code, analysed-race-first, e.g. "OvNE", "HvO". */
+    matchup: text("matchup").notNull(),
+    /** Analysed player's race id, e.g. "orc" (matches ontology race slug). */
+    raceId: text("race_id").notNull(),
+    /** Metric name, e.g. "first_hero_timing" (matches BenchmarkResult.metric). */
+    metric: text("metric").notNull(),
+    /** Expected value (ms for timings; dimensionless for level/count metrics). */
+    expected: real("expected").notNull(),
+    /** Natural window for this metric (documentation/future per-metric severity). */
+    windowMs: real("window_ms").notNull(),
+    /** Free-text rationale / source note. */
+    notes: text("notes"),
+    /**
+     * Provenance tier — where the number came from.
+     *   community — high-ladder/wiki knowledge (the original seed tier)
+     *   pro       — aggregated from pro replays (T-step #2)
+     *   user      — manually verified/overridden by the user
+     */
+    provenance: text("provenance")
+      .notNull()
+      .default("community")
+      .$type<"community" | "pro" | "user">(),
+    /** Optional confidence flag for low-certainty values. Nullable. */
+    confidence: text("confidence").$type<"low" | "medium" | "high" | null>(),
+    /** FK into patch_versions. NULL = patch-agnostic baseline. */
+    patchId: uuid("patch_id").references(() => patchVersions.id),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (table) => [
+    // One row per (matchup, race, metric) per patch; NULLS NOT DISTINCT so a
+    // single NULL-patch baseline row collapses correctly (see ontology tables).
+    unique("benchmark_references_key_patch_uq")
+      .on(table.matchup, table.raceId, table.metric, table.patchId)
+      .nullsNotDistinct(),
+    index("benchmark_references_lookup_idx").on(
+      table.matchup,
+      table.raceId,
+      table.metric,
+    ),
+  ],
+);
+
+export type BenchmarkReferenceRow = typeof benchmarkReferences.$inferSelect;
+export type NewBenchmarkReferenceRow = typeof benchmarkReferences.$inferInsert;
+
+// ---------------------------------------------------------------------------
 // apm_sessions
 // ---------------------------------------------------------------------------
 

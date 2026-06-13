@@ -34,6 +34,7 @@ from __future__ import annotations
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.admin.routes import router as admin_router
 from app.benchmarks.db import (
     fetch_benchmarks,
     get_engine,
@@ -42,6 +43,7 @@ from app.benchmarks.db import (
 )
 from app.benchmarks.engine import run_benchmarks
 from app.benchmarks.models import BenchmarkResult
+from app.benchmarks.references_db import load_reference_table
 from app.benchmarks.scoring import ScoredProblem, prioritize
 from app.coach.db import (
     fetch_report,
@@ -68,6 +70,9 @@ app = FastAPI(
     ),
     version="0.1.0",
 )
+
+# Admin curation endpoints (DB-backed benchmark references)
+app.include_router(admin_router)
 
 
 # ---------------------------------------------------------------------------
@@ -128,12 +133,17 @@ async def run_benchmarks_for_replay(replay_id: str) -> list[BenchmarkResult]:
         except ValueError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
+        # Load the curatable reference table from the DB (falls back to the
+        # in-code seed when empty) and inject it so the engine stays pure.
+        references = await load_reference_table(conn, patch_id)
+
         results = run_benchmarks(
             events=events,
             players=players,
             game_duration_ms=game_duration_ms,
             replay_id=replay_id,
             patch_id=patch_id,
+            references=references,
         )
 
         await persist_benchmarks(conn, replay_id, results)

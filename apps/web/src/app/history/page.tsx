@@ -135,6 +135,8 @@ export default function HistoryPage() {
             <a href="/history" className="nav-link nav-link--active">History</a>
             <span className="nav-sep">|</span>
             <a href="/trainer" className="nav-link">APM Trainer</a>
+            <span className="nav-sep">|</span>
+            <a href="/admin/references" className="nav-link">Admin</a>
           </nav>
         </div>
       </header>

@@ -43,6 +43,13 @@
       "when": 1781276760327,
       "tag": "0005_mute_morlun",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1781339572414,
+      "tag": "0006_short_frog_thor",
+      "breakpoints": true
     }
   ]
 }

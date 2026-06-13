@@ -203,6 +203,10 @@ export default function TrainerPage() {
             <a href="/trainer" className="nav-link nav-link--active">
               APM Trainer
             </a>
+            <span className="nav-sep">|</span>
+            <a href="/admin/references" className="nav-link">
+              Admin
+            </a>
           </nav>
         </div>
       </header>
